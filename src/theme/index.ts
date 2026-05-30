@@ -5,6 +5,8 @@
 
 export * from "./types";
 export { nativeTheme } from "./native-theme";
+export { ThemeProvider, useTheme } from "./ThemeProvider";
+export type { ThemeContextValue, ThemeMode } from "./ThemeProvider";
 
 /**
  * letterSpacingRatio（em 相当の比率）を、適用先の fontSize から RN の letterSpacing(pt) に解決する。

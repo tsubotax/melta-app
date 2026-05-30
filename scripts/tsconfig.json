@@ -1,0 +1,14 @@
+{
+  // scripts/ は node 実行（tsx）。src/(RN) とは型環境が別なので tsconfig を分ける。
+  // base から react-native の型解決（src/theme/types.ts → ViewStyle）は継承しつつ、
+  // node: ビルトイン解決のため types に "node" を明示追加する。
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    // base(expo) の customConditions:["react-native"] を継承すると node スクリプトの
+    // module 解決と乖離するため、scripts では明示的に空に上書きする。
+    "customConditions": [],
+    "types": ["node"]
+  },
+  "include": ["."],
+  "exclude": []
+}

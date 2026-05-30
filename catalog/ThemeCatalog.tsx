@@ -1,41 +1,84 @@
 /**
- * ThemeCatalog — 生成された nativeTheme を実機で目視確認するための最小カタログ画面。
- * primitives / components はまだ未実装なので、まずは theme 値（色 / spacing / radius / elevation）を並べる。
- * 各 primitive 実装後にこのカタログへ追記していく（ハーネス＝Storybook RN の自前版）。
+ * ThemeCatalog — theme 値 + primitive を実機で目視確認する最小カタログ（ハーネス＝Storybook RN の自前版）。
+ * primitive 実装ごとにこのカタログへ追記していく（設計書 §6）。
+ * light/dark トグルは App から forcedMode を切り替える（§6）。
  */
 
-import { ScrollView, StyleSheet, Text, View } from "react-native";
-import { nativeTheme } from "../src/theme";
+import { Pressable, ScrollView, StyleSheet, Text as RNText, View } from "react-native";
+import { nativeTheme, useTheme, type ThemeMode } from "../src/theme";
+import { CONTRACTS } from "../src/contracts/contract-types";
+import { TextCatalog } from "./components/Text.catalog";
 
 const t = nativeTheme;
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  const { colors } = useTheme();
   return (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>{title}</Text>
+      <RNText style={[styles.sectionTitle, { color: colors["text-heading"] }]}>{title}</RNText>
       {children}
     </View>
   );
 }
 
 function Swatch({ label, color }: { label: string; color: string }) {
+  const { colors } = useTheme();
   return (
     <View style={styles.swatchRow}>
       <View style={[styles.swatch, { backgroundColor: color }]} />
-      <Text style={styles.swatchLabel}>
+      <RNText style={[styles.swatchLabel, { color: colors["text-default"] }]}>
         {label} · {color}
-      </Text>
+      </RNText>
     </View>
   );
 }
 
-export function ThemeCatalog() {
+/** component の __contract メタを1行 chip で表示（§6 = conformance の目視版）。 */
+function ContractChip({ id }: { id: keyof typeof CONTRACTS }) {
+  const { colors } = useTheme();
+  const c = CONTRACTS[id];
+  return (
+    <RNText
+      style={[
+        styles.chip,
+        { color: colors["text-muted"], borderColor: colors["border-default"] },
+      ]}
+    >
+      {`__contract ${c.id}@${c.version} · variants:${c.variants.length} · states:${c.states.length}`}
+    </RNText>
+  );
+}
+
+interface ThemeCatalogProps {
+  mode: ThemeMode;
+  onToggleMode: () => void;
+}
+
+export function ThemeCatalog({ mode, onToggleMode }: ThemeCatalogProps) {
+  const { colors } = useTheme();
   return (
     <ScrollView
-      style={{ backgroundColor: t.color.semantic.light["bg-page"] }}
+      style={{ backgroundColor: colors["bg-page"] }}
       contentContainerStyle={styles.container}
     >
-      <Text style={styles.h1}>melta-app theme catalog</Text>
+      <View style={styles.headerRow}>
+        <RNText style={[styles.h1, { color: colors["text-heading"] }]}>melta-app catalog</RNText>
+        <Pressable
+          onPress={onToggleMode}
+          accessibilityRole="button"
+          accessibilityLabel={mode === "light" ? "ダークモードに切替" : "ライトモードに切替"}
+          style={[styles.toggle, { borderColor: colors["border-default"] }]}
+        >
+          <RNText style={{ color: colors["text-default"] }}>
+            {mode === "light" ? "🌙 dark" : "☀️ light"}
+          </RNText>
+        </Pressable>
+      </View>
+
+      <Section title="Text primitive">
+        <ContractChip id="text" />
+        <TextCatalog />
+      </Section>
 
       <Section title="primary">
         {(Object.entries(t.color.primary) as [string, string][]).map(([k, v]) => (
@@ -43,8 +86,8 @@ export function ThemeCatalog() {
         ))}
       </Section>
 
-      <Section title="semantic (light)">
-        {(Object.entries(t.color.semantic.light) as [string, string][]).map(([k, v]) => (
+      <Section title={`semantic (${mode})`}>
+        {(Object.entries(t.color.semantic[mode]) as [string, string][]).map(([k, v]) => (
           <Swatch key={k} label={k} color={v} />
         ))}
       </Section>
@@ -61,11 +104,13 @@ export function ThemeCatalog() {
             key={k}
             style={[
               styles.elevationCard,
-              { borderRadius: t.radius.md, backgroundColor: t.color.semantic.light["bg-surface"] },
+              { borderRadius: t.radius.md, backgroundColor: colors["bg-surface"] },
               t.elevation[k],
             ]}
           >
-            <Text style={styles.swatchLabel}>elevation.{k}</Text>
+            <RNText style={[styles.swatchLabel, { color: colors["text-default"] }]}>
+              elevation.{k}
+            </RNText>
           </View>
         ))}
       </Section>
@@ -79,9 +124,9 @@ export function ThemeCatalog() {
                 { borderRadius: v === 9999 ? 24 : v, backgroundColor: t.color.primary["500"] },
               ]}
             />
-            <Text style={styles.swatchLabel}>
+            <RNText style={[styles.swatchLabel, { color: colors["text-default"] }]}>
               radius.{k} · {v}
-            </Text>
+            </RNText>
           </View>
         ))}
       </Section>
@@ -91,23 +136,39 @@ export function ThemeCatalog() {
 
 const styles = StyleSheet.create({
   container: { padding: t.spacing["4"], gap: t.spacing["6"] },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
   h1: {
     fontSize: t.typography.fontSize["2xl"].fontSize,
     lineHeight: t.typography.fontSize["2xl"].lineHeight,
     fontWeight: t.typography.fontWeight.bold,
-    color: t.color.semantic.light["text-heading"],
+  },
+  toggle: {
+    paddingVertical: t.spacing["2"],
+    paddingHorizontal: t.spacing["3"],
+    borderWidth: 1,
+    borderRadius: t.radius.md,
   },
   section: { gap: t.spacing["2"] },
   sectionTitle: {
     fontSize: t.typography.fontSize.lg.fontSize,
     fontWeight: t.typography.fontWeight.semibold,
-    color: t.color.semantic.light["text-heading"],
+  },
+  chip: {
+    fontSize: t.typography.fontSize.xs.fontSize,
+    borderWidth: 1,
+    borderRadius: t.radius.sm,
+    paddingVertical: t.spacing["1"],
+    paddingHorizontal: t.spacing["2"],
+    alignSelf: "flex-start",
   },
   swatchRow: { flexDirection: "row", alignItems: "center", gap: t.spacing["3"] },
   swatch: { width: 40, height: 40, borderRadius: t.radius.sm },
   swatchLabel: {
     fontSize: t.typography.fontSize.sm.fontSize,
-    color: t.color.semantic.light["text-default"],
   },
   elevationCard: {
     paddingVertical: t.spacing["4"],
