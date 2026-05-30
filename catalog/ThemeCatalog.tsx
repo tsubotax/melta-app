@@ -27,6 +27,19 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
+/** グループ見出し（Components / Design tokens の大区切り）。 */
+function GroupHeading({ title, caption }: { title: string; caption?: string }) {
+  const { colors } = useTheme();
+  return (
+    <View style={[styles.groupHeading, { borderTopColor: colors["border-default"] }]}>
+      <RNText style={[styles.groupTitle, { color: colors["text-heading"] }]}>{title}</RNText>
+      {caption != null && (
+        <RNText style={[styles.swatchLabel, { color: colors["text-muted"] }]}>{caption}</RNText>
+      )}
+    </View>
+  );
+}
+
 function Swatch({ label, color }: { label: string; color: string }) {
   const { colors } = useTheme();
   return (
@@ -68,7 +81,12 @@ export function ThemeCatalog({ mode, onToggleMode }: ThemeCatalogProps) {
       contentContainerStyle={styles.container}
     >
       <View style={styles.headerRow}>
-        <RNText style={[styles.h1, { color: colors["text-heading"] }]}>melta-app catalog</RNText>
+        <View style={{ flex: 1 }}>
+          <RNText style={[styles.h1, { color: colors["text-heading"] }]}>melta-app catalog</RNText>
+          <RNText style={[styles.swatchLabel, { color: colors["text-muted"] }]}>
+            @melta/contracts 駆動の RN DS。各 chip は実装が満たす contract メタ（§6）。
+          </RNText>
+        </View>
         <Pressable
           onPress={onToggleMode}
           accessibilityRole="button"
@@ -80,6 +98,8 @@ export function ThemeCatalog({ mode, onToggleMode }: ThemeCatalogProps) {
           </RNText>
         </Pressable>
       </View>
+
+      <GroupHeading title="Components" caption={`MVP ${Object.keys(CONTRACTS).length} 個（公開 7 + internal Surface + EmptyState）`} />
 
       <Section title="Text primitive">
         <ContractChip id="text" />
@@ -117,6 +137,8 @@ export function ThemeCatalog({ mode, onToggleMode }: ThemeCatalogProps) {
         <ContractChip id="emptyState" />
         <SkeletonEmptyStateCatalog />
       </Section>
+
+      <GroupHeading title="Design tokens" caption="@melta/contracts tokens.json → NativeTheme（生成物）" />
 
       <Section title="primary">
         {(Object.entries(t.color.primary) as [string, string][]).map(([k, v]) => (
@@ -176,12 +198,22 @@ const styles = StyleSheet.create({
   container: { padding: t.spacing["4"], gap: t.spacing["6"] },
   headerRow: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     justifyContent: "space-between",
+    gap: t.spacing["3"],
   },
   h1: {
     fontSize: t.typography.fontSize["2xl"].fontSize,
     lineHeight: t.typography.fontSize["2xl"].lineHeight,
+    fontWeight: t.typography.fontWeight.bold,
+  },
+  groupHeading: {
+    borderTopWidth: 1,
+    paddingTop: t.spacing["4"],
+    gap: t.spacing["1"],
+  },
+  groupTitle: {
+    fontSize: t.typography.fontSize.xl.fontSize,
     fontWeight: t.typography.fontWeight.bold,
   },
   toggle: {
