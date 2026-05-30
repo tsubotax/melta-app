@@ -2,6 +2,15 @@
 // 生成元: scripts/generate-contract-types.ts（入力 @melta/contracts/components/*.contract.json）
 // 各 component の variant/size/state を contract から codegen した型 + 実行時メタ(__contract 用)。
 
+/** 各 contract メタの shape（§2 A-3: 生成結果が shape から逸脱したら型で検知する）。 */
+export interface ContractShape {
+  id: string;
+  version: string;
+  variants: readonly string[];
+  sizes: readonly string[];
+  states: readonly string[];
+}
+
 export const CONTRACTS = {
   text: {
     id: "text",
@@ -66,7 +75,7 @@ export const CONTRACTS = {
     sizes: ["sm", "md", "lg"],
     states: ["default"],
   },
-} as const;
+} as const satisfies Record<string, ContractShape>;
 
 export type ContractId = keyof typeof CONTRACTS;
 

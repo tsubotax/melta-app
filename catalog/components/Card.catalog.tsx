@@ -35,11 +35,21 @@ export function CardCatalog() {
         </Text>
       </Card>
 
-      {/* ツー活カード風（media + Metric 行 + Tag を compose） */}
+      {/* link（action と同じく Pressable、用途差はリンク遷移） */}
+      <Card variant="link" onPress={() => {}} accessibilityLabel="リンクカード">
+        <Text variant="lg" role="heading" weight="semibold" color="text-heading">
+          link カード
+        </Text>
+        <Text variant="sm" color="text-muted">
+          リンク遷移用。pressed で elevation sm→md。
+        </Text>
+      </Card>
+
+      {/* ツー活カード風（media + Metric 行 + Tag を compose）。
+          media variant は非インタラクティブ（見た目デモ）。実際の押下は D2I 側で Pressable 包む or
+          action/link と組合せる設計議論が必要（contract は variant 排他なので Phase1 は見た目まで）。 */}
       <Card
         variant="media"
-        onPress={() => {}}
-        accessibilityLabel="ツー活カード サンプル"
         media={
           <Image
             source={{ uri: "https://placehold.co/600x300/2b70ef/ffffff/png" }}

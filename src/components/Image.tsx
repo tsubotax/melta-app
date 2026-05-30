@@ -62,8 +62,16 @@ export function Image({
       ...(aspectRatio != null ? { aspectRatio } : null),
       ...(borderRadius != null ? { borderRadius, overflow: "hidden" } : null),
     };
+    // caller の style(width/height/flex 等の layout)を fallback にも反映する（通常画像と同寸法）。
+    // ImageStyle ⊃ ViewStyle ではないが layout プロパティは共通なので cast で流す
+    // （overflow:"scroll" 等 Image 固有値を caller が入れた稀ケースのみ無視される）。
     return (
-      <View style={fallbackShape} testID={testID}>
+      <View
+        style={[fallbackShape, style as unknown as StyleProp<ViewStyle>]}
+        testID={testID}
+        accessible={accessibilityLabel != null}
+        accessibilityLabel={accessibilityLabel}
+      >
         {fallback}
       </View>
     );

@@ -114,7 +114,15 @@ function main(): void {
     "// 各 component の variant/size/state を contract から codegen した型 + 実行時メタ(__contract 用)。\n\n";
 
   const body =
-    `export const CONTRACTS = {\n${blocks.join("\n")}\n} as const;\n\n` +
+    "/** 各 contract メタの shape（§2 A-3: 生成結果が shape から逸脱したら型で検知する）。 */\n" +
+    "export interface ContractShape {\n" +
+    "  id: string;\n" +
+    "  version: string;\n" +
+    "  variants: readonly string[];\n" +
+    "  sizes: readonly string[];\n" +
+    "  states: readonly string[];\n" +
+    "}\n\n" +
+    `export const CONTRACTS = {\n${blocks.join("\n")}\n} as const satisfies Record<string, ContractShape>;\n\n` +
     "export type ContractId = keyof typeof CONTRACTS;\n\n" +
     "/** contract の variant キー union（例: VariantOf<\"text\"> = \"xs\" | ... | \"3xl\"）。空なら never。 */\n" +
     'export type VariantOf<K extends ContractId> = (typeof CONTRACTS)[K]["variants"][number];\n' +
