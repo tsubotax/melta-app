@@ -10,6 +10,8 @@ import { CONTRACTS } from "../src/contracts/contract-types";
 import { TextCatalog } from "./components/Text.catalog";
 import { MetricCatalog } from "./components/Metric.catalog";
 import { SurfaceImageCatalog } from "./components/SurfaceImage.catalog";
+import { TagCatalog } from "./components/Tag.catalog";
+import { CardCatalog } from "./components/Card.catalog";
 
 const t = nativeTheme;
 
@@ -91,6 +93,16 @@ export function ThemeCatalog({ mode, onToggleMode }: ThemeCatalogProps) {
         <ContractChip id="surface" />
         <ContractChip id="image" />
         <SurfaceImageCatalog />
+      </Section>
+
+      <Section title="Tag primitive">
+        <ContractChip id="tag" />
+        <TagCatalog />
+      </Section>
+
+      <Section title="Card component（+ ツー活カード compose）">
+        <ContractChip id="card" />
+        <CardCatalog />
       </Section>
 
       <Section title="primary">

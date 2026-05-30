@@ -4,3 +4,4 @@
  */
 
 export { Image } from "./Image";
+export { Card } from "./Card";

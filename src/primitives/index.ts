@@ -2,3 +2,4 @@
 
 export { Text } from "./Text";
 export { Metric } from "./Metric";
+export { Tag } from "./Tag";
