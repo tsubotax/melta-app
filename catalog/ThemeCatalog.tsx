@@ -13,6 +13,7 @@ import { SurfaceImageCatalog } from "./components/SurfaceImage.catalog";
 import { TagCatalog } from "./components/Tag.catalog";
 import { CardCatalog } from "./components/Card.catalog";
 import { ButtonCatalog } from "./components/Button.catalog";
+import { SkeletonEmptyStateCatalog } from "./components/SkeletonEmptyState.catalog";
 
 const t = nativeTheme;
 
@@ -109,6 +110,12 @@ export function ThemeCatalog({ mode, onToggleMode }: ThemeCatalogProps) {
       <Section title="Card component（+ ツー活カード compose）">
         <ContractChip id="card" />
         <CardCatalog />
+      </Section>
+
+      <Section title="Skeleton + EmptyState">
+        <ContractChip id="skeleton" />
+        <ContractChip id="emptyState" />
+        <SkeletonEmptyStateCatalog />
       </Section>
 
       <Section title="primary">

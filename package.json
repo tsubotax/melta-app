@@ -12,8 +12,10 @@
   "devDependencies": {
     "@types/node": "^25.9.1",
     "@types/react": "~19.2.2",
+    "eslint": "^10.4.1",
     "tsx": "^4.19.0",
-    "typescript": "~6.0.3"
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.60.0"
   },
   "scripts": {
     "start": "expo start",
@@ -24,7 +26,8 @@
     "generate:contracts": "tsx scripts/generate-contract-types.ts",
     "generate": "npm run generate:theme && npm run generate:contracts",
     "test": "tsx --test scripts/lib/*.test.ts",
-    "typecheck": "tsc --noEmit && tsc --noEmit -p scripts/tsconfig.json"
+    "typecheck": "tsc --noEmit && tsc --noEmit -p scripts/tsconfig.json",
+    "lint": "eslint ."
   },
   "private": true
 }
