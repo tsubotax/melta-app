@@ -1,6 +1,7 @@
 {
   "name": "melta-app",
-  "version": "1.0.0",
+  "version": "0.1.0",
+  "description": "melta for APP — React Native(Expo) 版 melta デザインシステム。@melta/contracts を single source of truth に RN 実装で満たす。",
   "main": "index.ts",
   "dependencies": {
     "expo": "~56.0.8",
@@ -10,13 +11,16 @@
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
+    "tsx": "^4.19.0",
     "typescript": "~6.0.3"
   },
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "generate:theme": "tsx scripts/generate-native-theme.ts",
+    "test": "tsx --test scripts/lib/*.test.ts"
   },
   "private": true
 }
