@@ -45,7 +45,11 @@ const INTERACTIVE: Record<CardVariant, boolean> = {
   link: true,
 };
 
-/** Card の土台 style を一元生成。non-interactive / interactive の両分岐で共有する。 */
+/**
+ * Card の外枠 style を一元生成（non-interactive / interactive で共有）。
+ * 注: overflow:hidden は付けない。iOS は shadow(elevation) と overflow:hidden が同居すると影が
+ * 消えるため（contract は media でも elevation.sm 要求）。media のクリップは内側の clip View で行う。
+ */
 function buildCardShape(
   theme: NativeTheme,
   bgSurface: string,
@@ -58,7 +62,8 @@ function buildCardShape(
     borderRadius: theme.radius.lg,
     borderWidth: 1,
     borderColor,
-    ...(isMedia ? { overflow: "hidden" } : { padding: theme.spacing["6"] }),
+    // media は内側 clip View が padding を持つので外枠は padding なし。
+    ...(isMedia ? null : { padding: theme.spacing["6"] }),
     ...theme.elevation[elevation],
   };
 }
@@ -79,7 +84,7 @@ export function Card({
   const interactive = INTERACTIVE[variant] && onPress != null;
   const isMedia = variant === "media";
 
-  const content = (
+  const inner = (
     <>
       {media != null && <View>{media}</View>}
       <View style={isMedia ? { padding: theme.spacing["6"] } : undefined}>
@@ -88,6 +93,14 @@ export function Card({
         {footer}
       </View>
     </>
+  );
+
+  // media は内側 clip View で角丸クリップ（外枠の影を消さないため overflow は内側だけに置く、M-1）。
+  // borderRadius は外枠 radius.lg から border 分を引かず同値でクリップ（視覚差は実機で微調整可）。
+  const content = isMedia ? (
+    <View style={{ borderRadius: theme.radius.lg, overflow: "hidden" }}>{inner}</View>
+  ) : (
+    inner
   );
 
   if (!interactive) {

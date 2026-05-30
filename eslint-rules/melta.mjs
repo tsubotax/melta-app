@@ -40,14 +40,19 @@ export const meltaPlugin = {
     "no-raw-color": {
       meta: { type: "problem", docs: { description: "色は theme.color.* を使う（生 hex/rgb/hsl 禁止）" } },
       create(context) {
+        const check = (node, text) => {
+          if (typeof text === "string" && !SAFE_COLORS.has(text) && COLOR_RE.test(text)) {
+            context.report({ node, message: `生の色 "${text}" は禁止。theme.color.* を使う。` });
+          }
+        };
         return {
           Literal(node) {
-            if (
-              typeof node.value === "string" &&
-              !SAFE_COLORS.has(node.value) &&
-              COLOR_RE.test(node.value)
-            ) {
-              context.report({ node, message: `生の色 "${node.value}" は禁止。theme.color.* を使う。` });
+            check(node, node.value);
+          },
+          // テンプレートリテラル内の生色も拾う（`#fff` や `rgb(...)` を quasi に直書きするケース）。
+          TemplateLiteral(node) {
+            for (const quasi of node.quasis) {
+              check(quasi, quasi.value.cooked);
             }
           },
         };

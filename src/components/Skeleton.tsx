@@ -75,9 +75,10 @@ export function Skeleton({
   }, [opacity, theme]);
 
   const bar = colors["border-default"];
+  // contract a11y role は web の "status"。RN の accessibilityRole に status は無いため、
+  // busy state + label で status 相当を表現する（§2 web→RN mapping、skeleton は busy で扱う）。
   const a11y = {
     accessible: true,
-    accessibilityRole: "image" as const,
     accessibilityState: { busy: true },
     accessibilityLabel,
   };
@@ -94,7 +95,14 @@ export function Skeleton({
 
   if (variant === "card") {
     return (
-      <Surface radius="lg" elevation="sm" padding="6" style={style} testID={testID}>
+      <Surface
+        radius="lg"
+        elevation="sm"
+        padding="6"
+        // contract skeleton.card は border-default を要求（Surface は border を出さないので Skeleton で付与）。
+        style={[{ borderWidth: 1, borderColor: colors["border-default"] }, style]}
+        testID={testID}
+      >
         <Animated.View {...a11y} style={{ opacity, gap: theme.spacing["3"] }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: theme.spacing["3"] }}>
             <View style={{ width: 40, height: 40, borderRadius: theme.radius.full, backgroundColor: bar }} />

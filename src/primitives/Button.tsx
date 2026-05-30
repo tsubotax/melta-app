@@ -49,7 +49,8 @@ interface ButtonBase {
 
 type ButtonProps = ButtonBase &
   (
-    | { iconOnly: true; accessibilityLabel: string; label?: never }
+    // iconOnly は leadingIcon 必須（空ボタンを型で排除、§4 の最小 DU を保ちつつ icon 1個必須）。
+    | { iconOnly: true; accessibilityLabel: string; leadingIcon: ReactNode; label?: never }
     | { iconOnly?: false; label: string }
   );
 
@@ -153,7 +154,6 @@ export function Button(props: ButtonProps) {
               {props.label}
             </Text>
           )}
-          {iconOnly && leadingIcon == null && trailingIcon == null && null}
           {trailingIcon != null && <View>{trailingIcon}</View>}
         </>
       )}
