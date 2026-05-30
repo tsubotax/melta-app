@@ -8,6 +8,8 @@ import { Pressable, ScrollView, StyleSheet, Text as RNText, View } from "react-n
 import { nativeTheme, useTheme, type ThemeMode } from "../src/theme";
 import { CONTRACTS } from "../src/contracts/contract-types";
 import { TextCatalog } from "./components/Text.catalog";
+import { MetricCatalog } from "./components/Metric.catalog";
+import { SurfaceImageCatalog } from "./components/SurfaceImage.catalog";
 
 const t = nativeTheme;
 
@@ -44,7 +46,7 @@ function ContractChip({ id }: { id: keyof typeof CONTRACTS }) {
         { color: colors["text-muted"], borderColor: colors["border-default"] },
       ]}
     >
-      {`__contract ${c.id}@${c.version} · variants:${c.variants.length} · states:${c.states.length}`}
+      {`__contract ${c.id}@${c.version} · variants:${c.variants.length} · sizes:${c.sizes.length} · states:${c.states.length}`}
     </RNText>
   );
 }
@@ -78,6 +80,17 @@ export function ThemeCatalog({ mode, onToggleMode }: ThemeCatalogProps) {
       <Section title="Text primitive">
         <ContractChip id="text" />
         <TextCatalog />
+      </Section>
+
+      <Section title="Metric primitive">
+        <ContractChip id="metric" />
+        <MetricCatalog />
+      </Section>
+
+      <Section title="Surface (internal) + Image">
+        <ContractChip id="surface" />
+        <ContractChip id="image" />
+        <SurfaceImageCatalog />
       </Section>
 
       <Section title="primary">
