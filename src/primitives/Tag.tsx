@@ -14,6 +14,7 @@
 import { Pressable, View, type StyleProp, type ViewStyle } from "react-native";
 import { Text } from "./Text";
 import { useTheme } from "../theme";
+import { useFocusRing, FocusRing } from "./_internal/focus-ring";
 import { CONTRACTS } from "../contracts/contract-types";
 
 interface TagBase {
@@ -27,12 +28,10 @@ type TagProps =
   | (TagBase & { variant: "removable"; onRemove: () => void; removeAccessibilityLabel: string })
   | (TagBase & { variant: "filter-chip"; selected: boolean; onToggle: () => void });
 
-export function Tag(props: TagProps) {
-  const { theme, colors } = useTheme();
-  const { label, style, testID } = props;
-
-  // 共通形状（px-3 py-1 rounded-full）。
-  const base: ViewStyle = {
+/** 共通形状（px-3 py-1 rounded-full）。 */
+function useTagBase(): ViewStyle {
+  const { theme } = useTheme();
+  return {
     flexDirection: "row",
     alignItems: "center",
     gap: theme.spacing["1"],
@@ -40,67 +39,84 @@ export function Tag(props: TagProps) {
     paddingVertical: theme.spacing["1"],
     borderRadius: theme.radius.full,
   };
+}
 
-  // filter-chip（トグル可能）
-  if (props.variant === "filter-chip") {
-    const { selected, onToggle } = props;
-    return (
-      <Pressable
-        onPress={onToggle}
-        accessibilityRole="button"
-        accessibilityState={{ selected }}
-        testID={testID}
-        style={[
-          base,
-          {
-            backgroundColor: selected ? theme.color.primary["50"] : colors["bg-surface"],
-            borderWidth: 1,
-            borderColor: selected ? theme.color.primary["200"] : colors["border-default"],
-          },
-          style,
-        ]}
+function FilterChipTag(props: TagBase & { selected: boolean; onToggle: () => void }) {
+  const { theme, colors } = useTheme();
+  const base = useTagBase();
+  const { focused, focusHandlers } = useFocusRing();
+  const { label, selected, onToggle, style, testID } = props;
+  return (
+    <Pressable
+      {...focusHandlers}
+      onPress={onToggle}
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
+      testID={testID}
+      style={[
+        base,
+        {
+          backgroundColor: selected ? theme.color.primary["50"] : colors["bg-surface"],
+          borderWidth: 1,
+          borderColor: selected ? theme.color.primary["200"] : colors["border-default"],
+        },
+        style,
+      ]}
+    >
+      <Text
+        variant="sm"
+        color="text-default"
+        style={selected ? { color: theme.color.primary["700"] } : undefined}
       >
-        <Text
-          variant="sm"
-          color="text-default"
-          style={selected ? { color: theme.color.primary["700"] } : undefined}
-        >
-          {label}
-        </Text>
-      </Pressable>
-    );
-  }
+        {label}
+      </Text>
+      <FocusRing visible={focused} radius={theme.radius.full} />
+    </Pressable>
+  );
+}
 
-  // removable（削除ボタン付き）
-  if (props.variant === "removable") {
-    const { onRemove, removeAccessibilityLabel } = props;
-    return (
-      <View
-        testID={testID}
-        style={[base, { backgroundColor: colors["bg-page-alt"] }, style]}
-      >
-        <Text variant="xs" color="text-default">
-          {label}
-        </Text>
-        <Pressable
-          onPress={onRemove}
-          accessibilityRole="button"
-          accessibilityLabel={removeAccessibilityLabel}
-          hitSlop={8}
-        >
-          <Text variant="xs" color="text-muted">
-            ×
-          </Text>
-        </Pressable>
-      </View>
-    );
-  }
-
-  // basic（表示のみ）
+function RemovableTag(
+  props: TagBase & { onRemove: () => void; removeAccessibilityLabel: string },
+) {
+  const { theme, colors } = useTheme();
+  const base = useTagBase();
+  const { focused, focusHandlers } = useFocusRing();
+  const { label, onRemove, removeAccessibilityLabel, style, testID } = props;
   return (
     <View testID={testID} style={[base, { backgroundColor: colors["bg-page-alt"] }, style]}>
       <Text variant="xs" color="text-default">
         {label}
+      </Text>
+      {/* 最小タップターゲット確保: 親 Tag の高さを超えられないので remove 自身に min 24 + hitSlop（Codex M-2）。 */}
+      <Pressable
+        {...focusHandlers}
+        onPress={onRemove}
+        accessibilityRole="button"
+        accessibilityLabel={removeAccessibilityLabel}
+        hitSlop={10}
+        style={{ minWidth: 24, minHeight: 24, alignItems: "center", justifyContent: "center" }}
+      >
+        <Text variant="xs" color="text-muted">
+          ×
+        </Text>
+        <FocusRing visible={focused} radius={theme.radius.full} />
+      </Pressable>
+    </View>
+  );
+}
+
+export function Tag(props: TagProps) {
+  const { colors } = useTheme();
+  const base = useTagBase();
+
+  if (props.variant === "filter-chip") return <FilterChipTag {...props} />;
+  if (props.variant === "removable") return <RemovableTag {...props} />;
+
+  // basic（表示のみ）
+  return (
+    <View testID={props.testID} style={[base, { backgroundColor: colors["bg-page-alt"] }, props.style]}>
+      <Text variant="xs" color="text-default">
+        {props.label}
       </Text>
     </View>
   );

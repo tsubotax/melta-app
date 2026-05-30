@@ -12,6 +12,7 @@ import { MetricCatalog } from "./components/Metric.catalog";
 import { SurfaceImageCatalog } from "./components/SurfaceImage.catalog";
 import { TagCatalog } from "./components/Tag.catalog";
 import { CardCatalog } from "./components/Card.catalog";
+import { ButtonCatalog } from "./components/Button.catalog";
 
 const t = nativeTheme;
 
@@ -93,6 +94,11 @@ export function ThemeCatalog({ mode, onToggleMode }: ThemeCatalogProps) {
         <ContractChip id="surface" />
         <ContractChip id="image" />
         <SurfaceImageCatalog />
+      </Section>
+
+      <Section title="Button primitive">
+        <ContractChip id="button" />
+        <ButtonCatalog />
       </Section>
 
       <Section title="Tag primitive">

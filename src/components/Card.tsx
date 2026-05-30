@@ -15,6 +15,7 @@
 import type { ReactNode } from "react";
 import { Pressable, View, type StyleProp, type ViewStyle } from "react-native";
 import { useTheme, type NativeTheme, type ElevationKey } from "../theme";
+import { useFocusRing, FocusRing } from "../primitives/_internal/focus-ring";
 import { CONTRACTS } from "../contracts/contract-types";
 
 type CardVariant = "basic" | "media" | "action" | "link";
@@ -74,6 +75,7 @@ export function Card({
   children,
 }: CardProps) {
   const { theme, colors } = useTheme();
+  const { focused, focusHandlers } = useFocusRing();
   const interactive = INTERACTIVE[variant] && onPress != null;
   const isMedia = variant === "media";
 
@@ -102,9 +104,10 @@ export function Card({
     );
   }
 
-  // action/link: pressed 時 elevation.sm→md。
+  // action/link: pressed 時 elevation.sm→md、focus 時 ring overlay。
   return (
     <Pressable
+      {...focusHandlers}
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
@@ -121,6 +124,7 @@ export function Card({
       ]}
     >
       {content}
+      <FocusRing visible={focused} radius={theme.radius.lg} />
     </Pressable>
   );
 }
