@@ -1,5 +1,5 @@
 // ⚠️ 自動生成ファイル — 手で編集しないこと。
-// 生成元: scripts/generate-native-theme.ts（入力 @melta/contracts tokens.json）
+// 生成元: scripts/generate-native-theme.ts（入力 melta-contracts tokens.json）
 // tokens version: 1.0.0
 
 import type { NativeTheme } from "./types";

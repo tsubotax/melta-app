@@ -84,7 +84,7 @@ export function ThemeCatalog({ mode, onToggleMode }: ThemeCatalogProps) {
         <View style={{ flex: 1 }}>
           <RNText style={[styles.h1, { color: colors["text-heading"] }]}>melta-app catalog</RNText>
           <RNText style={[styles.swatchLabel, { color: colors["text-muted"] }]}>
-            @melta/contracts 駆動の RN DS。各 chip は実装が満たす contract メタ（§6）。
+            melta-contracts 駆動の RN DS。各 chip は実装が満たす contract メタ（§6）。
           </RNText>
         </View>
         <Pressable
@@ -138,7 +138,7 @@ export function ThemeCatalog({ mode, onToggleMode }: ThemeCatalogProps) {
         <SkeletonEmptyStateCatalog />
       </Section>
 
-      <GroupHeading title="Design tokens" caption="@melta/contracts tokens.json → NativeTheme（生成物）" />
+      <GroupHeading title="Design tokens" caption="melta-contracts tokens.json → NativeTheme（生成物）" />
 
       <Section title="primary">
         {(Object.entries(t.color.primary) as [string, string][]).map(([k, v]) => (

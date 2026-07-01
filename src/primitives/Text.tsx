@@ -1,6 +1,6 @@
 /**
  * Text — 基本テキスト primitive（設計書 §1）。RN コア Text の薄いラッパ。
- * contract: text（app 先行定義、@melta/contracts）。
+ * contract: text（app 先行定義、melta-contracts）。
  *
  * - variant は contract 由来の VariantOf<"text">（= fontSize の段階）。theme の FontSizeKey と
  *   構造一致している前提で theme.typography.fontSize[variant] を引く。乖離したら型エラーで検知

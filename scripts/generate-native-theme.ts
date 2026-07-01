@@ -1,5 +1,5 @@
 /**
- * generate-native-theme — @melta/contracts の tokens.json を読み、
+ * generate-native-theme — melta-contracts の tokens.json を読み、
  * RN 向け NativeTheme に正規化して src/theme/native-theme.ts を生成する codegen。
  *
  * 使い方:
@@ -7,7 +7,7 @@
  *
  * 入力の解決順:
  *   1. 第1引数で明示されたパス
- *   2. @melta/contracts/tokens（publish & install 後に有効）
+ *   2. melta-contracts/tokens（publish & install 後に有効）
  *   3. 開発 fallback: 兄弟ディレクトリ ../melta-ui/design/contracts/tokens.json
  */
 
@@ -28,16 +28,16 @@ function resolveTokensPath(): string {
     return p;
   }
   try {
-    return require.resolve("@melta/contracts/tokens");
+    return require.resolve("melta-contracts/tokens");
   } catch {
     // publish 前の開発 fallback（melta-app と melta-ui が兄弟ディレクトリ前提）
     const local = resolve(scriptDir, "../../melta-ui/design/contracts/tokens.json");
     if (existsSync(local)) {
-      console.warn(`⚠️  @melta/contracts 未 install。開発 fallback を使用: ${local}`);
+      console.warn(`⚠️  melta-contracts 未 install。開発 fallback を使用: ${local}`);
       return local;
     }
     throw new Error(
-      "tokens.json を解決できません。`npm install @melta/contracts` するか、第1引数でパスを渡してください。",
+      "tokens.json を解決できません。`npm install melta-contracts` するか、第1引数でパスを渡してください。",
     );
   }
 }
@@ -52,7 +52,7 @@ function main(): void {
   // package specifier + tokens version だけにする（実際の入力パスは stdout にのみ出す）。
   const banner =
     "// ⚠️ 自動生成ファイル — 手で編集しないこと。\n" +
-    "// 生成元: scripts/generate-native-theme.ts（入力 @melta/contracts tokens.json）\n" +
+    "// 生成元: scripts/generate-native-theme.ts（入力 melta-contracts tokens.json）\n" +
     `// tokens version: ${raw.version ?? "unknown"}\n\n`;
   const body =
     'import type { NativeTheme } from "./types";\n\n' +

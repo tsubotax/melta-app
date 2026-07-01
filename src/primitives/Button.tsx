@@ -1,7 +1,7 @@
 /**
  * Button — CTA / セカンダリ / アイコンボタン（設計書 §1, §4 C-3）。contract: button。
  *
- * - variant 6（contained/outlined/neutral/lighted/danger/subtle）× size 3（small/medium/large）。
+ * - variant 7（contained/outlined/brand-outline/neutral/lighted/danger/subtle）× size 3（small/medium/large）。
  * - iconOnly は discriminated union で accessibilityLabel 必須を型強制（§4、label 排他）。
  * - states（§2 mapping）: hover→pressed（背景を pressed 色に）、focus→FocusRing overlay（共通 helper）、
  *   disabled→prop（opacity + 非活性）、loading→Spinner + disabled 相当。
@@ -29,6 +29,7 @@ import { CONTRACTS } from "../contracts/contract-types";
 type ButtonVariant =
   | "contained"
   | "outlined"
+  | "brand-outline"
   | "neutral"
   | "lighted"
   | "danger"
@@ -85,6 +86,13 @@ function resolveVariant(
         pressedBg: sem["bg-surface-alt"],
         textColor: sem["text-default"],
         border: sem["border-default"],
+      };
+    case "brand-outline":
+      return {
+        bg: sem["bg-surface"],
+        pressedBg: c.primary["50"],
+        textColor: c.primary["500"],
+        border: c.primary["500"],
       };
     case "neutral":
       return { bg: sem["bg-surface-alt"], pressedBg: sem["border-default"], textColor: sem["text-default"] };

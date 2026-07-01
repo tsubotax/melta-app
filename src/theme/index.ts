@@ -1,6 +1,6 @@
 /**
  * melta-app theme エントリ。
- * 型は types.ts、値は native-theme.ts（@melta/contracts から自動生成）。
+ * 型は types.ts、値は native-theme.ts（melta-contracts から自動生成）。
  */
 
 export * from "./types";

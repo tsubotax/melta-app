@@ -1,5 +1,5 @@
 /**
- * NativeTheme — melta の design contracts(@melta/contracts の tokens.json)を
+ * NativeTheme — melta の design contracts(melta-contracts の tokens.json)を
  * React Native 向けに正規化した theme の型。
  *
  * 生成は scripts/generate-native-theme.ts（純粋変換は scripts/lib/normalize-tokens.ts）。

@@ -1,5 +1,5 @@
 // ⚠️ 自動生成ファイル — 手で編集しないこと。
-// 生成元: scripts/generate-contract-types.ts（入力 @melta/contracts/components/*.contract.json）
+// 生成元: scripts/generate-contract-types.ts（入力 melta-contracts/components/*.contract.json）
 // 各 component の variant/size/state を contract から codegen した型 + 実行時メタ(__contract 用)。
 
 /** 各 contract メタの shape（§2 A-3: 生成結果が shape から逸脱したら型で検知する）。 */
@@ -22,7 +22,7 @@ export const CONTRACTS = {
   button: {
     id: "button",
     version: "2.0.0",
-    variants: ["contained", "outlined", "neutral", "lighted", "danger", "subtle"],
+    variants: ["contained", "outlined", "brand-outline", "neutral", "lighted", "danger", "subtle"],
     sizes: ["small", "medium", "large"],
     states: ["default", "hover", "focus", "disabled", "loading"],
   },

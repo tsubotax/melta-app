@@ -1,5 +1,5 @@
 /**
- * normalize-tokens — @melta/contracts の tokens.json(web 形式)を
+ * normalize-tokens — melta-contracts の tokens.json(web 形式)を
  * React Native 向け NativeTheme に変換する純粋関数群。
  *
  * 副作用なし・I/O なし（fs アクセスは generate-native-theme.ts 側）。

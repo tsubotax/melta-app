@@ -2,7 +2,7 @@
  * conformance — 「実装が contract を満たしているか」を機械照合する最小ハーネス（設計書 §2 A-3）。
  *
  * 照合は3点を一直線に繋ぐ:
- *   契約源（@melta/contracts の *.contract.json）→ 生成メタ（src/contracts/contract-types.ts の CONTRACTS）
+ *   契約源（melta-contracts の *.contract.json）→ 生成メタ（src/contracts/contract-types.ts の CONTRACTS）
  *   → 実装宣言（各 component の `X.__contract = CONTRACTS.y`）
  *
  * RN component は node test で実行できないため、実装側はソースを「読むだけ」で静的スキャンする
@@ -48,10 +48,10 @@ export function toKey(id: string): string {
   return id.replace(/-([a-z])/g, (_m, ch: string) => ch.toUpperCase());
 }
 
-/** 契約源（@melta/contracts の components ディレクトリ）を解決。generate-contract-types と同方針。 */
+/** 契約源（melta-contracts の components ディレクトリ）を解決。generate-contract-types と同方針。 */
 export function resolveContractsDir(): string {
   try {
-    const pkgJson = require.resolve("@melta/contracts/package.json");
+    const pkgJson = require.resolve("melta-contracts/package.json");
     const dir = join(dirname(pkgJson), "components");
     if (existsSync(dir)) return dir;
   } catch {
@@ -59,7 +59,7 @@ export function resolveContractsDir(): string {
   }
   const local = resolve(here, "../../../melta-ui/design/contracts/components");
   if (existsSync(local)) return local;
-  throw new Error("contracts components ディレクトリを解決できません（@melta/contracts 未 install + fallback 不在）。");
+  throw new Error("contracts components ディレクトリを解決できません（melta-contracts 未 install + fallback 不在）。");
 }
 
 /** 契約源の *.contract.json を読み、ContractMeta 形式（CONTRACTS と同じ shape）に正規化。 */

@@ -1,5 +1,5 @@
 /**
- * generate-contract-types — @melta/contracts の *.contract.json を読み、
+ * generate-contract-types — melta-contracts の *.contract.json を読み、
  * 各 component の variant/size/state を string literal union 型 + 実行時メタ(CONTRACTS)に
  * codegen する。出力は src/contracts/contract-types.ts。
  *
@@ -12,7 +12,7 @@
  *
  * 入力の解決順（generate-native-theme.ts と同方針）:
  *   1. 第1引数で明示されたディレクトリ
- *   2. @melta/contracts の components/（publish & install 後に有効）
+ *   2. melta-contracts の components/（publish & install 後に有効）
  *   3. 開発 fallback: ../melta-ui/design/contracts/components
  */
 
@@ -57,7 +57,7 @@ function resolveContractsDir(): string {
     return p;
   }
   try {
-    const pkgJson = require.resolve("@melta/contracts/package.json");
+    const pkgJson = require.resolve("melta-contracts/package.json");
     const dir = join(dirname(pkgJson), "components");
     if (existsSync(dir)) return dir;
   } catch {
@@ -65,11 +65,11 @@ function resolveContractsDir(): string {
   }
   const local = resolve(scriptDir, "../../melta-ui/design/contracts/components");
   if (existsSync(local)) {
-    console.warn(`⚠️  @melta/contracts 未 install。開発 fallback を使用: ${local}`);
+    console.warn(`⚠️  melta-contracts 未 install。開発 fallback を使用: ${local}`);
     return local;
   }
   throw new Error(
-    "contracts の components ディレクトリを解決できません。`npm install @melta/contracts` するか、第1引数でパスを渡してください。",
+    "contracts の components ディレクトリを解決できません。`npm install melta-contracts` するか、第1引数でパスを渡してください。",
   );
 }
 
@@ -110,7 +110,7 @@ function main(): void {
 
   const banner =
     "// ⚠️ 自動生成ファイル — 手で編集しないこと。\n" +
-    "// 生成元: scripts/generate-contract-types.ts（入力 @melta/contracts/components/*.contract.json）\n" +
+    "// 生成元: scripts/generate-contract-types.ts（入力 melta-contracts/components/*.contract.json）\n" +
     "// 各 component の variant/size/state を contract から codegen した型 + 実行時メタ(__contract 用)。\n\n";
 
   const body =

@@ -1,7 +1,7 @@
 {
   "name": "melta-app",
   "version": "0.1.0",
-  "description": "melta for APP — React Native(Expo) 版 melta デザインシステム。@melta/contracts を single source of truth に RN 実装で満たす。",
+  "description": "melta for APP — React Native(Expo) 版 melta デザインシステム。melta-contracts を single source of truth に RN 実装で満たす。",
   "main": "index.ts",
   "dependencies": {
     "expo": "~56.0.8",
