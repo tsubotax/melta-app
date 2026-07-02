@@ -16,18 +16,22 @@ TARBALL="$(npm pack --pack-destination "$WORK" --silent | tail -1)"
 echo "  packed: $TARBALL"
 
 echo "→ tarball 実体検査（型が通っても実行ファイルが欠けている壊れ方を検出）"
+# 注意: `tar -tzf | grep -q` は禁止。grep -q が先に exit すると tar が SIGPIPE(141) になり、
+# pipefail 下で「ファイルが無い」と誤判定する（CI の Linux でのみ発火する flaky、2026-07-02 に実発生）。
+# tar は1回だけ実行して全リストを変数に取り、変数に対して照合する。
+LISTING="$(tar -tzf "$WORK/$TARBALL")"
 for required in \
   "package/lib/module/index.js" \
   "package/lib/typescript/src/index.d.ts" \
   "package/src/index.ts"; do
-  if ! tar -tzf "$WORK/$TARBALL" | grep -qx "$required"; then
+  if ! grep -qx "$required" <<<"$LISTING"; then
     echo "❌ tarball に $required がありません（bob build 出力 or files フィールドを確認）"
     echo "--- 診断: 環境 ---"
     node --version; npm --version
     echo "--- 診断: ディスク上の lib（prepare の出力） ---"
-    find "$ROOT/lib" -maxdepth 2 | head -20 || true
-    echo "--- 診断: tarball 内容（先頭40） ---"
-    tar -tzf "$WORK/$TARBALL" | head -40
+    find "$ROOT/lib" -maxdepth 2 || true
+    echo "--- 診断: tarball 内容 ---"
+    echo "$LISTING"
     exit 1
   fi
 done
