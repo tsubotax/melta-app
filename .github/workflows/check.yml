@@ -44,6 +44,10 @@ jobs:
       - name: Drift check (README / catalog / allowlist)
         run: npm run check:drift
 
+      # RN runtime での mount smoke（conformance は値の照合、こちらは「実際に描画木が作れる」証明）
+      - name: RN mount smoke (jest + Testing Library)
+        run: npm run test:rn
+
       # 「npm install すれば APP が作れる」の機械証明（公開 P1）:
       # pack した tarball を fixture に install → import + 型解決を tsc で検証
       - name: Installability gate (pack → install → import → typecheck)
