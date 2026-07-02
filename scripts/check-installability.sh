@@ -71,6 +71,16 @@ import {
   Screen,
   Header,
   Avatar,
+  TextField,
+  Toggle,
+  Checkbox,
+  Radio,
+  Alert,
+  Toast,
+  Progress,
+  Modal,
+  ActionSheet,
+  BottomSheet,
   CONTRACTS,
   type ContractId,
   type VariantOf,
@@ -95,6 +105,25 @@ export function App() {
             <Text variant="base">hello</Text>
             <Button variant={variant} label="save" onPress={() => {}} />
           </Card>
+          <TextField label="メール" value="" onChangeText={() => {}} />
+          <Toggle value onValueChange={() => {}} label="通知" />
+          <Checkbox label="同意" checked onChange={() => {}} />
+          <Radio
+            label="配送"
+            options={[{ label: "標準", value: "std" }]}
+            value="std"
+            onChange={() => {}}
+          />
+          <Alert variant="info" message="お知らせ" />
+          <Toast variant="success" message="保存しました" onClose={() => {}} />
+          <Progress value={50} label="進捗" />
+          <Modal visible={false} title="確認" onClose={() => {}}>
+            <Text>body</Text>
+          </Modal>
+          <ActionSheet visible={false} onClose={() => {}} actions={[{ label: "共有", onPress: () => {} }]} />
+          <BottomSheet visible={false} onClose={() => {}}>
+            <Text>sheet</Text>
+          </BottomSheet>
         </Stack>
       </Screen>
     </ThemeProvider>

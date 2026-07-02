@@ -21,8 +21,11 @@ melta-app/
       types.ts                  NativeTheme の型
       native-theme.ts           ⚠️ 自動生成（melta-contracts → RN 正規化済み）
       index.ts                  theme エントリ（ThemeProvider / useTheme / nativeTheme）
-    primitives/                 Text / Button / Tag / Metric
-    components/                 Card / Image / Surface / Skeleton / EmptyState
+    primitives/                 Text / Button / Tag / Metric / Stack / Row
+    components/                 Card / Image / Surface / Skeleton / EmptyState / Screen / Header /
+                                Avatar / TextField / Toggle / Checkbox / Radio / Alert / Toast /
+                                Progress / Modal / ActionSheet / BottomSheet
+    icons/                      Icon + glyphs（subpath エントリ melta-app/icons、react-native-svg 隔離）
     contracts/
       contract-types.ts         ⚠️ 自動生成（契約メタ CONTRACTS + 型）
     index.ts                    公開エントリ
@@ -74,14 +77,21 @@ npm run ios   # または android / web
 <!-- BEGIN GENERATED: component-status（scripts/check-drift.ts --write で再生成。手編集禁止） -->
 | 契約 | Component | APP | 形（appMapping） | メモ |
 |---|---|---|---|---|
+| action-sheet | `ActionSheet` | ✅ implemented | — |  |
+| alert | `Alert` | ✅ implemented | — |  |
 | avatar | `Avatar` | ✅ implemented | — |  |
+| bottom-sheet | `BottomSheet` | ✅ implemented | — |  |
 | button | `Button` | ✅ implemented | — |  |
 | card | `Card` | ✅ implemented | — |  |
+| checkbox | `Checkbox` | ✅ implemented | — |  |
 | empty-state | `EmptyState` | ✅ implemented | — |  |
 | header | `Header` | ✅ implemented | — |  |
 | icon | `Icon` | ✅ implemented | — |  |
 | image | `Image` | ✅ implemented | — |  |
 | metric | `Metric` | ✅ implemented | — |  |
+| modal | `Modal` | ✅ implemented | — |  |
+| progress | `Progress` | ✅ implemented | — |  |
+| radio | `Radio` | ✅ implemented | — |  |
 | row | `Row` | ✅ implemented | — |  |
 | screen | `Screen` | ✅ implemented | — |  |
 | skeleton | `Skeleton` | ✅ implemented | — |  |
@@ -89,23 +99,18 @@ npm run ios   # または android / web
 | surface | `Surface` | ✅ implemented | — |  |
 | tag | `Tag` | ✅ implemented | — |  |
 | text | `Text` | ✅ implemented | — |  |
+| textfield | `TextField` | ✅ implemented | — |  |
+| toast | `Toast` | ✅ implemented | — |  |
+| toggle | `Toggle` | ✅ implemented | — |  |
 | accordion | — | ⬜ planned | — |  |
-| alert | — | ⬜ planned | — |  |
 | badge | — | ⬜ planned | — |  |
-| checkbox | — | ⬜ planned | — |  |
 | datepicker | — | ⬜ planned | adapted | カレンダー自作はしない。OS 標準の日付ピッカー（@react-native-community/datetimepicker 等）への委譲でトークンのみ供給 |
 | divider | — | ⬜ planned | — |  |
 | dropdown | — | ⬜ planned | adapted | hover 起動は存在しない。タップ起動の Menu（アンカー付き）or ActionSheet に変換 |
 | list | — | ⬜ planned | — |  |
-| modal | — | ⬜ planned | — |  |
-| progress | — | ⬜ planned | — |  |
-| radio | — | ⬜ planned | — |  |
 | select | — | ⬜ planned | adapted | web のドロップリストは持ち込まない。ActionSheet / BottomSheet / OS Picker で開く選択 UI に変換（gluestack/Tamagui も native では Sheet 化） |
 | stepper | — | ⬜ planned | — |  |
 | tabs | — | ⬜ planned | adapted | トップタブ / SegmentedControl 型として実装（web の下線タブ意味論を M3 segmented / iOS UISegmentedControl に写像） |
-| textfield | — | ⬜ planned | — |  |
-| toast | — | ⬜ planned | — |  |
-| toggle | — | ⬜ planned | — |  |
 | breadcrumb | — | 🚫 not-planned | — | RN 主要ライブラリ提供 0/5。Apple HIG が multisegment breadcrumb を明示的に否定。back ボタン + nav bar タイトルで代替 |
 | copy-button | — | 🚫 not-planned | — | DS プリミティブでなくアプリ層のコンポジット（button + clipboard + toast） |
 | pagination | — | 🚫 not-planned | — | モバイルは無限スクロール（FlatList onEndReached）で代替。カルーセル文脈は PageControl の領分 |
@@ -142,7 +147,8 @@ import { Icon } from "melta-app/icons";
 - ✅ ハーネス: design lint（CI `--max-warnings 0` + PostToolUse hook）/ drift 検査（README・catalog・allowlist 突合）/ installability ゲート（pack → install → import → typecheck）
 - ✅ layout 6 個（Stack / Row / Screen / Header / Icon / Avatar）— dogfood 不足 1〜4 を解消、TouringFeedScreen は公開 primitive だけで構成
   - 既知の割り切り: Screen の SafeArea は RN core の SafeAreaView（deprecated / iOS のみの最小対応）。依存ゼロ方針を優先した判断で、精度が必要になれば react-native-safe-area-context への adapter 化を検討
-- ⬜ form / feedback 系コンポーネント（textfield / toggle / checkbox / radio / alert / toast / progress / modal / ActionSheet / BottomSheet…）→ showcase（Expo web export）
+- ✅ form / feedback 10 個（TextField / Toggle / Checkbox / Radio / Alert / Toast / Progress / Modal / ActionSheet / BottomSheet）— checkbox / radio は Pressable + 描画（svg 非依存）、ActionSheet / BottomSheet は select / dropdown の adapted 変換先の受け皿
+- ⬜ showcase（Expo web export → app.melta.tsubotax.com）→ 0.1.0 publish
 
 詳細は D2I リポの `.team/specs/requirements-melta-app.md`。
 

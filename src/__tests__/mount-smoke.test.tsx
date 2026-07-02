@@ -27,6 +27,16 @@ import {
   Screen,
   Header,
   Avatar,
+  TextField,
+  Toggle,
+  Checkbox,
+  Radio,
+  Alert,
+  Toast,
+  Progress,
+  Modal,
+  ActionSheet,
+  BottomSheet,
 } from "../index";
 // Icon は subpath エントリ（react-native-svg 隔離、src/icons/index.ts 参照）。
 // 利用者と同じ「melta-app/icons」相当の経路 = icons barrel 経由で import する。
@@ -106,6 +116,75 @@ const SMOKE_CASES: Array<[name: string, element: ReactElement]> = [
   ],
   ["Icon", <Icon name="like-on" accessibilityLabel="いいね" />],
   ["Icon (decorative sm)", <Icon name="close" size="sm" color="text-muted" />],
+  ["TextField", <TextField label="メール" value="" onChangeText={() => {}} helperText="半角英数" />],
+  [
+    "TextField (error)",
+    <TextField label="メール" value="x" onChangeText={() => {}} variant="error" errorText="形式が不正です" />,
+  ],
+  ["TextField (disabled)", <TextField label="ID" value="fixed" onChangeText={() => {}} disabled />],
+  ["Toggle", <Toggle value onValueChange={() => {}} label="通知" />],
+  ["Toggle (off large disabled)", <Toggle value={false} onValueChange={() => {}} size="large" disabled />],
+  ["Checkbox", <Checkbox label="同意します" checked onChange={() => {}} />],
+  ["Checkbox (indeterminate)", <Checkbox label="全選択" checked={false} indeterminate onChange={() => {}} />],
+  [
+    "Radio",
+    <Radio
+      label="配送方法"
+      options={[
+        { label: "標準配送", value: "std" },
+        { label: "速達", value: "exp" },
+      ]}
+      value="std"
+      onChange={() => {}}
+    />,
+  ],
+  [
+    "Radio (card-style + error)",
+    <Radio
+      label="プラン"
+      variant="card-style"
+      options={[
+        { label: "Free", value: "free", description: "無料" },
+        { label: "Pro", value: "pro", description: "有料" },
+      ]}
+      value={undefined}
+      onChange={() => {}}
+      error="選択してください"
+    />,
+  ],
+  ["Alert", <Alert variant="error" title="エラー" message="もう一度お試しください" />],
+  ["Alert (info + close)", <Alert variant="info" message="お知らせ" onClose={() => {}} />],
+  ["Toast", <Toast variant="success" message="保存しました" onClose={() => {}} />],
+  [
+    "Toast (action)",
+    <Toast variant="warning" message="削除しました" actionLabel="元に戻す" onAction={() => {}} onClose={() => {}} />,
+  ],
+  ["Progress", <Progress value={65} label="アップロード進捗" />],
+  ["Progress (indeterminate)", <Progress variant="indeterminate" label="読み込み中" />],
+  [
+    "Modal",
+    <Modal visible title="確認" onClose={() => {}} footer={<Button label="実行" onPress={() => {}} />}>
+      <Text>この操作を実行しますか？</Text>
+    </Modal>,
+  ],
+  [
+    "ActionSheet",
+    <ActionSheet
+      visible
+      onClose={() => {}}
+      title="操作を選択"
+      actions={[
+        { label: "共有", onPress: () => {} },
+        { label: "削除", onPress: () => {}, destructive: true },
+      ]}
+    />,
+  ],
+  [
+    "BottomSheet",
+    <BottomSheet visible onClose={() => {}} title="絞り込み">
+      <Text>フィルタ内容</Text>
+    </BottomSheet>,
+  ],
 ];
 
 describe.each(["light", "dark"] as const)("mount smoke（%s mode）", (mode) => {

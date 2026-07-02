@@ -17,6 +17,16 @@ import { SkeletonEmptyStateCatalog } from "./components/SkeletonEmptyState.catal
 import { LayoutCatalog } from "./components/Layout.catalog";
 import { ScreenHeaderCatalog } from "./components/ScreenHeader.catalog";
 import { AvatarIconCatalog } from "./components/AvatarIcon.catalog";
+import { TextFieldCatalog } from "./components/TextField.catalog";
+import { ToggleCatalog } from "./components/Toggle.catalog";
+import { CheckboxCatalog } from "./components/Checkbox.catalog";
+import { RadioCatalog } from "./components/Radio.catalog";
+import { AlertCatalog } from "./components/Alert.catalog";
+import { ToastCatalog } from "./components/Toast.catalog";
+import { ProgressCatalog } from "./components/Progress.catalog";
+import { ModalCatalog } from "./components/Modal.catalog";
+import { ActionSheetCatalog } from "./components/ActionSheet.catalog";
+import { BottomSheetCatalog } from "./components/BottomSheet.catalog";
 
 const t = nativeTheme;
 
@@ -157,6 +167,56 @@ export function ThemeCatalog({ mode, onToggleMode }: ThemeCatalogProps) {
         <ContractChip id="avatar" />
         <ContractChip id="icon" />
         <AvatarIconCatalog />
+      </Section>
+
+      <Section title="TextField（form）">
+        <ContractChip id="textfield" />
+        <TextFieldCatalog />
+      </Section>
+
+      <Section title="Toggle（form）">
+        <ContractChip id="toggle" />
+        <ToggleCatalog />
+      </Section>
+
+      <Section title="Checkbox（form）">
+        <ContractChip id="checkbox" />
+        <CheckboxCatalog />
+      </Section>
+
+      <Section title="Radio（form）">
+        <ContractChip id="radio" />
+        <RadioCatalog />
+      </Section>
+
+      <Section title="Alert（feedback）">
+        <ContractChip id="alert" />
+        <AlertCatalog />
+      </Section>
+
+      <Section title="Toast（feedback）">
+        <ContractChip id="toast" />
+        <ToastCatalog />
+      </Section>
+
+      <Section title="Progress（feedback）">
+        <ContractChip id="progress" />
+        <ProgressCatalog />
+      </Section>
+
+      <Section title="Modal（overlay）">
+        <ContractChip id="modal" />
+        <ModalCatalog />
+      </Section>
+
+      <Section title="ActionSheet（overlay）">
+        <ContractChip id="actionSheet" />
+        <ActionSheetCatalog />
+      </Section>
+
+      <Section title="BottomSheet（overlay）">
+        <ContractChip id="bottomSheet" />
+        <BottomSheetCatalog />
       </Section>
 
       <GroupHeading title="Design tokens" caption="melta-contracts tokens.json → NativeTheme（生成物）" />

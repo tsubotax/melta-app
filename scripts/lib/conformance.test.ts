@@ -12,6 +12,7 @@ import { CONTRACTS } from "../../src/contracts/contract-types.js";
 import {
   MVP_CONTRACT_IDS,
   toKey,
+  toContractKey,
   resolveContractsDir,
   loadContractMetaFromSource,
   scanContractDeclarations,
@@ -64,9 +65,8 @@ test("__contract = CONTRACTS.x の x が実在キーで、component 名と対応
   assert.ok(decls.length >= MVP_CONTRACT_IDS.length, "__contract 宣言が MVP 数より少ない");
 
   // component 名 → 期待 contractKey の対応（PascalCase component → camelCase key）。
-  // EmptyState → emptyState のように、component 名を lowerCamel 化したら key と一致する想定。
-  const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
-
+  // EmptyState → emptyState のように lowerCamel 化で一致する想定。表記例外（TextField↔textfield）は
+  // conformance.ts の COMPONENT_NAME_OVERRIDES に一元化し、toContractKey がその逆写像を返す。
   for (const d of decls) {
     // x が CONTRACTS の実在キーか
     assert.ok(
@@ -76,8 +76,8 @@ test("__contract = CONTRACTS.x の x が実在キーで、component 名と対応
     // component 名と contractKey が対応しているか（Button↔button, EmptyState↔emptyState 等）
     assert.equal(
       d.contractKey,
-      lowerFirst(d.component),
-      `${d.file}: ${d.component}.__contract が CONTRACTS.${d.contractKey} を指している（誤参照の疑い、期待 CONTRACTS.${lowerFirst(d.component)}）`,
+      toContractKey(d.component),
+      `${d.file}: ${d.component}.__contract が CONTRACTS.${d.contractKey} を指している（誤参照の疑い、期待 CONTRACTS.${toContractKey(d.component)}）`,
     );
   }
 });

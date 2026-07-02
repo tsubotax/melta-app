@@ -39,6 +39,16 @@ export const MVP_CONTRACT_IDS = [
   "header",
   "icon",
   "avatar",
+  "textfield",
+  "toggle",
+  "checkbox",
+  "radio",
+  "alert",
+  "toast",
+  "progress",
+  "modal",
+  "action-sheet",
+  "bottom-sheet",
 ] as const;
 
 export interface ContractMeta {
@@ -54,10 +64,29 @@ export function toKey(id: string): string {
   return id.replace(/-([a-z])/g, (_m, ch: string) => ch.toUpperCase());
 }
 
-/** "empty-state" → "EmptyState"（コンポーネント名の命名規約）。 */
+/**
+ * 機械変換（kebab→Pascal）で契約の name と表記が食い違う id の例外表。
+ * 例: id "textfield"（ハイフン無し）は機械変換だと "Textfield" だが、契約 name は "TextField"。
+ * toComponentName / toContractKey の両方向でこの表を参照し、照合の機械性を保ったまま表記を契約に合わせる。
+ */
+const COMPONENT_NAME_OVERRIDES: Record<string, string> = {
+  textfield: "TextField",
+};
+
+/** "empty-state" → "EmptyState"（コンポーネント名の命名規約。例外は COMPONENT_NAME_OVERRIDES）。 */
 export function toComponentName(id: string): string {
+  const override = COMPONENT_NAME_OVERRIDES[id];
+  if (override) return override;
   const key = toKey(id);
   return key.charAt(0).toUpperCase() + key.slice(1);
+}
+
+/** Component 名 → 期待 contract key（toComponentName の逆写像。__contract 誤参照検査用）。 */
+export function toContractKey(component: string): string {
+  for (const [id, name] of Object.entries(COMPONENT_NAME_OVERRIDES)) {
+    if (name === component) return toKey(id);
+  }
+  return component.charAt(0).toLowerCase() + component.slice(1);
 }
 
 /** 契約源（melta-contracts の components ディレクトリ）を解決。generate-contract-types と同方針。 */

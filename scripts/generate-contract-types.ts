@@ -45,6 +45,16 @@ const MVP_COMPONENTS = [
   "header",
   "icon",
   "avatar",
+  "textfield",
+  "toggle",
+  "checkbox",
+  "radio",
+  "alert",
+  "toast",
+  "progress",
+  "modal",
+  "action-sheet",
+  "bottom-sheet",
 ] as const;
 
 interface RawContract {
