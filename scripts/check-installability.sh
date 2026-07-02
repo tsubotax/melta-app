@@ -22,6 +22,12 @@ for required in \
   "package/src/index.ts"; do
   if ! tar -tzf "$WORK/$TARBALL" | grep -qx "$required"; then
     echo "❌ tarball に $required がありません（bob build 出力 or files フィールドを確認）"
+    echo "--- 診断: 環境 ---"
+    node --version; npm --version
+    echo "--- 診断: ディスク上の lib（prepare の出力） ---"
+    find "$ROOT/lib" -maxdepth 2 | head -20 || true
+    echo "--- 診断: tarball 内容（先頭40） ---"
+    tar -tzf "$WORK/$TARBALL" | head -40
     exit 1
   fi
 done
