@@ -72,19 +72,41 @@ npm run ios   # または android / web
 契約（melta-contracts）とコンポーネントの対応。この表は手書きせず契約から生成する（`npm run check:drift` が同期を検査）。
 
 <!-- BEGIN GENERATED: component-status（scripts/check-drift.ts --write で再生成。手編集禁止） -->
-| 契約 | Component | APP |
-|---|---|---|
-| button | `Button` | ✅ implemented |
-| card | `Card` | ✅ implemented |
-| empty-state | `EmptyState` | ✅ implemented |
-| image | `Image` | ✅ implemented |
-| metric | `Metric` | ✅ implemented |
-| skeleton | `Skeleton` | ✅ implemented |
-| surface | `Surface` | ✅ implemented |
-| tag | `Tag` | ✅ implemented |
-| text | `Text` | ✅ implemented |
-
-> planned / adapted / not-planned を含む全量の差分表は melta-contracts の `appStatus` 公開（0.2.1+）後にこの表へ自動拡張される。
+| 契約 | Component | APP | 形（appMapping） | メモ |
+|---|---|---|---|---|
+| button | `Button` | ✅ implemented | — |  |
+| card | `Card` | ✅ implemented | — |  |
+| empty-state | `EmptyState` | ✅ implemented | — |  |
+| image | `Image` | ✅ implemented | — |  |
+| metric | `Metric` | ✅ implemented | — |  |
+| skeleton | `Skeleton` | ✅ implemented | — |  |
+| surface | `Surface` | ✅ implemented | — |  |
+| tag | `Tag` | ✅ implemented | — |  |
+| text | `Text` | ✅ implemented | — |  |
+| accordion | — | ⬜ planned | — |  |
+| alert | — | ⬜ planned | — |  |
+| avatar | — | ⬜ planned | — |  |
+| badge | — | ⬜ planned | — |  |
+| checkbox | — | ⬜ planned | — |  |
+| datepicker | — | ⬜ planned | adapted | カレンダー自作はしない。OS 標準の日付ピッカー（@react-native-community/datetimepicker 等）への委譲でトークンのみ供給 |
+| divider | — | ⬜ planned | — |  |
+| dropdown | — | ⬜ planned | adapted | hover 起動は存在しない。タップ起動の Menu（アンカー付き）or ActionSheet に変換 |
+| list | — | ⬜ planned | — |  |
+| modal | — | ⬜ planned | — |  |
+| progress | — | ⬜ planned | — |  |
+| radio | — | ⬜ planned | — |  |
+| select | — | ⬜ planned | adapted | web のドロップリストは持ち込まない。ActionSheet / BottomSheet / OS Picker で開く選択 UI に変換（gluestack/Tamagui も native では Sheet 化） |
+| stepper | — | ⬜ planned | — |  |
+| tabs | — | ⬜ planned | adapted | トップタブ / SegmentedControl 型として実装（web の下線タブ意味論を M3 segmented / iOS UISegmentedControl に写像） |
+| textfield | — | ⬜ planned | — |  |
+| toast | — | ⬜ planned | — |  |
+| toggle | — | ⬜ planned | — |  |
+| breadcrumb | — | 🚫 not-planned | — | RN 主要ライブラリ提供 0/5。Apple HIG が multisegment breadcrumb を明示的に否定。back ボタン + nav bar タイトルで代替 |
+| copy-button | — | 🚫 not-planned | — | DS プリミティブでなくアプリ層のコンポジット（button + clipboard + toast） |
+| pagination | — | 🚫 not-planned | — | モバイルは無限スクロール（FlatList onEndReached）で代替。カルーセル文脈は PageControl の領分 |
+| sidebar | — | 🚫 not-planned | — | Navigation Drawer の領分＝react-navigation 側の責務。DS はトークン供給のみ |
+| table | — | 🚫 not-planned | — | モバイルは単列リスト / Card への再構成が定石（M3 に data table なし）。list + metric で分解表現する |
+| tooltip | — | 🚫 not-planned | — | hover 前提のため。iPhone HIG に tooltip 概念なし。必要になれば長押し Hint として別契約を切る |
 <!-- END GENERATED: component-status -->
 
 ## ステータス
