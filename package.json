@@ -77,6 +77,7 @@
     "ios": "npm run ios -w example",
     "web": "npm run web -w example",
     "export:web": "npm run export:web -w example",
+    "build:showcase": "bash scripts/build-showcase.sh",
     "generate:theme": "tsx scripts/generate-native-theme.ts",
     "generate:contracts": "tsx scripts/generate-contract-types.ts",
     "generate": "npm run generate:theme && npm run generate:contracts",

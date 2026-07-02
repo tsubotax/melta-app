@@ -1,31 +1,33 @@
 # melta-app showcase（app.melta.tsubotax.com）
-# example/ の catalog を Expo web export した静的サイトを配信する。
+# 構成:
+#   /            = showcase シェル（showcase/index.html + 契約由来データをビルド時注入）
+#   /catalog/    = example（実 RN コンポーネントのカタログ）の Expo web export
 # Netlify は repo root で npm install（workspaces + prepare の bob build まで走る）→
-# command で example を web export → example/dist を publish する。
+# build-showcase.sh が dist-site/ を組み立てる。
 
 [build]
-  command = "npm run export:web"
-  publish = "example/dist"
+  command = "npm run build:showcase"
+  publish = "dist-site"
 
 [build.environment]
   NODE_VERSION = "22"
 
-# SPA fallback（bundle は単一 index.html）
+# catalog（SPA）の fallback。force なしなので実ファイル（_expo/static 等）は shadow しない
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
+  from = "/catalog/*"
+  to = "/catalog/index.html"
   status = 200
 
 # Expo の静的アセットはハッシュ付きファイル名なので immutable キャッシュ
 [[headers]]
-  for = "/_expo/static/*"
+  for = "/catalog/_expo/static/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# Security headers（melta-ui と同水準）
+# Security headers（melta-ui と同水準。showcase が /catalog/ を iframe 埋め込みするため SAMEORIGIN）
 [[headers]]
   for = "/*"
   [headers.values]
-    X-Frame-Options = "DENY"
+    X-Frame-Options = "SAMEORIGIN"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"

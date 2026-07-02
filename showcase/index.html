@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>melta for APP — React Native UI kit | melta デザインシステム</title>
+  <meta name="description" content="melta デザインシステムの React Native / Expo 版 UI kit。melta-contracts（デザイン契約）を SSOT に、web と APP が同じデザイン言語を共有。実 RN コンポーネントの Live Catalog 付き。">
+  <meta property="og:title" content="melta for APP — React Native UI kit">
+  <meta property="og:description" content="melta-contracts を SSOT にした RN/Expo 向け UI kit。web 版と同じ契約から生成される、AI-Ready なデザインシステム。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://app.melta.tsubotax.com">
+  <meta property="og:site_name" content="melta for APP">
+  <meta property="og:locale" content="ja_JP">
+  <link rel="icon" href="https://melta.tsubotax.com/Meltan_favicon.svg" type="image/svg+xml">
+
+  <!--
+  @melta-app-showcase-index
+  このページは melta-app（React Native UI kit）の showcase シェル。
+  - 見た目の言語は web showcase（melta.tsubotax.com）と共有: ds-theme.css / ds-showcase.css を cross-site で参照
+  - コンポーネント表・統計値は melta-contracts の appStatus からビルド時に生成（__GEN_*__ placeholder、
+    scripts/generate-showcase.ts が dist-site/index.html へ注入。このソースは commit、生成物は commit しない）
+  - /catalog/ は example アプリ（実 RN コンポーネント）の Expo web export
+  -->
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          primary: {
+            50:'#f0f5ff',100:'#dde8ff',200:'#c0d4ff',300:'#95b6ff',
+            400:'#6492ff',500:'#2b70ef',600:'#2250df',700:'#1a40b5',
+            800:'#13318d',900:'#0e266a',950:'#07194e'
+          },
+          body: '#3d4b5f',
+        },
+        fontFamily: {
+          sans: ['Inter','Hiragino Sans','Hiragino Kaku Gothic ProN','Noto Sans JP','sans-serif'],
+          mono: ['JetBrains Mono','SF Mono','monospace'],
+        },
+        fontSize: {
+          xs: ['0.8125rem', { lineHeight: '1.4' }],
+          sm: ['0.9375rem', { lineHeight: '1.7' }],
+          base: ['1.125rem', { lineHeight: '2.0' }],
+          lg: ['1.25rem', { lineHeight: '1.5' }],
+          xl: ['1.375rem', { lineHeight: '1.4' }],
+          '2xl': ['1.625rem', { lineHeight: '1.4' }],
+          '3xl': ['2rem', { lineHeight: '1.4' }],
+        },
+      },
+    },
+  }
+  </script>
+
+  <!-- デザイン言語は web showcase と共有（melta-ui が SSOT。ここでは複製しない） -->
+  <link rel="stylesheet" href="https://melta.tsubotax.com/scripts/ds-theme.css">
+  <link rel="stylesheet" href="https://melta.tsubotax.com/scripts/ds-showcase.css">
+
+  <style>
+    /* このページ固有: スマホ型デバイスフレーム（Live Catalog 用） */
+    .app-device {
+      position: relative;
+      width: 390px;
+      max-width: 100%;
+      height: 780px;
+      border-radius: 48px;
+      border: 10px solid #0f172a;
+      background: #0f172a;
+      box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .app-device iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      border-radius: 38px;
+      background: var(--bg-page, #f9fafb);
+      display: block;
+    }
+    @media (max-width: 480px) {
+      .app-device { height: 640px; border-radius: 40px; }
+      .app-device iframe { border-radius: 30px; }
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+
+  <!-- ====================================================================
+       Sidebar (Fixed — web showcase と同じ 3-Zone 構成)
+       ==================================================================== -->
+  <aside class="ds-showcase-chrome ds-sidebar ds-sidebar-premium fixed left-0 top-0 w-64 h-screen border-r flex flex-col z-30" style="border-color:var(--border-default);">
+
+    <!-- Header Zone -->
+    <div class="px-4 py-4 border-b flex-shrink-0 ds-sidebar-header-gradient" style="border-color:var(--border-default);">
+      <a href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;" class="flex items-center gap-2.5 no-underline cursor-pointer" style="text-decoration:none;">
+        <div class="w-8 h-8 rounded-lg ds-logo-ring inline-flex items-center justify-center flex-shrink-0 overflow-hidden bg-white p-0.5" style="border:1px solid var(--border-default);">
+          <img src="https://melta.tsubotax.com/Meltan.svg" alt="melta for APP" class="w-full h-full" style="image-rendering:pixelated;">
+        </div>
+        <div>
+          <span class="text-sm font-bold leading-none" style="color:var(--text-heading);">melta for APP</span>
+          <span class="block text-[10px] leading-tight mt-0.5 ds-version-label" style="color:var(--text-muted);">React Native UI kit</span>
+        </div>
+      </a>
+    </div>
+
+    <!-- Navigation Zone -->
+    <nav aria-label="ショーケースナビゲーション" class="flex-1 overflow-y-auto px-3 py-3 space-y-1">
+      <a href="#section-overview" data-nav="overview" class="ds-nav-link flex items-center gap-3 px-4 py-2 text-sm font-medium rounded-lg transition-colors" style="color:var(--text-default);">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        概要・契約 SSOT
+      </a>
+      <a href="#section-catalog" data-nav="catalog" class="ds-nav-link flex items-center gap-3 px-4 py-2 text-sm font-medium rounded-lg transition-colors" style="color:var(--text-default);">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>
+        Live Catalog
+      </a>
+      <a href="#section-components" data-nav="components" class="ds-nav-link flex items-center gap-3 px-4 py-2 text-sm font-medium rounded-lg transition-colors" style="color:var(--text-default);">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Components
+      </a>
+      <a href="#section-install" data-nav="install" class="ds-nav-link flex items-center gap-3 px-4 py-2 text-sm font-medium rounded-lg transition-colors" style="color:var(--text-default);">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Install
+      </a>
+      <a href="#section-harness" data-nav="harness" class="ds-nav-link flex items-center gap-3 px-4 py-2 text-sm font-medium rounded-lg transition-colors" style="color:var(--text-default);">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        ハーネス（品質ゲート）
+      </a>
+    </nav>
+
+    <!-- Footer Zone -->
+    <div class="px-4 py-4 border-t flex-shrink-0 space-y-2" style="border-color:var(--border-default);">
+      <a href="https://melta.tsubotax.com" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 text-xs font-medium transition-colors hover:underline" style="color:var(--text-muted);">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        Web Showcase（melta UI）
+      </a>
+      <a href="https://github.com/tsubotax/melta-app" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 text-xs font-medium transition-colors hover:underline" style="color:var(--text-muted);">
+        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        GitHub
+      </a>
+      <a href="https://www.npmjs.com/package/melta-app" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 text-xs font-medium transition-colors hover:underline" style="color:var(--text-muted);">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        npm
+      </a>
+    </div>
+  </aside>
+
+  <!-- モバイル用オーバーレイ -->
+  <div class="ds-sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+
+  <main class="ml-64">
+    <!-- Sticky Header Bar -->
+    <header id="showcase-header" class="sticky top-0 z-20 backdrop-blur-sm border-b" style="background:color-mix(in srgb, var(--bg-page) 85%, transparent);border-color:var(--border-default);">
+      <div class="max-w-5xl mx-auto px-4 md:px-8 flex items-center justify-between h-14">
+        <div class="flex items-center gap-2 text-sm" style="color:var(--text-muted);">
+          <button onclick="toggleMobileSidebar()" class="ds-mobile-menu-btn w-9 h-9 inline-flex items-center justify-center rounded-lg hover:bg-gray-100 mr-1 cursor-pointer" style="color:var(--text-default);" aria-label="メニューを開く">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+          </button>
+          <span style="color:var(--text-heading);" class="font-medium">melta UI</span>
+          <svg class="w-3.5 h-3.5 ds-breadcrumb-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg>
+          <span class="ds-breadcrumb-chevron">APP Showcase</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <a href="https://melta.tsubotax.com" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium transition-colors hover:bg-gray-100" style="color:var(--text-muted);">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            Web Showcase
+            <span class="inline-flex items-center h-4 px-1.5 rounded text-[10px] font-semibold leading-none" style="background:var(--sidebar-active-bg, #f0f5ff);color:var(--sidebar-active-color, #2250df);">Web</span>
+          </a>
+          <a href="https://github.com/tsubotax/melta-app" target="_blank" rel="noopener noreferrer" class="w-9 h-9 inline-flex items-center justify-center rounded-lg transition-colors hover:bg-gray-100" style="color:var(--text-muted);" aria-label="GitHub">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          </a>
+        </div>
+      </div>
+      <!-- Scroll Progress Bar -->
+      <div class="h-0.5 w-full" style="background:var(--border-default);">
+        <div id="scroll-progress" class="h-full bg-primary-500 transition-[width] duration-150" style="width:0%"></div>
+      </div>
+    </header>
+
+    <!-- Hero — web showcase と同じ Melt Edition -->
+    <section id="section-overview" data-section="overview">
+      <div class="relative overflow-hidden" style="background:#0f172a;">
+        <div class="absolute inset-0" style="background:radial-gradient(ellipse 50% 45% at 10% 15%, rgba(34,80,223,0.22) 0%, transparent 70%);"></div>
+        <div class="absolute inset-0" style="background:radial-gradient(ellipse 40% 50% at 75% 10%, rgba(96,165,250,0.14) 0%, transparent 65%);"></div>
+        <div class="absolute inset-0" style="background:radial-gradient(ellipse 45% 40% at 90% 75%, rgba(34,80,223,0.18) 0%, transparent 60%);"></div>
+        <div class="absolute inset-0" style="background:radial-gradient(ellipse 35% 45% at 35% 85%, rgba(96,165,250,0.12) 0%, transparent 65%);"></div>
+        <div class="melt-mesh">
+          <div class="melt-blob-1 w-[500px] h-[500px] -top-40 -left-24 opacity-20" style="background:#2250df;"></div>
+          <div class="melt-blob-2 w-[400px] h-[400px] top-16 right-[-80px] opacity-15" style="background:#6492ff;animation-delay:-3s;"></div>
+          <div class="melt-blob-3 w-[550px] h-[550px] -bottom-48 left-1/3 opacity-12" style="background:#1a40b5;animation-delay:-7s;"></div>
+        </div>
+
+        <div class="relative z-10 text-center px-4 py-12 md:px-8 md:py-20 max-w-4xl mx-auto ds-hero-content">
+          <div class="flex items-center justify-center gap-5 mb-5">
+            <div class="flex flex-col items-center flex-shrink-0">
+              <img src="https://melta.tsubotax.com/Meltan.svg" alt="" class="meltan-hero" style="image-rendering:pixelated;">
+              <div class="meltan-hero-shadow"></div>
+            </div>
+            <h1 class="text-white font-bold ds-hero-heading" style="font-size:3.5rem;line-height:1.15;letter-spacing:-0.02em;">
+              境界を溶かすUIを、<span class="melt-text-gradient">APP</span>へ
+            </h1>
+          </div>
+
+          <p class="text-xl text-slate-300 mb-10 max-w-2xl mx-auto" style="line-height:1.7;">
+            melta UI の React Native / Expo 版。<br class="ds-hero-br">デザイン契約（melta-contracts）を SSOT に、web と APP が同じ言語で溶け合う。
+          </p>
+
+          <!-- Stats（契約から生成） -->
+          <div class="inline-flex items-center gap-4 md:gap-8 mb-10 px-4 md:px-8 py-3 md:py-4 rounded-2xl ds-hero-stats" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);backdrop-filter:blur(12px);">
+            <div>
+              <span class="text-2xl md:text-3xl font-bold text-white">__GEN_IMPLEMENTED_COUNT__</span>
+              <span class="text-sm ml-1 text-slate-400">Components</span>
+            </div>
+            <div class="w-px h-8 bg-white/10 ds-hero-stats-divider"></div>
+            <div>
+              <span class="text-2xl md:text-3xl font-bold text-white">__GEN_CONTRACT_COUNT__</span>
+              <span class="text-sm ml-1 text-slate-400">Contracts</span>
+            </div>
+            <div class="w-px h-8 bg-white/10 ds-hero-stats-divider"></div>
+            <div>
+              <span class="text-2xl md:text-3xl font-bold text-white">1</span>
+              <span class="text-sm ml-1 text-slate-400">SSOT</span>
+            </div>
+          </div>
+
+          <!-- CTA -->
+          <div class="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 ds-hero-cta">
+            <a href="#section-catalog" onclick="event.preventDefault();var t=document.querySelector('#section-catalog');if(t)window.scrollTo({top:t.getBoundingClientRect().top+window.pageYOffset-72,behavior:'smooth'})" class="inline-flex items-center justify-center gap-2 bg-white text-slate-900 px-6 py-3 rounded-xl text-[1rem] font-semibold hover:bg-slate-100 transition-colors cursor-pointer melt-shadow-lg">
+              Live Catalog を見る
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+            <a href="https://github.com/tsubotax/melta-app" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 text-white px-6 py-3 rounded-xl text-[1rem] font-medium transition-colors cursor-pointer" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);">
+              GitHub
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- SVG wave transition -->
+        <div class="absolute bottom-0 left-0 right-0">
+          <svg viewBox="0 0 1440 120" preserveAspectRatio="none" class="w-full" style="height:120px;display:block;">
+            <path d="M0,80 C240,120 480,40 720,80 S1200,120 1440,60 L1440,120 L0,120 Z" fill="var(--bg-page, #f8fafc)" opacity="0.5"/>
+            <path d="M0,90 C360,50 600,110 900,70 S1200,100 1440,80 L1440,120 L0,120 Z" fill="var(--bg-page, #f8fafc)" opacity="0.7"/>
+            <path d="M0,100 C300,80 500,110 720,95 S1100,110 1440,100 L1440,120 L0,120 Z" fill="var(--bg-page, #f8fafc)"/>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <div class="max-w-5xl mx-auto px-4 pt-8 pb-8 md:px-6 md:pt-12 md:pb-10 lg:px-8 lg:pt-16 lg:pb-12">
+
+      <!-- 概要 -->
+      <section data-section="overview">
+        <div class="mb-14">
+          <h2 class="text-3xl font-bold mb-3" style="color:var(--text-heading);">web と APP、同じ契約から。</h2>
+          <p class="text-base leading-relaxed mb-8 max-w-3xl" style="color:var(--text-default);">
+            melta-app は melta デザインシステムの React Native 実装。<br>
+            見た目のルールはコードに書かず、デザイン契約（<a href="https://www.npmjs.com/package/melta-contracts" target="_blank" rel="noopener noreferrer" class="underline" style="color:var(--sidebar-active-color);">melta-contracts</a>）に宣言する。<br>
+            <span class="whitespace-nowrap">web（Tailwind）と APP（React Native）は、同じ契約を満たす2つの実装にすぎない。</span>
+          </p>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm ds-hover-card" style="background:var(--bg-surface);border-color:var(--border-default);">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-lg inline-flex items-center justify-center" style="background:var(--sidebar-active-bg);color:var(--sidebar-active-color);">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                </div>
+                <h3 class="text-sm font-semibold" style="color:var(--text-heading);">契約ファースト</h3>
+              </div>
+              <p class="text-sm" style="color:var(--text-default);">
+                variants / sizes / states / tokens は契約が規範。実装は契約を満たすことを conformance テストで機械検証する。手書きの「仕様書と実装のズレ」が構造的に起きない。
+              </p>
+            </div>
+            <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm ds-hover-card" style="background:var(--bg-surface);border-color:var(--border-default);">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-lg inline-flex items-center justify-center" style="background:var(--sidebar-active-bg);color:var(--sidebar-active-color);">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>
+                </div>
+                <h3 class="text-sm font-semibold" style="color:var(--text-heading);">本物だけを見せる</h3>
+              </div>
+              <p class="text-sm" style="color:var(--text-default);">
+                この showcase の Live Catalog は React Native 実装そのものの web export（react-native-web）。HTML で作り直した再現デモではなく、iOS / Android で動くコードと同一。
+              </p>
+            </div>
+            <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm ds-hover-card" style="background:var(--bg-surface);border-color:var(--border-default);">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-lg inline-flex items-center justify-center" style="background:var(--sidebar-active-bg);color:var(--sidebar-active-color);">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"/><line x1="9" y1="21" x2="15" y2="21"/></svg>
+                </div>
+                <h3 class="text-sm font-semibold" style="color:var(--text-heading);">AI-Ready</h3>
+              </div>
+              <p class="text-sm" style="color:var(--text-default);">
+                契約・recipe・実装状態（appStatus）はすべて機械可読。このページのコンポーネント表も契約からビルド時に生成していて、手書きの表は存在しない。
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Live Catalog -->
+      <section id="section-catalog" data-section="catalog" class="ds-section-animate mb-14">
+        <div class="ds-section-header mb-2">
+          <h2 class="text-2xl font-bold" style="color:var(--text-heading);">Live Catalog</h2>
+        </div>
+        <p class="text-base text-body mb-6" style="color:var(--text-default);">
+          実 RN コンポーネントのカタログ。light / dark 切替、Feed（dogfood 画面）、overlay 系の実挙動まですべて動く。
+        </p>
+
+        <div class="flex flex-col lg:flex-row gap-8 items-start">
+          <div class="app-device mx-auto lg:mx-0">
+            <iframe src="/catalog/" title="melta-app catalog（React Native の web export）" loading="lazy"></iframe>
+          </div>
+
+          <div class="flex-1 space-y-4 lg:pt-4">
+            <div class="bg-white rounded-xl border p-5" style="background:var(--bg-surface);border-color:var(--border-default);">
+              <h3 class="text-sm font-semibold mb-2" style="color:var(--text-heading);">これは何？</h3>
+              <ul class="space-y-2 text-sm" style="color:var(--text-default);">
+                <li class="flex items-start gap-2">
+                  <span class="w-1.5 h-1.5 rounded-full bg-slate-400 mt-2 flex-shrink-0"></span>
+                  <span>example アプリ（dogfood + カタログ）を <code class="text-xs px-1.5 py-0.5 rounded" style="background:var(--bg-page-alt);">expo export --platform web</code> した静的サイト</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="w-1.5 h-1.5 rounded-full bg-slate-400 mt-2 flex-shrink-0"></span>
+                  <span>各セクションの <code class="text-xs px-1.5 py-0.5 rounded" style="background:var(--bg-page-alt);">__contract</code> chip は、その実装が満たす契約のメタデータ</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="w-1.5 h-1.5 rounded-full bg-slate-400 mt-2 flex-shrink-0"></span>
+                  <span>下部タブの Feed / Loading / Empty は公開 primitive だけで組んだ dogfood 画面</span>
+                </li>
+              </ul>
+            </div>
+            <a href="/catalog/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors bg-primary-500 text-white hover:bg-primary-600">
+              フルスクリーンで開く
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Components（契約から生成） -->
+      <section id="section-components" data-section="components" class="ds-section-animate mb-14">
+        <div class="ds-section-header mb-2">
+          <h2 class="text-2xl font-bold" style="color:var(--text-heading);">Components</h2>
+        </div>
+        <p class="text-base text-body mb-4" style="color:var(--text-default);">
+          全契約の APP 実装状態。この表は melta-contracts の <code class="text-xs px-1.5 py-0.5 rounded" style="background:var(--bg-page-alt);">appStatus</code> からビルド時に生成される（手書きではない）。
+        </p>
+
+        <!-- サマリーチップ -->
+        <div class="flex flex-wrap items-center gap-3 mb-6">
+          <span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-xs font-medium">implemented __GEN_IMPLEMENTED_COUNT__</span>
+          <span class="inline-flex items-center gap-1.5 bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-medium">planned __GEN_PLANNED_COUNT__</span>
+          <span class="inline-flex items-center gap-1.5 bg-red-50 text-red-700 px-3 py-1 rounded-full text-xs font-medium">not planned __GEN_NOT_PLANNED_COUNT__</span>
+          <span class="inline-flex items-center gap-1.5 bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-xs font-medium">形を変えて提供（adapted）__GEN_ADAPTED_COUNT__</span>
+        </div>
+
+        <div class="bg-white rounded-xl border overflow-hidden" style="background:var(--bg-surface);border-color:var(--border-default);">
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="border-b border-slate-200 bg-gray-50">
+                  <th scope="col" class="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">契約</th>
+                  <th scope="col" class="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">Component</th>
+                  <th scope="col" class="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">APP</th>
+                  <th scope="col" class="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">形（appMapping）</th>
+                  <th scope="col" class="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">メモ</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200">
+__GEN_STATUS_TABLE__
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <p class="text-xs mt-3" style="color:var(--text-muted);">
+          adapted = web と同じ見た目を持ち込まず、モバイルの慣習に形を変えて提供（例: select → ActionSheet）。not planned = HIG / モバイル UX 上の判断で APP には実装しない宣言。
+        </p>
+      </section>
+
+      <!-- Install -->
+      <section id="section-install" data-section="install" class="ds-section-animate mb-14">
+        <div class="ds-section-header mb-2">
+          <h2 class="text-2xl font-bold" style="color:var(--text-heading);">Install</h2>
+        </div>
+        <p class="text-base text-body mb-6" style="color:var(--text-default);">
+          runtime 依存ゼロ。peer は react / react-native のみ（Icon を使う場合のみ react-native-svg を opt-in）。
+        </p>
+
+        <div class="space-y-4 max-w-3xl">
+          <div>
+            <p class="text-sm font-semibold mb-2" style="color:var(--text-heading);">インストール</p>
+            <pre class="rounded-xl p-4 text-sm overflow-x-auto" style="background:#1e293b;color:#e2e8f0;font-family:'JetBrains Mono','SF Mono',monospace;"><code>npm install melta-app</code></pre>
+          </div>
+          <div>
+            <p class="text-sm font-semibold mb-2" style="color:var(--text-heading);">使う</p>
+            <pre class="rounded-xl p-4 text-sm overflow-x-auto" style="background:#1e293b;color:#e2e8f0;font-family:'JetBrains Mono','SF Mono',monospace;"><code>import { ThemeProvider, Screen, Header, Button, Card } from "melta-app";
+
+export default function App() {
+  return (
+    &lt;ThemeProvider&gt;
+      &lt;Screen variant="scroll" header={&lt;Header title="ツーリング" /&gt;}&gt;
+        &lt;Card&gt;...&lt;/Card&gt;
+        &lt;Button label="記録する" onPress={...} /&gt;
+      &lt;/Screen&gt;
+    &lt;/ThemeProvider&gt;
+  );
+}</code></pre>
+          </div>
+          <div>
+            <p class="text-sm font-semibold mb-2" style="color:var(--text-heading);">アイコン（opt-in subpath）</p>
+            <pre class="rounded-xl p-4 text-sm overflow-x-auto" style="background:#1e293b;color:#e2e8f0;font-family:'JetBrains Mono','SF Mono',monospace;"><code>npm install react-native-svg
+import { Icon } from "melta-app/icons";</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ハーネス -->
+      <section id="section-harness" data-section="harness" class="ds-section-animate mb-14">
+        <div class="ds-section-header mb-2">
+          <h2 class="text-2xl font-bold" style="color:var(--text-heading);">ハーネス（品質ゲート）</h2>
+        </div>
+        <p class="text-base text-body mb-6" style="color:var(--text-default);">
+          「契約と実装がズレない」を人間の注意力ではなく CI の構造で守る。melta-app に入っている主なゲート:
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-4xl">
+          <div class="bg-white rounded-xl border p-5" style="background:var(--bg-surface);border-color:var(--border-default);">
+            <h3 class="text-sm font-semibold mb-1" style="color:var(--text-heading);">conformance</h3>
+            <p class="text-sm" style="color:var(--text-default);">契約の variants / sizes / states / tokens と RN 実装の resolver を機械照合。recipe との不一致はテストで落ちる。</p>
+          </div>
+          <div class="bg-white rounded-xl border p-5" style="background:var(--bg-surface);border-color:var(--border-default);">
+            <h3 class="text-sm font-semibold mb-1" style="color:var(--text-heading);">drift-check</h3>
+            <p class="text-sm" style="color:var(--text-default);">README のコンポーネント表を契約から生成し、カタログの掲載漏れ・「未実装」主張の腐りを CI で検知。</p>
+          </div>
+          <div class="bg-white rounded-xl border p-5" style="background:var(--bg-surface);border-color:var(--border-default);">
+            <h3 class="text-sm font-semibold mb-1" style="color:var(--text-heading);">installability gate</h3>
+            <p class="text-sm" style="color:var(--text-default);">pack した tarball を fixture に install → import → 型解決まで検証。「npm install すれば APP が作れる」の機械証明。</p>
+          </div>
+          <div class="bg-white rounded-xl border p-5" style="background:var(--bg-surface);border-color:var(--border-default);">
+            <h3 class="text-sm font-semibold mb-1" style="color:var(--text-heading);">mount smoke + design lint</h3>
+            <p class="text-sm" style="color:var(--text-default);">RN runtime での描画木生成を Testing Library で証明。raw color / radius の直書きは lint（--max-warnings 0）で禁止。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="mt-16 pt-8 border-t" style="border-color:var(--border-default);">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div class="relative">
+              <img src="https://melta.tsubotax.com/Meltan.svg" alt="" class="w-10 h-10" style="image-rendering:pixelated;">
+              <div class="meltan-footer-shadow"></div>
+            </div>
+            <div>
+              <p class="text-sm font-medium" style="color:var(--text-heading);">melta for APP</p>
+              <p class="text-xs mt-1" style="color:var(--text-muted);">声を張らずに伝わるUI — React Native UI kit</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-4">
+            <a href="https://github.com/tsubotax/melta-app" target="_blank" rel="noopener noreferrer" class="text-xs font-medium transition-colors hover:underline" style="color:var(--text-muted);">GitHub</a>
+            <a href="https://www.npmjs.com/package/melta-app" target="_blank" rel="noopener noreferrer" class="text-xs font-medium transition-colors hover:underline" style="color:var(--text-muted);">npm</a>
+            <a href="https://melta.tsubotax.com" target="_blank" rel="noopener noreferrer" class="text-xs font-medium transition-colors hover:underline" style="color:var(--text-muted);">Web Showcase</a>
+            <a href="#section-overview" class="text-xs font-medium transition-colors hover:underline" style="color:var(--text-muted);">概要に戻る</a>
+          </div>
+        </div>
+        <div class="flex items-center gap-4 mt-4 mb-8">
+          <span class="text-xs" style="color:var(--text-muted);">melta-contracts 駆動 &middot; __GEN_CONTRACT_COUNT__ contracts</span>
+          <span class="text-xs" style="color:var(--text-muted);">MIT License &copy; 2026 tsubotax</span>
+        </div>
+      </footer>
+
+    </div>
+  </main>
+
+  <script>
+  // スクロール進捗バー + サイドバーの現在地ハイライト + モバイルメニュー（web showcase の挙動を最小再現）
+  (function () {
+    var progress = document.getElementById("scroll-progress");
+    window.addEventListener("scroll", function () {
+      var h = document.documentElement.scrollHeight - window.innerHeight;
+      if (progress && h > 0) progress.style.width = Math.min(100, (window.scrollY / h) * 100) + "%";
+    }, { passive: true });
+
+    var links = Array.prototype.slice.call(document.querySelectorAll("[data-nav]"));
+    var sections = Array.prototype.slice.call(document.querySelectorAll("[data-section]"));
+    function setActive(name) {
+      links.forEach(function (a) {
+        var on = a.getAttribute("data-nav") === name;
+        a.style.background = on ? "var(--sidebar-active-bg)" : "";
+        a.style.color = on ? "var(--sidebar-active-color)" : "var(--text-default)";
+      });
+    }
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) setActive(e.target.getAttribute("data-section"));
+      });
+    }, { rootMargin: "-20% 0px -70% 0px" });
+    sections.forEach(function (s) { observer.observe(s); });
+    setActive("overview");
+  })();
+
+  function toggleMobileSidebar() {
+    document.body.classList.toggle("ds-sidebar-open");
+  }
+  </script>
+</body>
+</html>

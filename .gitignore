@@ -43,5 +43,8 @@ yarn-error.*
 # bob build 出力（root の lib のみ。scripts/lib まで ignore しないよう root 限定）
 /lib/
 
+# showcase サイトのビルド出力（build-showcase.sh が生成）
+/dist-site/
+
 # Local Netlify folder
 .netlify
