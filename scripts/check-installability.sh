@@ -23,7 +23,10 @@ LISTING="$(tar -tzf "$WORK/$TARBALL")"
 for required in \
   "package/lib/module/index.js" \
   "package/lib/typescript/src/index.d.ts" \
-  "package/src/index.ts"; do
+  "package/src/index.ts" \
+  "package/lib/module/icons/index.js" \
+  "package/lib/typescript/src/icons/index.d.ts" \
+  "package/THIRD_PARTY_LICENSES.md"; do
   if ! grep -qx "$required" <<<"$LISTING"; then
     echo "❌ tarball に $required がありません（bob build 出力 or files フィールドを確認）"
     echo "--- 診断: 環境 ---"
@@ -43,7 +46,7 @@ cd "$FIXTURE"
 npm init -y --silent >/dev/null
 npm install --silent --no-audit --no-fund \
   "$WORK/$TARBALL" \
-  react@19.2.3 react-native@0.85.3 \
+  react@19.2.3 react-native@0.85.3 react-native-svg@15.15.4 \
   typescript@~6.0.3 @types/react@~19.2.2 >/dev/null
 
 echo "→ import + 型解決の検証（tsc）"
@@ -67,8 +70,12 @@ import {
   type VariantOf,
 } from "melta-app";
 
+// subpath エントリ（melta-app/icons、react-native-svg 隔離）も利用者と同経路で検証
+import { Icon, ICON_NAMES, type IconName } from "melta-app/icons";
+
 const variant: VariantOf<"button"> = "contained";
 const id: ContractId = "button";
+const iconName: IconName = "close";
 
 export function App() {
   return (
@@ -76,6 +83,7 @@ export function App() {
       <Card>
         <Text variant="base">hello</Text>
         <Button variant={variant} label="save" onPress={() => {}} />
+        <Icon name={iconName} size="sm" />
       </Card>
     </ThemeProvider>
   );
@@ -84,6 +92,7 @@ export function App() {
 // 実行時値も参照できること（as const の literal 型がそのまま届くので includes で検証）
 if (!CONTRACTS[id].variants.includes(variant)) throw new Error("contracts meta missing");
 if (!nativeTheme.color.primary["500"]) throw new Error("theme missing");
+if (!ICON_NAMES.includes(iconName)) throw new Error("icon glyphs missing");
 void useTheme; void Tag; void Metric; void Surface; void Image; void Skeleton; void EmptyState;
 TSX
 
@@ -106,13 +115,15 @@ npx tsc -p tsconfig.json
 
 echo "→ モジュール解決の実体確認（exports 経由で実在ファイルに解決されること）"
 node --input-type=module -e "
-const url = import.meta.resolve('melta-app', new URL('file://' + process.cwd() + '/'));
 const { existsSync } = await import('node:fs');
 const { fileURLToPath } = await import('node:url');
-const path = fileURLToPath(url);
-if (!path.includes('lib/module')) throw new Error('exports の解決先が lib/module ではない: ' + path);
-if (!existsSync(path)) throw new Error('解決先ファイルが存在しない: ' + path);
-console.log('  resolved:', path);
+for (const spec of ['melta-app', 'melta-app/icons']) {
+  const url = import.meta.resolve(spec, new URL('file://' + process.cwd() + '/'));
+  const path = fileURLToPath(url);
+  if (!path.includes('lib/module')) throw new Error('exports の解決先が lib/module ではない: ' + path);
+  if (!existsSync(path)) throw new Error('解決先ファイルが存在しない: ' + path);
+  console.log('  resolved:', spec, '→', path);
+}
 "
 
 echo "✅ installability OK: pack → 実体検査 → install → import → typecheck → resolve が通った"

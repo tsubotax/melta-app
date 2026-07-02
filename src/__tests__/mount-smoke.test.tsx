@@ -22,7 +22,15 @@ import {
   Image,
   Skeleton,
   EmptyState,
+  Stack,
+  Row,
+  Screen,
+  Header,
+  Avatar,
 } from "../index";
+// Icon は subpath エントリ（react-native-svg 隔離、src/icons/index.ts 参照）。
+// 利用者と同じ「melta-app/icons」相当の経路 = icons barrel 経由で import する。
+import { Icon } from "../icons";
 
 /** implemented 全コンポーネントの代表 render（DU の全分岐は conformance / catalog の担当、ここは 1 mount）。 */
 const SMOKE_CASES: Array<[name: string, element: ReactElement]> = [
@@ -57,6 +65,47 @@ const SMOKE_CASES: Array<[name: string, element: ReactElement]> = [
   ["Skeleton (text)", <Skeleton variant="text" lines={2} />],
   ["Skeleton (card)", <Skeleton variant="card" />],
   ["EmptyState", <EmptyState title="記録がありません" description="最初のツーリングを追加" />],
+  [
+    "Stack",
+    <Stack gap="4">
+      <Text>上</Text>
+      <Text>下</Text>
+    </Stack>,
+  ],
+  [
+    "Row",
+    <Row gap="2" justify="between" wrap>
+      <Text>左</Text>
+      <Text>右</Text>
+    </Row>,
+  ],
+  [
+    "Screen (scroll)",
+    <Screen header={<Header title="フィード" />}>
+      <Text>本文</Text>
+    </Screen>,
+  ],
+  [
+    "Screen (fixed)",
+    <Screen variant="fixed" padding="none">
+      <Text>固定</Text>
+    </Screen>,
+  ],
+  ["Header", <Header title="設定" trailing={<Text>閉じる</Text>} />],
+  ["Avatar (initials)", <Avatar name="Taro Tanaka" />],
+  [
+    "Avatar (image + status)",
+    <Avatar name="ezo_rider" source={{ uri: "https://example.com/a.png" }} status="online" />,
+  ],
+  [
+    "Avatar.Group",
+    <Avatar.Group>
+      <Avatar name="A" size="small" />
+      <Avatar name="B" size="small" />
+    </Avatar.Group>,
+  ],
+  ["Icon", <Icon name="like-on" accessibilityLabel="いいね" />],
+  ["Icon (decorative sm)", <Icon name="close" size="sm" color="text-muted" />],
 ];
 
 describe.each(["light", "dark"] as const)("mount smoke（%s mode）", (mode) => {

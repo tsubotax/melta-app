@@ -74,18 +74,23 @@ npm run ios   # または android / web
 <!-- BEGIN GENERATED: component-status（scripts/check-drift.ts --write で再生成。手編集禁止） -->
 | 契約 | Component | APP | 形（appMapping） | メモ |
 |---|---|---|---|---|
+| avatar | `Avatar` | ✅ implemented | — |  |
 | button | `Button` | ✅ implemented | — |  |
 | card | `Card` | ✅ implemented | — |  |
 | empty-state | `EmptyState` | ✅ implemented | — |  |
+| header | `Header` | ✅ implemented | — |  |
+| icon | `Icon` | ✅ implemented | — |  |
 | image | `Image` | ✅ implemented | — |  |
 | metric | `Metric` | ✅ implemented | — |  |
+| row | `Row` | ✅ implemented | — |  |
+| screen | `Screen` | ✅ implemented | — |  |
 | skeleton | `Skeleton` | ✅ implemented | — |  |
+| stack | `Stack` | ✅ implemented | — |  |
 | surface | `Surface` | ✅ implemented | — |  |
 | tag | `Tag` | ✅ implemented | — |  |
 | text | `Text` | ✅ implemented | — |  |
 | accordion | — | ⬜ planned | — |  |
 | alert | — | ⬜ planned | — |  |
-| avatar | — | ⬜ planned | — |  |
 | badge | — | ⬜ planned | — |  |
 | checkbox | — | ⬜ planned | — |  |
 | datepicker | — | ⬜ planned | adapted | カレンダー自作はしない。OS 標準の日付ピッカー（@react-native-community/datetimepicker 等）への委譲でトークンのみ供給 |
@@ -109,13 +114,34 @@ npm run ios   # または android / web
 | tooltip | — | 🚫 not-planned | — | hover 前提のため。iPhone HIG に tooltip 概念なし。必要になれば長押し Hint として別契約を切る |
 <!-- END GENERATED: component-status -->
 
+### Icon だけ subpath エントリ（`melta-app/icons`）
+
+Icon は唯一 `react-native-svg`（optional peerDependency）に依存するため、本体エントリから分離している。
+本体 `melta-app` は依存ゼロのまま — Icon を使うアプリだけが以下を行う:
+
+```bash
+npx expo install react-native-svg
+```
+
+```tsx
+import { Icon } from "melta-app/icons";
+
+<Icon name="like-on" accessibilityLabel="いいね" />        // 意味を持つ icon は label 必須
+<Icon name="close" size="sm" color="text-muted" />         // 省略時は装飾扱い（a11y ツリーから除外）
+```
+
+グリフは Charcoal Icons（pixiv、Apache-2.0）の curated サブセット（`assets/icons/*.svg` →
+`npm run generate:icons` で `src/icons/glyphs.ts` に codegen、commit 済みを配布）。
+帰属表示は `THIRD_PARTY_LICENSES.md`。
+
 ## ステータス
 
 - ✅ ライブラリ化（root=ライブラリ / example=カタログアプリ、peerDeps react + react-native、runtime deps ゼロ）
 - ✅ `melta-contracts` を npm 依存として購読（recipes/app の styleRefs 同梱）
-- ✅ conformance: 契約源 ↔ 生成メタ ↔ `__contract` 宣言の照合 + consumer テスト（契約 subset / token 実在 / contractVersion 同期）+ styleRefs conformance（button で機構実証、他コンポーネントへ展開中）
+- ✅ conformance: 契約源 ↔ 生成メタ ↔ `__contract` 宣言の照合 + consumer テスト（契約 subset / token 実在 / contractVersion 同期）+ styleRefs conformance（全実装コンポーネント展開済み）+ RN mount smoke（light/dark × 全公開コンポーネント）
 - ✅ ハーネス: design lint（CI `--max-warnings 0` + PostToolUse hook）/ drift 検査（README・catalog・allowlist 突合）/ installability ゲート（pack → install → import → typecheck）
-- ⬜ styleRefs conformance の全コンポーネント展開 → RN mount smoke → form / feedback 系コンポーネント → showcase（Expo web export）
+- ✅ layout 6 個（Stack / Row / Screen / Header / Icon / Avatar）— dogfood 不足 1〜4 を解消、TouringFeedScreen は公開 primitive だけで構成
+- ⬜ form / feedback 系コンポーネント（textfield / toggle / checkbox / radio / alert / toast / progress / modal / ActionSheet / BottomSheet…）→ showcase（Expo web export）
 
 詳細は D2I リポの `.team/specs/requirements-melta-app.md`。
 

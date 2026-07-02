@@ -14,6 +14,9 @@ import { TagCatalog } from "./components/Tag.catalog";
 import { CardCatalog } from "./components/Card.catalog";
 import { ButtonCatalog } from "./components/Button.catalog";
 import { SkeletonEmptyStateCatalog } from "./components/SkeletonEmptyState.catalog";
+import { LayoutCatalog } from "./components/Layout.catalog";
+import { ScreenHeaderCatalog } from "./components/ScreenHeader.catalog";
+import { AvatarIconCatalog } from "./components/AvatarIcon.catalog";
 
 const t = nativeTheme;
 
@@ -99,7 +102,7 @@ export function ThemeCatalog({ mode, onToggleMode }: ThemeCatalogProps) {
         </Pressable>
       </View>
 
-      <GroupHeading title="Components" caption={`MVP ${Object.keys(CONTRACTS).length} 個（公開 7 + internal Surface + EmptyState）`} />
+      <GroupHeading title="Components" caption={`MVP ${Object.keys(CONTRACTS).length} 個（Icon は melta-app/icons subpath）`} />
 
       <Section title="Text primitive">
         <ContractChip id="text" />
@@ -136,6 +139,24 @@ export function ThemeCatalog({ mode, onToggleMode }: ThemeCatalogProps) {
         <ContractChip id="skeleton" />
         <ContractChip id="emptyState" />
         <SkeletonEmptyStateCatalog />
+      </Section>
+
+      <Section title="Stack + Row（layout primitives）">
+        <ContractChip id="stack" />
+        <ContractChip id="row" />
+        <LayoutCatalog />
+      </Section>
+
+      <Section title="Screen + Header（画面骨格）">
+        <ContractChip id="screen" />
+        <ContractChip id="header" />
+        <ScreenHeaderCatalog />
+      </Section>
+
+      <Section title="Avatar + Icon">
+        <ContractChip id="avatar" />
+        <ContractChip id="icon" />
+        <AvatarIconCatalog />
       </Section>
 
       <GroupHeading title="Design tokens" caption="melta-contracts tokens.json → NativeTheme（生成物）" />

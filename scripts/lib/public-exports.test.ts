@@ -28,9 +28,12 @@ function listBarrelExports(relPath: string): string[] {
 }
 
 test("公開コンポーネント集合が MVP allowlist（implemented 契約）と一致", () => {
+  // Icon だけ subpath エントリ（melta-app/icons）。react-native-svg（optional peer）依存を
+  // 本体エントリから隔離するため（src/icons/index.ts の冒頭コメント参照）。
   const exported = [
     ...listBarrelExports("primitives/index.ts"),
     ...listBarrelExports("components/index.ts"),
+    ...listBarrelExports("icons/index.ts").filter((name) => name === "Icon"),
   ].sort();
   const expected = MVP_CONTRACT_IDS.map(toComponentName).sort();
   assert.deepEqual(
@@ -38,6 +41,14 @@ test("公開コンポーネント集合が MVP allowlist（implemented 契約）
     expected,
     "barrel の export と implemented 契約がズレている（export し忘れ or allowlist 外の露出）"
   );
+});
+
+test("本体エントリ（primitives / components barrel）に Icon が混入していない（依存ゼロ境界）", () => {
+  const main = [
+    ...listBarrelExports("primitives/index.ts"),
+    ...listBarrelExports("components/index.ts"),
+  ];
+  assert.ok(!main.includes("Icon"), "Icon は melta-app/icons からのみ export（react-native-svg 隔離）");
 });
 
 test("src/index.ts が theme / primitives / components / CONTRACTS を公開している", () => {

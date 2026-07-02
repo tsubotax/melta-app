@@ -33,6 +33,12 @@ export const MVP_CONTRACT_IDS = [
   "skeleton",
   "empty-state",
   "metric",
+  "stack",
+  "row",
+  "screen",
+  "header",
+  "icon",
+  "avatar",
 ] as const;
 
 export interface ContractMeta {

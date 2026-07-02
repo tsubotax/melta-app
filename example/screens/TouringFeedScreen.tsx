@@ -7,26 +7,20 @@
  *
  * 画像化(View→PNG)・軌跡描画・通過スポット連携は D2I/mobile 側機能（意思決定2）。ここは見た目まで。
  *
- * ----- dogfood で判明した不足（このファイルを書きながら記録） -----
- * 🔴 DOGFOOD不足-1: レイアウト primitive が無い（Stack/Row/Spacer）。
- *    画面の縦積み・横並び・gap を全部 生 <View style={{ flexDirection, gap }}> で手書きしている。
- *    DS なのに「箱の並べ方」だけ生 RN に落ちるのは穴。melta に Stack/Row(gap は token)が要る。
- * 🔴 DOGFOOD不足-2: Icon システムが無い。
- *    Button の leadingIcon / EmptyState の icon は ReactNode 受けだが、アイコンセット自体が無いので
- *    絵文字(🗺️ 等)や生 Text で代用している。実アプリには 閉じる/矢印/地図ピン/ハート 等の統一 Icon が要る。
- * 🔴 DOGFOOD不足-3: Screen 骨格（SafeArea + Header + Scroll）の primitive が無い。
- *    SafeAreaView + ScrollView + ヘッダーを毎画面 手書きになる。melta に Screen/Header があると dogfood が早い。
- * 🔴 DOGFOOD不足-4: Avatar が無い（投稿者表示）。Image を circle に clip すれば作れるが、
- *    radius=full + 固定サイズの Avatar は頻出なので primitive 化候補。
- * 🟡 DOGFOOD気付き-5: Card の media slot に Image を入れると、Card header/footer/children と media の
- *    縦順制御が呼び出し側まかせ。ツー活カードの「画像→タイトル→Metric→Tag」の定番並びは
+ * ----- dogfood 履歴 -----
+ * ✅ 解消済（P3 layout バッチで primitive 化）:
+ *   - 不足-1 レイアウト primitive → Stack / Row（gap は token キー）
+ *   - 不足-2 Icon システム → Icon（melta-app/icons、Charcoal 35 glyph）
+ *   - 不足-3 Screen 骨格 → Screen（SafeArea + header slot + Scroll）+ Header
+ *   - 不足-4 Avatar → Avatar（image / initials / status / Group）
+ * 🟡 DOGFOOD気付き-5（現状維持）: Card の media slot と header/footer/children の縦順制御は
+ *    呼び出し側まかせ。ツー活カードの「画像→タイトル→Metric→Tag」の定番並びは
  *    D2I 固有 compose（melta に上げない、§7 純度）でよい。境界は正しく機能している。
  */
 
-import { SafeAreaView, ScrollView, View } from "react-native";
-import { Text, Metric, Tag, Button } from "melta-app";
-import { Card, Image, Skeleton, EmptyState } from "melta-app";
-import { useTheme } from "melta-app";
+import { Text, Metric, Tag, Button, Stack, Row } from "melta-app";
+import { Card, Image, Skeleton, EmptyState, Screen, Header, Avatar } from "melta-app";
+import { Icon } from "melta-app/icons";
 
 interface TouringActivity {
   id: string;
@@ -64,58 +58,47 @@ const FEED: TouringActivity[] = [
 
 /** ツー活カード1枚（D2I 固有 compose、melta の Card slot に primitive を差し込む、§7 純度）。 */
 function TouringCard({ item }: { item: TouringActivity }) {
-  const { theme, colors } = useTheme();
   return (
     <Card
       variant="media"
       media={<Image source={{ uri: item.imageUri }} aspectRatio={2} accessibilityLabel={item.title} />}
     >
-      <Text variant="lg" role="heading" weight="bold" color="text-heading">
-        {item.title}
-      </Text>
-
-      {/* 🔴 DOGFOOD不足-1: この横並び+gap が生 View 手書き（MetricsRow があれば1行） */}
-      <View style={{ flexDirection: "row", gap: theme.spacing["6"], marginTop: theme.spacing["3"] }}>
-        <Metric value={item.distanceKm} unit="km" label="走行距離" size="sm" />
-        <Metric value={item.durationH} unit="h" label="走行時間" size="sm" />
-        <Metric value={item.climbM} unit="m" label="獲得標高" size="sm" />
-      </View>
-
-      {/* 🔴 DOGFOOD不足-1: タグの折返し横並びも生 View */}
-      <View
-        style={{
-          flexDirection: "row",
-          flexWrap: "wrap",
-          gap: theme.spacing["2"],
-          marginTop: theme.spacing["3"],
-        }}
-      >
-        {item.tags.map((t) => (
-          <Tag key={t} label={t} />
-        ))}
-      </View>
-
-      {/* 投稿者 + アクション。🔴 DOGFOOD不足-4: Avatar 無いので投稿者名のみ */}
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginTop: theme.spacing["4"],
-        }}
-      >
-        <Text variant="sm" color="text-muted">
-          {item.author}
+      <Stack gap="3">
+        <Text variant="lg" role="heading" weight="bold" color="text-heading">
+          {item.title}
         </Text>
-        {/* 🔴 DOGFOOD不足-2: Icon 無いので絵文字代用 */}
-        <Button
-          variant="subtle"
-          size="small"
-          label="シェア"
-          leadingIcon={<Text style={{ color: colors["text-default"] }}>↗</Text>}
-          onPress={() => {}}
-        />
-      </View>
+
+        {/* 走行サマリー（旧: 生 View 手書き → Row。不足-1 解消） */}
+        <Row gap="6">
+          <Metric value={item.distanceKm} unit="km" label="走行距離" size="sm" />
+          <Metric value={item.durationH} unit="h" label="走行時間" size="sm" />
+          <Metric value={item.climbM} unit="m" label="獲得標高" size="sm" />
+        </Row>
+
+        {/* タグの折返し横並び（旧: 生 View → Row wrap） */}
+        <Row gap="2" wrap>
+          {item.tags.map((t) => (
+            <Tag key={t} label={t} />
+          ))}
+        </Row>
+
+        {/* 投稿者 + アクション（旧: Avatar 無し・絵文字 Icon 代用 → Avatar + Icon。不足-2 / -4 解消） */}
+        <Row justify="between">
+          <Row gap="2">
+            <Avatar name={item.author} size="small" />
+            <Text variant="sm" color="text-muted">
+              {item.author}
+            </Text>
+          </Row>
+          <Button
+            variant="subtle"
+            size="small"
+            label="シェア"
+            leadingIcon={<Icon name="share-ios" size="sm" />}
+            onPress={() => {}}
+          />
+        </Row>
+      </Stack>
     </Card>
   );
 }
@@ -123,40 +106,28 @@ function TouringCard({ item }: { item: TouringActivity }) {
 type FeedState = "loading" | "ready" | "empty";
 
 export function TouringFeedScreen({ state = "ready" }: { state?: FeedState }) {
-  const { theme, colors } = useTheme();
-
+  // 旧: SafeAreaView + ScrollView + ヘッダー手書き → Screen + Header（不足-3 解消）
   return (
-    // 🔴 DOGFOOD不足-3: Screen 骨格（SafeArea+Header+Scroll）が毎回手書き
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors["bg-page"] }}>
-      {/* ヘッダー 🔴 DOGFOOD不足-3 */}
-      <View
-        style={{
-          paddingHorizontal: theme.spacing["4"],
-          paddingVertical: theme.spacing["3"],
-          borderBottomWidth: 1,
-          borderBottomColor: colors["border-default"],
-        }}
-      >
-        <Text variant="xl" role="heading" weight="bold" color="text-heading">
-          ツー活フィード
-        </Text>
-      </View>
-
+    <Screen
+      variant={state === "empty" ? "fixed" : "scroll"}
+      padding={state === "empty" ? "none" : "4"}
+      header={<Header title="ツー活フィード" />}
+    >
       {state === "empty" ? (
         <EmptyState
-          icon={<Text variant="3xl">🗺️</Text>}
+          icon={<Icon name="discovery" size="lg" color="text-muted" />}
           title="まだ記録がありません"
           description="ツーリングを記録すると、ここにツー活カードが並びます。"
           action={{ label: "記録をはじめる", onPress: () => {} }}
         />
       ) : (
-        <ScrollView contentContainerStyle={{ padding: theme.spacing["4"], gap: theme.spacing["4"] }}>
+        <Stack gap="4">
           {state === "loading"
             ? // ローディング: Skeleton card を3枚
               [0, 1, 2].map((i) => <Skeleton key={i} variant="card" />)
             : FEED.map((item) => <TouringCard key={item.id} item={item} />)}
-        </ScrollView>
+        </Stack>
       )}
-    </SafeAreaView>
+    </Screen>
   );
 }

@@ -75,6 +75,48 @@ export const CONTRACTS = {
     sizes: ["sm", "md", "lg"],
     states: ["default"],
   },
+  stack: {
+    id: "stack",
+    version: "0.1.0",
+    variants: ["default"],
+    sizes: [],
+    states: ["default"],
+  },
+  row: {
+    id: "row",
+    version: "0.1.0",
+    variants: ["default"],
+    sizes: [],
+    states: ["default"],
+  },
+  screen: {
+    id: "screen",
+    version: "0.1.0",
+    variants: ["fixed", "scroll"],
+    sizes: [],
+    states: ["default"],
+  },
+  header: {
+    id: "header",
+    version: "0.1.0",
+    variants: ["default"],
+    sizes: [],
+    states: ["default"],
+  },
+  icon: {
+    id: "icon",
+    version: "0.1.0",
+    variants: ["default"],
+    sizes: ["sm", "md", "lg"],
+    states: ["default"],
+  },
+  avatar: {
+    id: "avatar",
+    version: "2.0.0",
+    variants: ["image", "initials", "group"],
+    sizes: ["small", "medium", "large"],
+    states: ["default", "online", "away", "offline"],
+  },
 } as const satisfies Record<string, ContractShape>;
 
 export type ContractId = keyof typeof CONTRACTS;

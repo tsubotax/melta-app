@@ -4,3 +4,5 @@ export { Text } from "./Text";
 export { Metric } from "./Metric";
 export { Tag } from "./Tag";
 export { Button } from "./Button";
+export { Stack } from "./Stack";
+export { Row } from "./Row";

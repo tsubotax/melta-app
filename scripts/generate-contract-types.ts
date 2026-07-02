@@ -39,6 +39,12 @@ const MVP_COMPONENTS = [
   "skeleton",
   "empty-state",
   "metric",
+  "stack",
+  "row",
+  "screen",
+  "header",
+  "icon",
+  "avatar",
 ] as const;
 
 interface RawContract {
