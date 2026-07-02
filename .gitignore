@@ -42,3 +42,6 @@ yarn-error.*
 
 # bob build 出力（root の lib のみ。scripts/lib まで ignore しないよう root 限定）
 /lib/
+
+# Local Netlify folder
+.netlify
