@@ -108,6 +108,12 @@ test("tag conformance: states.inactive は差分なし（= 非選択の filter-c
 test("tag conformance: states.focus が FocusRing 実装値と一致（literal 照合）", () => {
   // FocusRing（_internal/focus-ring.tsx）は borderWidth 2 / theme.color.primary.500 をハードコード。
   // react-native import のため node から読めず、値の literal 照合で recipe との一致を担保する。
+  // キー集合も固定（recipe の focus に新キーが増えたら黙って通らず、照合の追加を強制する。Codex L-4）
+  assert.deepEqual(
+    Object.keys(tagRecipe.states.focus.style).sort(),
+    ["borderColor", "borderWidth"],
+    "focus: recipe のキー集合が変わった（このテストに照合を追加すること）",
+  );
   const focus = resolveStyleRefs(tokens, tagRecipe.states.focus.style);
   assert.equal(focus.borderWidth, 2, "focus: borderWidth（FocusRing の固定値 2）");
   assert.equal(

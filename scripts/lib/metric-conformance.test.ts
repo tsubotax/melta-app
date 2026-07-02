@@ -46,6 +46,23 @@ test("metric conformance: variant default の valueStyle / unitStyle / labelStyl
   const variantRecipe = metricRecipe.variants.default;
   assert.ok(variantRecipe, "recipe に variant default が無い");
 
+  // 各 slot のキー集合を固定（recipe に新キーが増えたら黙って通らず、照合の追加を強制する。Codex L-2）
+  assert.deepEqual(
+    Object.keys(variantRecipe.valueStyle).sort(),
+    ["color", "fontVariant", "fontWeight"],
+    "valueStyle: recipe のキー集合が変わった（このテストに照合を追加すること）",
+  );
+  assert.deepEqual(
+    Object.keys(variantRecipe.unitStyle).sort(),
+    ["color", "fontWeight", "marginLeft"],
+    "unitStyle: recipe のキー集合が変わった（このテストに照合を追加すること）",
+  );
+  assert.deepEqual(
+    Object.keys(variantRecipe.labelStyle).sort(),
+    ["color", "fontSize"],
+    "labelStyle: recipe のキー集合が変わった（このテストに照合を追加すること）",
+  );
+
   const value = resolveStyleRefs(tokens, variantRecipe.valueStyle);
   assert.equal(value.fontWeight, impl.valueStyle.fontWeight, "valueStyle.fontWeight");
   assert.equal(value.color, impl.valueStyle.color, "valueStyle.color");

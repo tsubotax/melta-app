@@ -33,6 +33,12 @@ const surfaceRecipe = loadAppRecipe(contractsRoot, "surface.recipe.json") as App
 };
 
 test("surface conformance: default variant の色・角丸が実装デフォルト（prop デフォルト）と一致", () => {
+  // recipe style のキー集合を固定（新キーが増えたら黙って通らず、照合の追加を強制する。Codex L-3）
+  assert.deepEqual(
+    Object.keys(surfaceRecipe.variants.default.style).sort(),
+    ["backgroundColor", "borderRadius", "elevation"],
+    "default: recipe style のキー集合が変わった（このテストに照合を追加すること）",
+  );
   const impl = resolveSurfaceStyle(nativeTheme, "light"); // 引数なし = prop デフォルト
   const style = resolveStyleRefs(tokens, surfaceRecipe.variants.default.style);
   assert.equal(style.backgroundColor, impl.base.backgroundColor, "default: backgroundColor");

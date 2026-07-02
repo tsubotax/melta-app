@@ -39,6 +39,12 @@ test("text conformance: 全 variant の fontSize / lineHeight / letterSpacing �
       nativeTheme.typography.fontSize[name as FontSizeKey],
       `実装（theme.typography.fontSize）に無い variant: ${name}`,
     );
+    // recipe style のキー集合を固定（新キーが増えたら黙って通らず、照合の追加を強制する。Codex L-1）
+    assert.deepEqual(
+      Object.keys(variantRecipe.style).sort(),
+      ["fontSize", "letterSpacing"],
+      `${name}: recipe style のキー集合が変わった（このテストに照合を追加すること）`,
+    );
     const impl = resolveTextShape(nativeTheme, name as FontSizeKey, "body");
     const style = resolveStyleRefs(tokens, variantRecipe.style) as {
       fontSize: number;
