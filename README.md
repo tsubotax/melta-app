@@ -51,15 +51,13 @@ melta-app/
 ## セットアップ
 
 ```bash
-npm install
+npm install   # melta-contracts（npm 公開済み）も dependencies として入る
 
-# ⚠️ melta-contracts が npm publish された後に追加する（現状は未 publish）
-# npm install melta-contracts
+# theme + contract 型を生成（melta-contracts のノードを読む。
+# 未 install 時のみ隣の melta-ui を fallback で読む開発モード）
+npm run generate
 
-# theme を生成（contracts 未 install のうちは隣の melta-ui を fallback で読む）
-npm run generate:theme
-
-# 変換のテスト
+# 変換・conformance・consumer テスト
 npm test
 
 # 実機 / シミュレータでカタログを確認
@@ -69,8 +67,10 @@ npm run ios   # または android / web
 ## ステータス
 
 - ✅ scaffold + token adapter（generate-native-theme）+ ユニットテスト + theme カタログ骨格
-- ⏳ `melta-contracts` の npm publish（melta-ui 側で対応中）
-- ⬜ primitives（Text / Button / Tag）→ components → design lint → ツー活カード（D2I dogfood）→ contract conformance test
+- ✅ `melta-contracts@0.2.0` を npm 依存として購読（recipes/app の styleRefs 同梱）
+- ✅ primitives（Text / Button / Tag / Metric）+ components（Card / Surface / Image / Skeleton / EmptyState）+ カタログ + dogfood 実画面
+- ✅ conformance: 契約源 ↔ 生成メタ ↔ `__contract` 宣言の照合 + consumer テスト（契約 subset / token 実在 / contractVersion 同期）+ styleRefs conformance（button で機構実証、他コンポーネントへ展開中）
+- ⬜ design lint → ツー活カード（D2I dogfood 深化）→ styleRefs conformance の全コンポーネント展開
 
 詳細は D2I リポの `.team/specs/requirements-melta-app.md`。
 
