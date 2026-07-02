@@ -24,10 +24,12 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# Security headers（melta-ui と同水準。showcase が /catalog/ を iframe 埋め込みするため SAMEORIGIN）
+# Security headers（melta-ui と同水準。showcase が /catalog/ を iframe 埋め込みするため
+# SAMEORIGIN + CSP frame-ancestors 'self' を併用 — 後者が現代的な正）
 [[headers]]
   for = "/*"
   [headers.values]
     X-Frame-Options = "SAMEORIGIN"
+    Content-Security-Policy = "frame-ancestors 'self'"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"

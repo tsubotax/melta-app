@@ -53,9 +53,10 @@
   }
   </script>
 
-  <!-- デザイン言語は web showcase と共有（melta-ui が SSOT。ここでは複製しない） -->
-  <link rel="stylesheet" href="https://melta.tsubotax.com/scripts/ds-theme.css">
-  <link rel="stylesheet" href="https://melta.tsubotax.com/scripts/ds-showcase.css">
+  <!-- デザイン言語は web showcase と共有（SSOT=melta-ui）。build-showcase.sh が
+       melta.tsubotax.com からビルド時に fetch して vendor/ に同梱する（実行時 cross-site 依存を排除） -->
+  <link rel="stylesheet" href="vendor/ds-theme.css">
+  <link rel="stylesheet" href="vendor/ds-showcase.css">
 
   <style>
     /* このページ固有: スマホ型デバイスフレーム（Live Catalog 用） */
@@ -91,7 +92,7 @@
   <!-- ====================================================================
        Sidebar (Fixed — web showcase と同じ 3-Zone 構成)
        ==================================================================== -->
-  <aside class="ds-showcase-chrome ds-sidebar ds-sidebar-premium fixed left-0 top-0 w-64 h-screen border-r flex flex-col z-30" style="border-color:var(--border-default);">
+  <aside id="app-sidebar" class="ds-showcase-chrome ds-sidebar ds-sidebar-premium fixed left-0 top-0 w-64 h-screen border-r flex flex-col z-30" style="border-color:var(--border-default);">
 
     <!-- Header Zone -->
     <div class="px-4 py-4 border-b flex-shrink-0 ds-sidebar-header-gradient" style="border-color:var(--border-default);">
@@ -148,14 +149,14 @@
   </aside>
 
   <!-- モバイル用オーバーレイ -->
-  <div class="ds-sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+  <div class="ds-sidebar-overlay" onclick="toggleMobileSidebar(false)"></div>
 
   <main class="ml-64">
     <!-- Sticky Header Bar -->
     <header id="showcase-header" class="sticky top-0 z-20 backdrop-blur-sm border-b" style="background:color-mix(in srgb, var(--bg-page) 85%, transparent);border-color:var(--border-default);">
       <div class="max-w-5xl mx-auto px-4 md:px-8 flex items-center justify-between h-14">
         <div class="flex items-center gap-2 text-sm" style="color:var(--text-muted);">
-          <button onclick="toggleMobileSidebar()" class="ds-mobile-menu-btn w-9 h-9 inline-flex items-center justify-center rounded-lg hover:bg-gray-100 mr-1 cursor-pointer" style="color:var(--text-default);" aria-label="メニューを開く">
+          <button id="sidebar-toggle" onclick="toggleMobileSidebar()" class="ds-mobile-menu-btn w-9 h-9 inline-flex items-center justify-center rounded-lg hover:bg-gray-100 mr-1 cursor-pointer" style="color:var(--text-default);" aria-label="メニューを開く" aria-expanded="false" aria-controls="app-sidebar">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
           </button>
           <span style="color:var(--text-heading);" class="font-medium">melta UI</span>
@@ -501,9 +502,15 @@ import { Icon } from "melta-app/icons";</code></pre>
     setActive("overview");
   })();
 
-  function toggleMobileSidebar() {
-    document.body.classList.toggle("ds-sidebar-open");
+  function toggleMobileSidebar(force) {
+    var open = typeof force === "boolean" ? force : !document.body.classList.contains("ds-sidebar-open");
+    document.body.classList.toggle("ds-sidebar-open", open);
+    var btn = document.getElementById("sidebar-toggle");
+    if (btn) btn.setAttribute("aria-expanded", String(open));
   }
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") toggleMobileSidebar(false);
+  });
   </script>
 </body>
 </html>

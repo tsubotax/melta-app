@@ -42,9 +42,10 @@ function section(title: string): void {
 
 // --- 契約の読み込み（appStatus は 0.2.1+。無ければ allowlist ベースに degrade） ---
 
+// appStatus は3値。「adapted」は appStatus の値ではなく appMapping 側（直交、contracts 0.2.1 の設計）
 interface ContractAvailability {
   id: string;
-  appStatus?: "implemented" | "planned" | "adapted" | "not-planned";
+  appStatus?: "implemented" | "planned" | "not-planned";
   appMapping?: string;
   appNote?: string;
 }
@@ -65,7 +66,6 @@ export const STATUS_END = "<!-- END GENERATED: component-status -->";
 const STATUS_LABEL: Record<string, string> = {
   implemented: "✅ implemented",
   planned: "⬜ planned",
-  adapted: "🔁 adapted",
   "not-planned": "🚫 not-planned",
 };
 
@@ -73,7 +73,7 @@ const STATUS_LABEL: Record<string, string> = {
 function renderStatusBlock(): string {
   const lines: string[] = [];
   if (hasAppStatus) {
-    const order = ["implemented", "adapted", "planned", "not-planned"];
+    const order = ["implemented", "planned", "not-planned"];
     const sorted = [...contracts]
       .filter((c) => c.appStatus)
       .sort(
