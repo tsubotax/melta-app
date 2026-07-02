@@ -1,0 +1,31 @@
+# melta-app showcase（app.melta.tsubotax.com）
+# example/ の catalog を Expo web export した静的サイトを配信する。
+# Netlify は repo root で npm install（workspaces + prepare の bob build まで走る）→
+# command で example を web export → example/dist を publish する。
+
+[build]
+  command = "npm run export:web"
+  publish = "example/dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# SPA fallback（bundle は単一 index.html）
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Expo の静的アセットはハッシュ付きファイル名なので immutable キャッシュ
+[[headers]]
+  for = "/_expo/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Security headers（melta-ui と同水準）
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
