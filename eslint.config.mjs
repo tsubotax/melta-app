@@ -13,6 +13,11 @@ export default tseslint.config(
   {
     ignores: [
       "node_modules",
+      // bob のビルド出力。ソースのコメント（eslint-disable 含む）ごとコンパイルされるため
+      // lint 対象にすると「plugin 未登録の .js に disable コメント」で誤爆する
+      // （CI は npm ci の prepare で lib/ が生成済み = 2026-07-02 に実発火。ローカルは lib/ が
+      // 古いままだと再現しない罠があるので、lint の前に prepare を挟んで検証すること）
+      "lib",
       "src/theme/native-theme.ts",
       "src/contracts/contract-types.ts",
     ],
