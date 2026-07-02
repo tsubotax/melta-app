@@ -62,6 +62,15 @@ export function walkTokenPath(tokens: unknown, path: string): unknown {
   return node;
 }
 
+/**
+ * token leaf 判定: 参照可能な token = `value`（大半）か `size`（fontSize）を持つ object。
+ * group ノード（color.primary 等）はどちらも持たないため false。
+ * melta-ui 側 validate（section 9b）と同一基準（group 参照が存在チェックを通る穴を塞ぐ）。
+ */
+export function isTokenLeaf(node: unknown): boolean {
+  return node !== null && typeof node === "object" && ("value" in node || "size" in node);
+}
+
 /** recipe 内の {"token": path} 参照を深掘りで全部集める。 */
 export function collectTokenRefs(node: unknown, refs: string[] = []): string[] {
   if (Array.isArray(node)) {
@@ -95,22 +104,24 @@ export function resolveTokenScalar(tokens: unknown, path: string): unknown {
   return node;
 }
 
-/** styleRefs の 1 階層 object を解決（{token} → scalar / literal はそのまま）。 */
+/** styleRefs 内の値を再帰解決（{token} → scalar、object / array は構造を保って深掘り）。 */
+function resolveValue(tokens: unknown, value: unknown): unknown {
+  if (Array.isArray(value)) return value.map((v) => resolveValue(tokens, v));
+  if (value !== null && typeof value === "object") {
+    const obj = value as Record<string, unknown>;
+    if (typeof obj.token === "string") return resolveTokenScalar(tokens, obj.token);
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(obj)) out[k] = resolveValue(tokens, v);
+    return out;
+  }
+  return value;
+}
+
+/** styleRefs object を解決（nested な token 参照も再帰で拾う。shadowOffset.width 等に備える）。 */
 export function resolveStyleRefs(
   tokens: unknown,
   style: Record<string, unknown> | undefined
 ): Record<string, unknown> {
-  const out: Record<string, unknown> = {};
-  if (!style) return out;
-  for (const [key, value] of Object.entries(style)) {
-    if (value !== null && typeof value === "object" && !Array.isArray(value)) {
-      const ref = value as Record<string, unknown>;
-      if (typeof ref.token === "string") {
-        out[key] = resolveTokenScalar(tokens, ref.token);
-        continue;
-      }
-    }
-    out[key] = value;
-  }
-  return out;
+  if (!style) return {};
+  return resolveValue(tokens, style) as Record<string, unknown>;
 }

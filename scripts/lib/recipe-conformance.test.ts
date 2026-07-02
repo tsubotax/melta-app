@@ -21,6 +21,7 @@ import {
   listAppRecipeFiles,
   loadAppRecipe,
   walkTokenPath,
+  isTokenLeaf,
   collectTokenRefs,
   resolveStyleRefs,
   type AppRecipe,
@@ -90,10 +91,10 @@ for (const file of recipeFiles) {
     }
   });
 
-  test(`recipe ${file}: 全 token 参照が tokens.json に実在`, () => {
+  test(`recipe ${file}: 全 token 参照が tokens.json の leaf に実在（group 参照は不正）`, () => {
     const refs = collectTokenRefs(recipe);
-    const missing = [...new Set(refs)].filter((r) => walkTokenPath(tokens, r) === undefined);
-    assert.deepEqual(missing, [], `tokens.json に無い参照: ${missing.join(", ")}`);
+    const missing = [...new Set(refs)].filter((r) => !isTokenLeaf(walkTokenPath(tokens, r)));
+    assert.deepEqual(missing, [], `tokens.json に無い / group を指す参照: ${missing.join(", ")}`);
   });
 }
 

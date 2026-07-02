@@ -1,0 +1,36 @@
+name: Check
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # CI には兄弟ディレクトリ（melta-ui）が存在しないため、ここが通る = npm 経路
+      # （melta-contracts）だけで生成できる証明。fallback 依存の混入を構造的に禁止する
+      - name: Regenerate from melta-contracts (npm route only)
+        run: npm run generate
+
+      - name: Generated files freshness (再生成漏れの検知)
+        run: git diff --exit-code src/theme/native-theme.ts src/contracts/contract-types.ts
+
+      - name: TypeScript
+        run: npx tsc --noEmit
+
+      # consumer-driven contract テスト: melta-contracts が契約 / token / recipe を
+      # 壊すとここが赤くなる（melta-ui 側の design:compat と対になる消費者側ゲート）
+      - name: Consumer + conformance tests
+        run: npm test
