@@ -39,19 +39,20 @@ for required in \
   fi
 done
 
-echo "→ fixture プロジェクトへ install"
+echo "→ fixture プロジェクトへ install（react-native-svg 無し = 本体エントリの依存ゼロ検証）"
 FIXTURE="$WORK/fixture"
 mkdir -p "$FIXTURE"
 cd "$FIXTURE"
 npm init -y --silent >/dev/null
 npm install --silent --no-audit --no-fund \
   "$WORK/$TARBALL" \
-  react@19.2.3 react-native@0.85.3 react-native-svg@15.15.4 \
+  react@19.2.3 react-native@0.85.3 \
   typescript@~6.0.3 @types/react@~19.2.2 >/dev/null
 
-echo "→ import + 型解決の検証（tsc）"
-cat > check.tsx <<'TSX'
-// fixture: ライブラリ利用者の最小コード。ここが型ごと通る = installable
+echo "→ 本体エントリの import + 型解決（svg 無しで通る = subpath 隔離が機能）"
+cat > check-main.tsx <<'TSX'
+// fixture A: react-native-svg を install していない利用者の最小コード。
+// 本体エントリ（melta-app）は依存ゼロなので、ここが型ごと通らなければ隔離が壊れている。
 import {
   ThemeProvider,
   useTheme,
@@ -65,26 +66,37 @@ import {
   Image,
   Skeleton,
   EmptyState,
+  Stack,
+  Row,
+  Screen,
+  Header,
+  Avatar,
   CONTRACTS,
   type ContractId,
   type VariantOf,
 } from "melta-app";
 
-// subpath エントリ（melta-app/icons、react-native-svg 隔離）も利用者と同経路で検証
-import { Icon, ICON_NAMES, type IconName } from "melta-app/icons";
-
 const variant: VariantOf<"button"> = "contained";
 const id: ContractId = "button";
-const iconName: IconName = "close";
 
 export function App() {
   return (
     <ThemeProvider>
-      <Card>
-        <Text variant="base">hello</Text>
-        <Button variant={variant} label="save" onPress={() => {}} />
-        <Icon name={iconName} size="sm" />
-      </Card>
+      <Screen header={<Header title="fixture" />}>
+        <Stack gap="4">
+          <Row gap="2" justify="between" wrap>
+            <Avatar name="Taro Tanaka" status="online" />
+            <Avatar.Group>
+              <Avatar name="A" size="small" />
+              <Avatar name="B" size="small" />
+            </Avatar.Group>
+          </Row>
+          <Card>
+            <Text variant="base">hello</Text>
+            <Button variant={variant} label="save" onPress={() => {}} />
+          </Card>
+        </Stack>
+      </Screen>
     </ThemeProvider>
   );
 }
@@ -92,7 +104,6 @@ export function App() {
 // 実行時値も参照できること（as const の literal 型がそのまま届くので includes で検証）
 if (!CONTRACTS[id].variants.includes(variant)) throw new Error("contracts meta missing");
 if (!nativeTheme.color.primary["500"]) throw new Error("theme missing");
-if (!ICON_NAMES.includes(iconName)) throw new Error("icon glyphs missing");
 void useTheme; void Tag; void Metric; void Surface; void Image; void Skeleton; void EmptyState;
 TSX
 
@@ -107,11 +118,43 @@ cat > tsconfig.json <<'JSON'
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["check.tsx"]
+  "include": ["check-main.tsx"]
 }
 JSON
 
 npx tsc -p tsconfig.json
+
+echo "→ react-native-svg を追加して icons subpath を検証（opt-in 利用者の経路）"
+npm install --silent --no-audit --no-fund react-native-svg@15.15.4 >/dev/null
+
+cat > check-icons.tsx <<'TSX'
+// fixture B: react-native-svg を install した利用者だけが melta-app/icons を import できる
+import { Icon, ICON_NAMES, type IconName } from "melta-app/icons";
+
+const iconName: IconName = "close";
+if (!ICON_NAMES.includes(iconName)) throw new Error("icon glyphs missing");
+
+export function Deco() {
+  return <Icon name={iconName} size="sm" />;
+}
+TSX
+
+cat > tsconfig.icons.json <<'JSON'
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true
+  },
+  "include": ["check-icons.tsx"]
+}
+JSON
+
+npx tsc -p tsconfig.icons.json
 
 echo "→ モジュール解決の実体確認（exports 経由で実在ファイルに解決されること）"
 node --input-type=module -e "

@@ -7,6 +7,11 @@
  * - header slot は scroll の外（SafeArea 直下）に固定する。
  * - padding は spacing token キー限定 | "none"（default "4"）。
  * - 決定ロジックは pure resolver（screen.styles.ts）に分離 — recipe との機械照合対象。
+ *
+ * ⚠️ SafeArea は RN core の SafeAreaView（deprecated / iOS のみの最小対応）を意図的に使う。
+ * 依存ゼロ方針（P1）を安全域の精度より優先した判断。Android の edge-to-edge や notch 精度が
+ * 必要になったら react-native-safe-area-context への adapter 化を再検討する（optional peer の
+ * 前例は Icon × react-native-svg）。
  */
 
 import { useMemo, type ReactNode } from "react";

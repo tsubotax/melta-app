@@ -15,6 +15,7 @@ import {
 } from "./recipe-conformance.js";
 import {
   AVATAR_GROUP_OVERLAP,
+  resolveAvatarGroupStyle,
   resolveAvatarStatusColor,
   resolveAvatarStyle,
 } from "../../src/components/avatar.styles.js";
@@ -59,10 +60,19 @@ test("avatar conformance: initials variant（bg primary.50 + text primary.500 / 
   assert.equal(impl.text.fontWeight, textStyle.fontWeight, "initials: fontWeight = medium");
 });
 
-test("avatar conformance: group variant のオーバーラップ（-spacing.2 相当の literal）が実装と一致", () => {
+test("avatar conformance: group variant（container + オーバーラップ）が実装と一致", () => {
   assert.deepEqual(Object.keys(recipe.variants.group).sort(), ["overlapStyle", "style"]);
-  const overlap = recipe.variants.group.overlapStyle as { marginLeft: number };
-  assert.equal(AVATAR_GROUP_OVERLAP, overlap.marginLeft, "group: overlap = recipe の literal");
+  const impl = resolveAvatarGroupStyle();
+  assert.deepEqual(
+    impl.container,
+    resolveStyleRefs(tokens, recipe.variants.group.style),
+    "group: container（flexDirection row）",
+  );
+  assert.deepEqual(
+    impl.overlap,
+    resolveStyleRefs(tokens, recipe.variants.group.overlapStyle),
+    "group: overlap = recipe の literal",
+  );
   // literal の由来（-spacing.2）が崩れていないことも確認する
   assert.equal(AVATAR_GROUP_OVERLAP, -nativeTheme.spacing["2"], "group: overlap = -spacing.2");
 });

@@ -10,7 +10,7 @@ melta-app は以下のサードパーティ製アイコンを同梱していま�
 - **License**: Apache License, Version 2.0
 - **Copyright**: Copyright 2022 pixiv Inc.
 - **Source**: https://github.com/pixiv/charcoal
-- **Location**: `assets/icons/`（melta-ui からの curated サブセット。SVG 源 + codegen 生成物 src/icons/glyphs.ts）
+- **Location**: repository source: `assets/icons/`（melta-ui からの curated サブセット SVG。npm tarball には含まない）/ packaged output: `src/icons/glyphs.ts` + `lib/module/icons/`（SVG から codegen した path データ、これが配布物）
 - **Modifications**: 単色 tint 契約のため fill が currentColor でない path（白抜き backdrop）を codegen 時に除外（scripts/generate-icons.ts）
 
 ### Apache License, Version 2.0

@@ -21,7 +21,7 @@ import {
 import { useTheme } from "../theme";
 import { CONTRACTS } from "../contracts/contract-types";
 import {
-  AVATAR_GROUP_OVERLAP,
+  resolveAvatarGroupStyle,
   resolveAvatarStatusColor,
   resolveAvatarStyle,
   type AvatarSize,
@@ -59,10 +59,12 @@ export function Avatar({ name, source, size = "medium", status, style, testID }:
   );
   const dotColor = status ? resolveAvatarStatusColor(theme, mode, status) : undefined;
 
-  // clip（overflow hidden）は内側の円に閉じ、statusDot は外側（クリップされない層）に置く
+  // clip（overflow hidden）は内側の円に閉じ、statusDot は外側（クリップされない層）に置く。
+  // accessible 明示で「1つの読み上げ単位」にする（非 Touchable の View は暗黙では discoverable でない）
   return (
     <View
       style={[{ width: resolved.container.width, height: resolved.container.height }, style]}
+      accessible
       accessibilityRole="image"
       accessibilityLabel={name}
       testID={testID}
@@ -94,10 +96,11 @@ interface AvatarGroupProps {
 
 /** 複数アバターの重ね表示（contract の group variant）。2枚目以降を負 margin で重ねる。 */
 function AvatarGroup({ style, testID, children }: AvatarGroupProps) {
+  const group = resolveAvatarGroupStyle();
   return (
-    <View style={[{ flexDirection: "row" }, style]} testID={testID}>
+    <View style={[group.container, style]} testID={testID}>
       {Children.map(children, (child, index) => (
-        <View style={index > 0 ? { marginLeft: AVATAR_GROUP_OVERLAP } : null}>{child}</View>
+        <View style={index > 0 ? group.overlap : null}>{child}</View>
       ))}
     </View>
   );

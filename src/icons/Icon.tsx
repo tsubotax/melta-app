@@ -48,6 +48,7 @@ export function Icon({ name, size = "md", color = "text-default", accessibilityL
       width={resolved.width}
       height={resolved.height}
       viewBox={glyph.viewBox}
+      accessible={!decorative}
       accessibilityRole="image"
       accessibilityLabel={accessibilityLabel}
       accessibilityElementsHidden={decorative}

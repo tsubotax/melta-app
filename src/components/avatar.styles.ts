@@ -21,6 +21,20 @@ const SIZE_TABLE = {
 /** group の重なり（-spacing.2 相当。負値 token が無いため recipe と同じ literal）。 */
 export const AVATAR_GROUP_OVERLAP = -8;
 
+/**
+ * group variant（avatar.recipe の group.style / group.overlapStyle の 1:1 写像）。
+ * container は横並び、2枚目以降の子に overlap（負 margin）を適用する。
+ */
+export function resolveAvatarGroupStyle(): {
+  container: { flexDirection: "row" };
+  overlap: { marginLeft: number };
+} {
+  return {
+    container: { flexDirection: "row" },
+    overlap: { marginLeft: AVATAR_GROUP_OVERLAP },
+  };
+}
+
 export interface AvatarStyleResult {
   /** 円形コンテナ（image は overflow clip / initials は bg + 中央寄せ）。 */
   container: {

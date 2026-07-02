@@ -51,9 +51,13 @@ function parseSvg(file: string): { viewBox: string; paths: GlyphPath[] } {
     if (!d) throw new Error(`${basename(file)}: d 属性の無い path`);
     const fill = attrs.match(/\bfill="([^"]+)"/)?.[1];
     if (fill !== "currentColor") {
-      // 白抜き backdrop（例: LikeOff の #fff）は単色 tint の契約に反するため落とす。
-      // 固定色を残すと dark mode で破綻する。outline 側（currentColor）だけ採用する。
-      continue;
+      // 白抜き backdrop（例: LikeOff の #fff）だけは既知パターンとして落とす（単色 tint 契約。
+      // 固定色を残すと dark mode で破綻する）。それ以外の固定色は「意味のある path の無音欠落」に
+      // なり得るため throw して人間に判断させる（Codex レビュー反映）。
+      if (fill && /^(#fff|#ffffff|white)$/i.test(fill)) continue;
+      throw new Error(
+        `${basename(file)}: 未知の固定色 fill="${fill ?? "無し"}"（白抜き backdrop 以外は許可しない — アイコンを curated セットに入れる前に形式を確認）`,
+      );
     }
     const fillRule = attrs.match(/\bfill-rule="([^"]+)"/)?.[1];
     if (fillRule && fillRule !== "evenodd") {
