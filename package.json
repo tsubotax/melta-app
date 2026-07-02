@@ -64,7 +64,8 @@
     "prepare": "bob build",
     "test": "tsx --test scripts/lib/*.test.ts",
     "typecheck": "tsc --noEmit && tsc --noEmit -p example/tsconfig.json && tsc --noEmit -p scripts/tsconfig.json",
-    "lint": "eslint .",
+    "lint": "eslint . --max-warnings 0",
+    "check:drift": "tsx scripts/check-drift.ts",
     "check:installability": "bash scripts/check-installability.sh"
   },
   "react-native-builder-bob": {

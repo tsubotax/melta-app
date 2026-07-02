@@ -39,4 +39,6 @@ yarn-error.*
 # generated native folders
 /ios
 /android
-lib/
+
+# bob build 出力（root の lib のみ。scripts/lib まで ignore しないよう root 限定）
+/lib/

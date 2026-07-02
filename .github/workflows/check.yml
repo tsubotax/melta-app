@@ -30,10 +30,19 @@ jobs:
       - name: TypeScript (lib + example + scripts)
         run: npm run typecheck
 
+      # design lint: raw color / radius は error、spacing / fontSize は warn。
+      # --max-warnings 0 で warn も CI では落とす（ローカルは hook が即時フィードバック）
+      - name: Design lint (--max-warnings 0)
+        run: npm run lint
+
       # consumer-driven contract テスト: melta-contracts が契約 / token / recipe を
       # 壊すとここが赤くなる（melta-ui 側の design:compat と対になる消費者側ゲート）
       - name: Consumer + conformance tests
         run: npm test
+
+      # README のコンポーネント表（契約から生成）/ catalog 網羅 / allowlist の突合
+      - name: Drift check (README / catalog / allowlist)
+        run: npm run check:drift
 
       # 「npm install すれば APP が作れる」の機械証明（公開 P1）:
       # pack した tarball を fixture に install → import + 型解決を tsc で検証

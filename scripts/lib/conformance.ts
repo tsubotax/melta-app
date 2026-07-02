@@ -48,6 +48,12 @@ export function toKey(id: string): string {
   return id.replace(/-([a-z])/g, (_m, ch: string) => ch.toUpperCase());
 }
 
+/** "empty-state" → "EmptyState"（コンポーネント名の命名規約）。 */
+export function toComponentName(id: string): string {
+  const key = toKey(id);
+  return key.charAt(0).toUpperCase() + key.slice(1);
+}
+
 /** 契約源（melta-contracts の components ディレクトリ）を解決。generate-contract-types と同方針。 */
 export function resolveContractsDir(): string {
   try {
