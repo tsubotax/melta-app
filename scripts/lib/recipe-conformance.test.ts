@@ -14,7 +14,7 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import {
   resolveContractsRoot,
@@ -97,6 +97,30 @@ for (const file of recipeFiles) {
     assert.deepEqual(missing, [], `tokens.json に無い / group を指す参照: ${missing.join(", ")}`);
   });
 }
+
+// --- 層A': appStatus 同期（契約の宣言 ⇔ 実装 allowlist の一致） ---
+
+test("appStatus=implemented の契約集合が MVP allowlist と一致", (t) => {
+  const componentsDir = join(contractsRoot, "components");
+  const contracts = readdirSync(componentsDir)
+    .filter((f) => f.endsWith(".contract.json"))
+    .map((f) => JSON.parse(readFileSync(join(componentsDir, f), "utf8")) as { id: string; appStatus?: string });
+  const withStatus = contracts.filter((c) => c.appStatus);
+  if (withStatus.length === 0) {
+    // melta-contracts@0.2.0 以前は appStatus 未公開。publish 後に自動で発火する tolerant skip
+    t.skip("melta-contracts に appStatus フィールドなし（0.2.1 未満）");
+    return;
+  }
+  const implemented = contracts
+    .filter((c) => c.appStatus === "implemented")
+    .map((c) => c.id)
+    .sort();
+  assert.deepEqual(
+    implemented,
+    [...MVP_CONTRACT_IDS].sort(),
+    "契約の appStatus=implemented 宣言と melta-app の実装 allowlist がズレている（どちらかを更新）"
+  );
+});
 
 // --- 層B: button styleRefs conformance（実装 resolver との機械照合） ---
 
