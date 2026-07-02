@@ -4,8 +4,8 @@
 
 import { useState } from "react";
 import { View } from "react-native";
-import { Tag } from "../../src/primitives";
-import { useTheme } from "../../src/theme";
+import { Tag } from "melta-app";
+import { useTheme } from "melta-app";
 
 export function TagCatalog() {
   const { theme } = useTheme();

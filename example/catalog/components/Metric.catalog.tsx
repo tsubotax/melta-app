@@ -5,9 +5,9 @@
  */
 
 import { View } from "react-native";
-import { Metric } from "../../src/primitives";
-import { useTheme } from "../../src/theme";
-import { CONTRACTS } from "../../src/contracts/contract-types";
+import { Metric } from "melta-app";
+import { useTheme } from "melta-app";
+import { CONTRACTS } from "melta-app";
 
 export function MetricCatalog() {
   const { theme } = useTheme();

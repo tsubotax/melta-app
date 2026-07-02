@@ -24,9 +24,9 @@
  */
 
 import { SafeAreaView, ScrollView, View } from "react-native";
-import { Text, Metric, Tag, Button } from "../src/primitives";
-import { Card, Image, Skeleton, EmptyState } from "../src/components";
-import { useTheme } from "../src/theme";
+import { Text, Metric, Tag, Button } from "melta-app";
+import { Card, Image, Skeleton, EmptyState } from "melta-app";
+import { useTheme } from "melta-app";
 
 interface TouringActivity {
   id: string;

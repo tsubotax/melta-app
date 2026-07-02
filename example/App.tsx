@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
-import { ThemeProvider, useTheme, type ThemeMode } from "./src/theme";
+import { ThemeProvider, useTheme, type ThemeMode } from "melta-app";
 import { ThemeCatalog } from "./catalog/ThemeCatalog";
 import { TouringFeedScreen } from "./screens/TouringFeedScreen";
 

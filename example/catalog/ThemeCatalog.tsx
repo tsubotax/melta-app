@@ -5,8 +5,8 @@
  */
 
 import { Pressable, ScrollView, StyleSheet, Text as RNText, View } from "react-native";
-import { nativeTheme, useTheme, type ThemeMode } from "../src/theme";
-import { CONTRACTS } from "../src/contracts/contract-types";
+import { nativeTheme, useTheme, type ThemeMode } from "melta-app";
+import { CONTRACTS } from "melta-app";
 import { TextCatalog } from "./components/Text.catalog";
 import { MetricCatalog } from "./components/Metric.catalog";
 import { SurfaceImageCatalog } from "./components/SurfaceImage.catalog";

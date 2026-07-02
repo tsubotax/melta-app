@@ -1,34 +1,76 @@
 {
   "name": "melta-app",
   "version": "0.1.0",
-  "description": "melta for APP — React Native(Expo) 版 melta デザインシステム。melta-contracts を single source of truth に RN 実装で満たす。",
-  "main": "index.ts",
-  "dependencies": {
-    "expo": "~56.0.8",
-    "expo-status-bar": "~56.0.4",
-    "melta-contracts": "^0.2.0",
-    "react": "19.2.3",
-    "react-native": "0.85.3"
+  "description": "melta for APP — melta デザインシステムの React Native UI kit。melta-contracts（デザイン契約）を single source of truth に RN 実装でその契約を満たす。アプリ本体ではなくライブラリ。",
+  "license": "MIT",
+  "homepage": "https://github.com/tsubotax/melta-app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tsubotax/melta-app.git"
+  },
+  "keywords": [
+    "react-native",
+    "expo",
+    "design-system",
+    "ui-kit",
+    "melta",
+    "ai-ready"
+  ],
+  "main": "./lib/module/index.js",
+  "types": "./lib/typescript/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/typescript/src/index.d.ts",
+      "default": "./lib/module/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "src",
+    "!src/**/*.test.*"
+  ],
+  "sideEffects": false,
+  "workspaces": [
+    "example"
+  ],
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*"
   },
   "devDependencies": {
     "@types/node": "^25.9.1",
     "@types/react": "~19.2.2",
     "eslint": "^10.4.1",
+    "melta-contracts": "^0.2.0",
+    "react": "19.2.3",
+    "react-native": "0.85.3",
+    "react-native-builder-bob": "^0.40.13",
     "tsx": "^4.19.0",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.60.0"
   },
   "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web",
+    "start": "npm run start -w example",
+    "android": "npm run android -w example",
+    "ios": "npm run ios -w example",
+    "web": "npm run web -w example",
     "generate:theme": "tsx scripts/generate-native-theme.ts",
     "generate:contracts": "tsx scripts/generate-contract-types.ts",
     "generate": "npm run generate:theme && npm run generate:contracts",
+    "build": "bob build",
+    "prepare": "bob build",
     "test": "tsx --test scripts/lib/*.test.ts",
-    "typecheck": "tsc --noEmit && tsc --noEmit -p scripts/tsconfig.json",
-    "lint": "eslint ."
+    "typecheck": "tsc --noEmit && tsc --noEmit -p example/tsconfig.json && tsc --noEmit -p scripts/tsconfig.json",
+    "lint": "eslint .",
+    "check:installability": "bash scripts/check-installability.sh"
   },
-  "private": true
+  "react-native-builder-bob": {
+    "source": "src",
+    "output": "lib",
+    "targets": [
+      ["module", { "esm": true }],
+      "typescript"
+    ]
+  }
 }

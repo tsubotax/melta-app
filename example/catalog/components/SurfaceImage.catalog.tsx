@@ -1,13 +1,13 @@
 /**
- * SurfaceImage.catalog — Surface(internal) + Image を実レンダ（設計書 §6）。
- * Surface は未 export だが catalog は内部なので直接 import して土台の見た目を確認する。
+ * SurfaceImage.catalog — Surface + Image を実レンダ（設計書 §6）。
+ * Surface はライブラリ化（公開 P1）で正式 export に昇格（契約・recipe を持つ implemented のため）。
  */
 
 import { View } from "react-native";
-import { Surface } from "../../src/components/Surface";
-import { Image } from "../../src/components";
-import { Text } from "../../src/primitives";
-import { useTheme } from "../../src/theme";
+import { Surface } from "melta-app";
+import { Image } from "melta-app";
+import { Text } from "melta-app";
+import { useTheme } from "melta-app";
 
 export function SurfaceImageCatalog() {
   const { theme } = useTheme();

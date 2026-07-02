@@ -7,9 +7,9 @@
  */
 
 import { View } from "react-native";
-import { Card, Image } from "../../src/components";
-import { Text, Metric, Tag } from "../../src/primitives";
-import { useTheme } from "../../src/theme";
+import { Card, Image } from "melta-app";
+import { Text, Metric, Tag } from "melta-app";
+import { useTheme } from "melta-app";
 
 export function CardCatalog() {
   const { theme } = useTheme();

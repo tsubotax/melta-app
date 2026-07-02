@@ -4,9 +4,9 @@
  */
 
 import { View } from "react-native";
-import { Text } from "../../src/primitives";
-import { useTheme } from "../../src/theme";
-import { CONTRACTS } from "../../src/contracts/contract-types";
+import { Text } from "melta-app";
+import { useTheme } from "melta-app";
+import { CONTRACTS } from "melta-app";
 
 export function TextCatalog() {
   const { theme } = useTheme();

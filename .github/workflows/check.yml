@@ -27,10 +27,15 @@ jobs:
       - name: Generated files freshness (再生成漏れの検知)
         run: git diff --exit-code src/theme/native-theme.ts src/contracts/contract-types.ts
 
-      - name: TypeScript
-        run: npx tsc --noEmit
+      - name: TypeScript (lib + example + scripts)
+        run: npm run typecheck
 
       # consumer-driven contract テスト: melta-contracts が契約 / token / recipe を
       # 壊すとここが赤くなる（melta-ui 側の design:compat と対になる消費者側ゲート）
       - name: Consumer + conformance tests
         run: npm test
+
+      # 「npm install すれば APP が作れる」の機械証明（公開 P1）:
+      # pack した tarball を fixture に install → import + 型解決を tsc で検証
+      - name: Installability gate (pack → install → import → typecheck)
+        run: npm run check:installability

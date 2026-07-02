@@ -3,10 +3,10 @@
  */
 
 import { View } from "react-native";
-import { Button } from "../../src/primitives";
-import { Text } from "../../src/primitives";
-import { useTheme } from "../../src/theme";
-import { CONTRACTS } from "../../src/contracts/contract-types";
+import { Button } from "melta-app";
+import { Text } from "melta-app";
+import { useTheme } from "melta-app";
+import { CONTRACTS } from "melta-app";
 
 export function ButtonCatalog() {
   const { theme } = useTheme();

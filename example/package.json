@@ -1,0 +1,20 @@
+{
+  "name": "melta-app-example",
+  "version": "0.0.0",
+  "private": true,
+  "description": "melta-app のカタログ / dogfood アプリ（showcase の実体。ライブラリを workspace 経由で消費する）",
+  "main": "index.ts",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "expo": "~56.0.8",
+    "expo-status-bar": "~56.0.4",
+    "melta-app": "file:..",
+    "react": "19.2.3",
+    "react-native": "0.85.3"
+  }
+}

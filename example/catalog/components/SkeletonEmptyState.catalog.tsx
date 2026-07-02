@@ -3,9 +3,9 @@
  */
 
 import { View } from "react-native";
-import { Skeleton, EmptyState } from "../../src/components";
-import { Text } from "../../src/primitives";
-import { useTheme } from "../../src/theme";
+import { Skeleton, EmptyState } from "melta-app";
+import { Text } from "melta-app";
+import { useTheme } from "melta-app";
 
 export function SkeletonEmptyStateCatalog() {
   const { theme } = useTheme();
