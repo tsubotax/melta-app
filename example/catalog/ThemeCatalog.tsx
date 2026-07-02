@@ -116,14 +116,23 @@ function ContractChip({ id }: { id: keyof typeof CONTRACTS }) {
 }
 
 /** セクションへのジャンプナビ（sticky）。COMPONENT_SECTIONS から自動生成。 */
-function JumpNav({ onJump }: { onJump: (key: string) => void }) {
+function JumpNav({
+  onJump,
+  onHeight,
+}: {
+  onJump: (key: string) => void;
+  onHeight: (h: number) => void;
+}) {
   const { colors } = useTheme();
   const items = [
     ...COMPONENT_SECTIONS.map((s) => ({ key: s.key, label: s.navLabel })),
     { key: TOKENS_KEY, label: "Tokens" },
   ];
   return (
-    <View style={{ backgroundColor: colors["bg-page"] }}>
+    <View
+      style={{ backgroundColor: colors["bg-page"] }}
+      onLayout={(e) => onHeight(e.nativeEvent.layout.height)}
+    >
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -160,10 +169,16 @@ export function ThemeCatalog({ mode, onToggleMode }: ThemeCatalogProps) {
   const scrollRef = useRef<ScrollView>(null);
   // 各セクションの y 位置（onLayout で記録、ジャンプナビの scrollTo 先）
   const sectionY = useRef<Record<string, number>>({});
+  // sticky ナビの実高。ジャンプ先がナビの下に潜らないよう scrollTo から差し引く（Codex L指摘）
+  const navHeight = useRef(0);
 
   const handleJump = (key: string) => {
     const y = sectionY.current[key];
-    if (y != null) scrollRef.current?.scrollTo({ y: Math.max(0, y - t.spacing["2"]), animated: true });
+    if (y != null)
+      scrollRef.current?.scrollTo({
+        y: Math.max(0, y - navHeight.current - t.spacing["2"]),
+        animated: true,
+      });
   };
 
   return (
@@ -194,7 +209,7 @@ export function ThemeCatalog({ mode, onToggleMode }: ThemeCatalogProps) {
       </View>
 
       {/* index 1: sticky ジャンプナビ */}
-      <JumpNav onJump={handleJump} />
+      <JumpNav onJump={handleJump} onHeight={(h) => (navHeight.current = h)} />
 
       <GroupHeading
         title="Components"
