@@ -101,6 +101,10 @@ export function resolveTokenScalar(tokens: unknown, path: string): unknown {
   if (path.startsWith("spacing.")) return parseFloat(String(obj.value));
   if (path.startsWith("radius.")) return obj.px;
   if (path.startsWith("typography.fontSize.")) return obj.px;
+  // fontWeight は tokens で数値（700）、RN では文字列（"700"）。theme と同じ変換で返す
+  if (path.startsWith("typography.fontWeight.")) return String(obj.value);
+  // letterSpacing は em 比率（"0.02em"）。適用側が fontSize × ratio で pt 化するため ratio を返す
+  if (path.startsWith("typography.letterSpacing.")) return parseFloat(String(obj.value));
   return node;
 }
 

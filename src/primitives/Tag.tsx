@@ -6,6 +6,8 @@
  * - contract states active/inactive → prop selected:boolean（§2）。selected→accessibilityState.selected。
  * - 配色: basic/removable は bg-page-alt、filter-chip は bg-surface+border、selected 時は
  *   active-bg=primary.50 / active-border=primary.200 / active-text=primary.700（tag.contract tokenRefs）。
+ *   色・寸法の決定は pure resolver（tag.styles.ts）に分離、recipe との機械照合は
+ *   scripts/lib/tag-conformance.test.ts が行う。
  * - label は Text primitive。filter-chip active の文字色だけ primary.700（SemanticColors 外なので style 上書き）。
  * - focus outline は Button(Step8) で Pressable focus handling を共通化してから Tag にも適用する
  *   （§1 は Phase1 scope だが acceptance 外。今は accessibilityState のみ。Button 実装時に回収）。
@@ -16,6 +18,7 @@ import { Text } from "./Text";
 import { useTheme } from "../theme";
 import { useFocusRing, FocusRing } from "./_internal/focus-ring";
 import { CONTRACTS } from "../contracts/contract-types";
+import { resolveTagBase, resolveTagVariant } from "./tag.styles";
 
 interface TagBase {
   label: string;
@@ -28,24 +31,22 @@ type TagProps =
   | (TagBase & { variant: "removable"; onRemove: () => void; removeAccessibilityLabel: string })
   | (TagBase & { variant: "filter-chip"; selected: boolean; onToggle: () => void });
 
-/** 共通形状（px-3 py-1 rounded-full）。 */
+/** 共通形状（px-3 py-1 rounded-full。寸法は resolver、layout はここで足す）。 */
 function useTagBase(): ViewStyle {
   const { theme } = useTheme();
   return {
     flexDirection: "row",
     alignItems: "center",
-    gap: theme.spacing["1"],
-    paddingHorizontal: theme.spacing["3"],
-    paddingVertical: theme.spacing["1"],
-    borderRadius: theme.radius.full,
+    ...resolveTagBase(theme),
   };
 }
 
 function FilterChipTag(props: TagBase & { selected: boolean; onToggle: () => void }) {
-  const { theme, colors } = useTheme();
+  const { theme, mode } = useTheme();
   const base = useTagBase();
   const { focused, focusHandlers } = useFocusRing();
   const { label, selected, onToggle, style, testID } = props;
+  const v = resolveTagVariant(theme, mode, "filter-chip", selected);
   return (
     <Pressable
       {...focusHandlers}
@@ -56,18 +57,15 @@ function FilterChipTag(props: TagBase & { selected: boolean; onToggle: () => voi
       style={[
         base,
         {
-          backgroundColor: selected ? theme.color.primary["50"] : colors["bg-surface"],
-          borderWidth: 1,
-          borderColor: selected ? theme.color.primary["200"] : colors["border-default"],
+          backgroundColor: v.bg,
+          borderWidth: v.borderWidth,
+          borderColor: v.border,
         },
         style,
       ]}
     >
-      <Text
-        variant="sm"
-        color="text-default"
-        style={selected ? { color: theme.color.primary["700"] } : undefined}
-      >
+      {/* 非選択時の文字色は Text の color prop（text-default）と同値なので上書き不要。 */}
+      <Text variant={v.font} color="text-default" style={selected ? { color: v.textColor } : undefined}>
         {label}
       </Text>
       <FocusRing visible={focused} radius={theme.radius.full} />
@@ -78,13 +76,14 @@ function FilterChipTag(props: TagBase & { selected: boolean; onToggle: () => voi
 function RemovableTag(
   props: TagBase & { onRemove: () => void; removeAccessibilityLabel: string },
 ) {
-  const { theme, colors } = useTheme();
+  const { theme, mode } = useTheme();
   const base = useTagBase();
   const { focused, focusHandlers } = useFocusRing();
   const { label, onRemove, removeAccessibilityLabel, style, testID } = props;
+  const v = resolveTagVariant(theme, mode, "removable");
   return (
-    <View testID={testID} style={[base, { backgroundColor: colors["bg-page-alt"] }, style]}>
-      <Text variant="xs" color="text-default">
+    <View testID={testID} style={[base, { backgroundColor: v.bg }, style]}>
+      <Text variant={v.font} color="text-default">
         {label}
       </Text>
       {/* 最小タップターゲット確保: 親 Tag の高さを超えられないので remove 自身に min 24 + hitSlop（Codex M-2）。 */}
@@ -106,16 +105,17 @@ function RemovableTag(
 }
 
 export function Tag(props: TagProps) {
-  const { colors } = useTheme();
+  const { theme, mode } = useTheme();
   const base = useTagBase();
 
   if (props.variant === "filter-chip") return <FilterChipTag {...props} />;
   if (props.variant === "removable") return <RemovableTag {...props} />;
 
   // basic（表示のみ）
+  const v = resolveTagVariant(theme, mode, "basic");
   return (
-    <View testID={props.testID} style={[base, { backgroundColor: colors["bg-page-alt"] }, props.style]}>
-      <Text variant="xs" color="text-default">
+    <View testID={props.testID} style={[base, { backgroundColor: v.bg }, props.style]}>
+      <Text variant={v.font} color="text-default">
         {props.label}
       </Text>
     </View>

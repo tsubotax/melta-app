@@ -1,8 +1,10 @@
 /**
  * Card — コンテンツコンテナ component（設計書 §1）。contract: card。
  *
- * - 土台の解決（bg/radius/elevation/border/padding）は buildCardShape() に一元化し、
- *   非インタラクティブ(View)・インタラクティブ(Pressable) の両分岐で共有する（DRY、形状二重定義を防ぐ）。
+ * - 土台の解決（bg/radius/elevation/border/padding）は pure resolver（card.styles.ts の
+ *   resolveCardShape）に一元化し、非インタラクティブ(View)・インタラクティブ(Pressable) の
+ *   両分岐で共有する（DRY、形状二重定義を防ぐ）。recipe との機械照合は
+ *   scripts/lib/card-conformance.test.ts が行う。
  * - variant: basic/media は非インタラクティブ、action/link は Pressable。
  *   action/link は pressed 時 elevation.sm→md（§2 hover→pressed mapping）。
  *   focus-within は RN 非サポートとして Phase1 明示 drop（§2）。
@@ -14,11 +16,10 @@
 
 import type { ReactNode } from "react";
 import { Pressable, View, type StyleProp, type ViewStyle } from "react-native";
-import { useTheme, type NativeTheme, type ElevationKey } from "../theme";
+import { useTheme } from "../theme";
 import { useFocusRing, FocusRing } from "../primitives/_internal/focus-ring";
 import { CONTRACTS } from "../contracts/contract-types";
-
-type CardVariant = "basic" | "media" | "action" | "link";
+import { CARD_INTERACTIVE, resolveCardShape, resolveCardBodyStyle } from "./card.styles";
 
 interface CardBase {
   header?: ReactNode;
@@ -38,36 +39,6 @@ type CardProps = CardBase &
     | { variant: "action" | "link"; onPress: () => void }
   );
 
-const INTERACTIVE: Record<CardVariant, boolean> = {
-  basic: false,
-  media: false,
-  action: true,
-  link: true,
-};
-
-/**
- * Card の外枠 style を一元生成（non-interactive / interactive で共有）。
- * 注: overflow:hidden は付けない。iOS は shadow(elevation) と overflow:hidden が同居すると影が
- * 消えるため（contract は media でも elevation.sm 要求）。media のクリップは内側の clip View で行う。
- */
-function buildCardShape(
-  theme: NativeTheme,
-  bgSurface: string,
-  borderColor: string,
-  isMedia: boolean,
-  elevation: ElevationKey,
-): ViewStyle {
-  return {
-    backgroundColor: bgSurface,
-    borderRadius: theme.radius.lg,
-    borderWidth: 1,
-    borderColor,
-    // media は内側 clip View が padding を持つので外枠は padding なし。
-    ...(isMedia ? null : { padding: theme.spacing["6"] }),
-    ...theme.elevation[elevation],
-  };
-}
-
 export function Card({
   variant = "basic",
   header,
@@ -79,15 +50,15 @@ export function Card({
   testID,
   children,
 }: CardProps) {
-  const { theme, colors } = useTheme();
+  const { theme, mode } = useTheme();
   const { focused, focusHandlers } = useFocusRing();
-  const interactive = INTERACTIVE[variant] && onPress != null;
+  const interactive = CARD_INTERACTIVE[variant] && onPress != null;
   const isMedia = variant === "media";
 
   const inner = (
     <>
       {media != null && <View>{media}</View>}
-      <View style={isMedia ? { padding: theme.spacing["6"] } : undefined}>
+      <View style={resolveCardBodyStyle(theme, variant)}>
         {header}
         {children}
         {footer}
@@ -105,13 +76,7 @@ export function Card({
 
   if (!interactive) {
     return (
-      <View
-        testID={testID}
-        style={[
-          buildCardShape(theme, colors["bg-surface"], colors["border-default"], isMedia, "sm"),
-          style,
-        ]}
-      >
+      <View testID={testID} style={[resolveCardShape(theme, mode, variant), style]}>
         {content}
       </View>
     );
@@ -125,16 +90,7 @@ export function Card({
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       testID={testID}
-      style={({ pressed }) => [
-        buildCardShape(
-          theme,
-          colors["bg-surface"],
-          colors["border-default"],
-          isMedia,
-          pressed ? "md" : "sm",
-        ),
-        style,
-      ]}
+      style={({ pressed }) => [resolveCardShape(theme, mode, variant, pressed), style]}
     >
       {content}
       <FocusRing visible={focused} radius={theme.radius.lg} />

@@ -6,7 +6,7 @@
  *   構造一致している前提で theme.typography.fontSize[variant] を引く。乖離したら型エラーで検知
  *   される（= A-3 conformance の型レベル最低ライン、§2）。
  * - 色は token キーのみ（生 hex 不可、§5 lint の意味を保つ）。
- * - letterSpacing は role(heading/body) の ratio を fontSize から pt 換算（resolveLetterSpacing）。
+ * - letterSpacing は role(heading/body) の ratio を fontSize から pt 換算（text.styles.ts）。
  * - 形状（fontSize/lineHeight/letterSpacing/fontWeight）は variant/role/weight 依存なので useMemo で
  *   分離（B-3 の「形状/色 分離 + 参照安定性」を Phase1 は useMemo で満たす。StyleSheet 事前生成の
  *   最適化は Card で実証予定）。色のみ render 時に colors から取る。
@@ -14,12 +14,12 @@
 
 import { useMemo, type ReactNode } from "react";
 import { Text as RNText, type StyleProp, type TextStyle } from "react-native";
-import { useTheme, resolveLetterSpacing } from "../theme";
+import { useTheme } from "../theme";
 import type { FontWeightKey, SemanticColors } from "../theme";
 import { CONTRACTS, type VariantOf } from "../contracts/contract-types";
+import { resolveTextShape, type TextRole } from "./text.styles";
 
 type TextVariant = VariantOf<"text">;
-type TextRole = "heading" | "body";
 
 interface TextProps {
   /** fontSize の段階（contract variant）。default "base"。 */
@@ -49,15 +49,11 @@ export function Text({
   const { theme, colors } = useTheme();
 
   // 形状（mode 非依存）は variant/role/weight にだけ依存させてメモ化（B-3）。
-  const shape = useMemo<TextStyle>(() => {
-    const fs = theme.typography.fontSize[variant];
-    return {
-      fontSize: fs.fontSize,
-      lineHeight: fs.lineHeight,
-      letterSpacing: resolveLetterSpacing(fs.fontSize, theme.typography.letterSpacingRatio[role]),
-      ...(weight ? { fontWeight: theme.typography.fontWeight[weight] } : null),
-    };
-  }, [theme, variant, role, weight]);
+  // 決定ロジックは pure resolver（text.styles.ts）に分離済み — recipe との機械照合対象。
+  const shape = useMemo<TextStyle>(
+    () => resolveTextShape(theme, variant, role, weight),
+    [theme, variant, role, weight],
+  );
 
   return (
     <RNText

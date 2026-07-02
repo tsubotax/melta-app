@@ -5,7 +5,9 @@
  *   差し替えコスト最小化のためここで包む（呼び出し側は melta-app の Image だけ見る）。
  * - contentFit("cover"|"contain") → RN の resizeMode に変換。
  * - onError 時に fallback（ReactNode）を表示。fallback 未指定なら何も出さない。
- * - radius は token キーのみ（生数値不可、§5）。
+ * - radius は token キーのみ（生数値不可、§5）。shape の解決は pure resolver
+ *   （image.styles.ts）に分離。recipes/app/image.recipe.json との機械照合は
+ *   scripts/lib/image-conformance.test.ts が行う。
  */
 
 import { useState, type ReactNode } from "react";
@@ -20,6 +22,7 @@ import {
 import { useTheme } from "../theme";
 import type { RadiusKey } from "../theme";
 import { CONTRACTS } from "../contracts/contract-types";
+import { resolveImageShape } from "./image.styles";
 
 type ContentFit = "cover" | "contain";
 
@@ -49,25 +52,17 @@ export function Image({
   const { theme } = useTheme();
   const [errored, setErrored] = useState(false);
 
-  const borderRadius = radius != null ? theme.radius[radius] : undefined;
-  // RNImage(ImageStyle) と fallback View(ViewStyle) で overflow の許容値が異なるため、
-  // overflow:"hidden" は両者に有効な共通サブセットとして個別に組み立てる。
-  const imageShape: ImageStyle = {
-    ...(aspectRatio != null ? { aspectRatio } : null),
-    ...(borderRadius != null ? { borderRadius, overflow: "hidden" } : null),
-  };
+  // shape は ImageStyle / ViewStyle 双方に有効な共通サブセット（resolver 参照）なので、
+  // RNImage と fallback View で同じ値を共用できる。
+  const shape = resolveImageShape(theme, { aspectRatio, radius });
 
   if (errored && fallback != null) {
-    const fallbackShape: ViewStyle = {
-      ...(aspectRatio != null ? { aspectRatio } : null),
-      ...(borderRadius != null ? { borderRadius, overflow: "hidden" } : null),
-    };
     // caller の style(width/height/flex 等の layout)を fallback にも反映する（通常画像と同寸法）。
     // ImageStyle ⊃ ViewStyle ではないが layout プロパティは共通なので cast で流す
     // （overflow:"scroll" 等 Image 固有値を caller が入れた稀ケースのみ無視される）。
     return (
       <View
-        style={[fallbackShape, style as unknown as StyleProp<ViewStyle>]}
+        style={[shape, style as unknown as StyleProp<ViewStyle>]}
         testID={testID}
         accessible={accessibilityLabel != null}
         accessibilityLabel={accessibilityLabel}
@@ -85,7 +80,7 @@ export function Image({
       onError={() => setErrored(true)}
       accessible={accessibilityLabel != null}
       accessibilityLabel={accessibilityLabel}
-      style={[imageShape, style]}
+      style={[shape, style]}
     />
   );
 }

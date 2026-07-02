@@ -5,37 +5,18 @@
  * - value は tabular（fontVariant:["tabular-nums"]）で桁揃え。Text primitive は fontVariant を
  *   公開しないので、value は RN Text を直接使う。
  * - size(sm/md/lg) は value の fontSize token にマップ（contract の height は想定行高、実 fontSize は
- *   ここで token 解決する。metric.contract intent 参照）。
+ *   pure resolver（metric.styles.ts）で token 解決する。metric.contract intent 参照）。
  * - unit は value の1段下の fontSize でベースライン揃え。label は muted。
  * - a11y: value+unit+label を1つの accessibilityLabel に合成して読み上げる（contract a11y）。
  */
 
 import { useMemo } from "react";
-import {
-  Text as RNText,
-  View,
-  type FontVariant,
-  type StyleProp,
-  type ViewStyle,
-} from "react-native";
+import { Text as RNText, View, type StyleProp, type ViewStyle } from "react-native";
 import { useTheme } from "../theme";
-import type { FontSizeKey } from "../theme";
 import { CONTRACTS, type SizeOf } from "../contracts/contract-types";
+import { resolveMetricStyles } from "./metric.styles";
 
 type MetricSize = SizeOf<"metric">; // "sm" | "md" | "lg"
-
-/** size → value の fontSize token。sm/md/lg を段階的に大きい見出しサイズに割り当てる。 */
-const VALUE_FONT: Record<MetricSize, FontSizeKey> = {
-  sm: "lg",
-  md: "2xl",
-  lg: "3xl",
-};
-/** unit は value の1段下の fontSize（ベースライン揃え用）。 */
-const UNIT_FONT: Record<MetricSize, FontSizeKey> = {
-  sm: "base",
-  md: "lg",
-  lg: "xl",
-};
 
 interface MetricProps {
   /** 整形済みの数値文字列（整形は呼び出し側）。 */
@@ -59,20 +40,11 @@ export function Metric({
   style,
   testID,
 }: MetricProps) {
-  const { theme, colors } = useTheme();
+  const { theme, mode } = useTheme();
 
-  const valueStyle = useMemo(() => {
-    const fs = theme.typography.fontSize[VALUE_FONT[size]];
-    return {
-      fontSize: fs.fontSize,
-      lineHeight: fs.lineHeight,
-      fontWeight: theme.typography.fontWeight.bold,
-      color: colors["text-heading"],
-      fontVariant: ["tabular-nums"] satisfies FontVariant[],
-    };
-  }, [theme, colors, size]);
+  // 決定ロジックは pure resolver（metric.styles.ts）に分離済み — recipe との機械照合対象。
+  const styles = useMemo(() => resolveMetricStyles(theme, mode, size), [theme, mode, size]);
 
-  const unitFontSize = theme.typography.fontSize[UNIT_FONT[size]].fontSize;
   const a11yLabel = [value, unit, label].filter(Boolean).join(" ");
 
   return (
@@ -83,30 +55,10 @@ export function Metric({
       style={[{ alignItems: align === "center" ? "center" : "flex-start" }, style]}
     >
       <View style={{ flexDirection: "row", alignItems: "baseline" }}>
-        <RNText style={valueStyle}>{value}</RNText>
-        {unit != null && (
-          <RNText
-            style={{
-              fontSize: unitFontSize,
-              fontWeight: theme.typography.fontWeight.medium,
-              color: colors["text-muted"],
-              marginLeft: theme.spacing["1"],
-            }}
-          >
-            {unit}
-          </RNText>
-        )}
+        <RNText style={styles.valueStyle}>{value}</RNText>
+        {unit != null && <RNText style={styles.unitStyle}>{unit}</RNText>}
       </View>
-      {label != null && (
-        <RNText
-          style={{
-            fontSize: theme.typography.fontSize.sm.fontSize,
-            color: colors["text-muted"],
-          }}
-        >
-          {label}
-        </RNText>
-      )}
+      {label != null && <RNText style={styles.labelStyle}>{label}</RNText>}
     </View>
   );
 }
