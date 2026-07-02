@@ -21,6 +21,8 @@
   "exports": {
     ".": {
       "types": "./lib/typescript/src/index.d.ts",
+      "react-native": "./lib/module/index.js",
+      "import": "./lib/module/index.js",
       "default": "./lib/module/index.js"
     },
     "./package.json": "./package.json"

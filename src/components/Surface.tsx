@@ -1,9 +1,9 @@
 /**
- * Surface — Card / Skeleton / EmptyState の共通土台となる「箱」（設計書 §1、internal 未 export）。
+ * Surface — Card / Skeleton / EmptyState の共通土台となる「箱」（設計書 §1）。
  * contract: surface（app 先行定義）。
  *
- * - melta-app 内部実装専用。公開 export しない（src/components/index.ts に載せない）。
- *   D2I が「生の箱」を欲しい場合は Card を使う（§1 確定）。
+ * - 公開 P1 で正式 export に昇格（契約 surface.contract.json + recipe を持つ implemented のため）。
+ *   セマンティクスを持つ箱が必要なら Card を優先し、Surface は素の土台が要る時だけ使う。
  * - elevation[key] は iOS shadow* + Android elevation を 1 ViewStyle に同居させた値なので
  *   そのまま spread すれば両 OS に効く（types.ts ElevationStyle）。
  * - 色は useTheme().colors から render 時取得（B-3）。形状は variant を持たないので useMemo 不要。

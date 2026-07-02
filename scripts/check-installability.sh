@@ -15,6 +15,17 @@ cd "$ROOT"
 TARBALL="$(npm pack --pack-destination "$WORK" --silent | tail -1)"
 echo "  packed: $TARBALL"
 
+echo "→ tarball 実体検査（型が通っても実行ファイルが欠けている壊れ方を検出）"
+for required in \
+  "package/lib/module/index.js" \
+  "package/lib/typescript/src/index.d.ts" \
+  "package/src/index.ts"; do
+  if ! tar -tzf "$WORK/$TARBALL" | grep -qx "$required"; then
+    echo "❌ tarball に $required がありません（bob build 出力 or files フィールドを確認）"
+    exit 1
+  fi
+done
+
 echo "→ fixture プロジェクトへ install"
 FIXTURE="$WORK/fixture"
 mkdir -p "$FIXTURE"
@@ -83,4 +94,15 @@ JSON
 
 npx tsc -p tsconfig.json
 
-echo "✅ installability OK: pack → install → import → typecheck が通った"
+echo "→ モジュール解決の実体確認（exports 経由で実在ファイルに解決されること）"
+node --input-type=module -e "
+const url = import.meta.resolve('melta-app', new URL('file://' + process.cwd() + '/'));
+const { existsSync } = await import('node:fs');
+const { fileURLToPath } = await import('node:url');
+const path = fileURLToPath(url);
+if (!path.includes('lib/module')) throw new Error('exports の解決先が lib/module ではない: ' + path);
+if (!existsSync(path)) throw new Error('解決先ファイルが存在しない: ' + path);
+console.log('  resolved:', path);
+"
+
+echo "✅ installability OK: pack → 実体検査 → install → import → typecheck → resolve が通った"
