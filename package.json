@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "description": "melta for APP — melta デザインシステムの React Native UI kit。melta-contracts（デザイン契約）を single source of truth に RN 実装でその契約を満たす。アプリ本体ではなくライブラリ。",
   "license": "MIT",
-  "homepage": "https://github.com/tsubotax/melta-app",
+  "homepage": "https://app.melta.tsubotax.com",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tsubotax/melta-app.git"
+    "url": "git+https://github.com/tsubotax/melta-app.git"
   },
   "keywords": [
     "react-native",

@@ -1,16 +1,55 @@
 # melta for APP（melta-app）
 
-**React Native（Expo）版の melta デザインシステム。** web 版 [melta-ui](https://github.com/tsubotax/melta-ui) と同じデザイン契約（`melta-contracts`）を single source of truth に、RN 実装でその契約を満たす。
+**React Native（Expo）版の melta デザインシステム — アプリ本体ではなく、`npm install melta-app` で使う UI kit（ライブラリ）。** web 版 [melta-ui](https://github.com/tsubotax/melta-ui) と同じデザイン契約（`melta-contracts`）を single source of truth に、RN 実装でその契約を満たす。
 
 > 1 つのデザイン言語が、web では Tailwind に、app では React Native に降りる。
 
+- **Showcase / Live Catalog**: https://app.melta.tsubotax.com （Live Catalog は実 RN コンポーネントの web export。HTML 再現デモではない）
+- **Web 版 showcase**: https://melta.tsubotax.com
+
 D2I（北海道ツーリング DB）アプリが最初の adopter / dogfood。最初の実需は「ツーリング記録を Garmin 風サマリーカードに焼いて外部シェア」機能。
+
+## Install
+
+```bash
+npm install melta-app
+```
+
+peerDependencies は `react` / `react-native` のみ（Expo でも素の RN でも可、runtime 依存ゼロ）。
+
+```tsx
+import { ThemeProvider, Screen, Header, Card, Text, Button } from "melta-app";
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <Screen variant="scroll" header={<Header title="ツーリング" />}>
+        <Card>
+          <Text>道東ぐるり 摩周湖・屈斜路湖</Text>
+        </Card>
+        <Button label="記録する" onPress={() => {}} />
+      </Screen>
+    </ThemeProvider>
+  );
+}
+```
+
+テーマは `ThemeProvider` が OS の light / dark に自動追従（`forcedMode` で固定も可）。トークンは `useTheme()` / `nativeTheme` から取れる。Icon だけは subpath（[後述](#icon-だけ-subpath-エントリmelta-appicons)）。
 
 ## 設計の核
 
 - **契約は共有、実装は各最適**: tokens / 禁止ルール / component 契約は `melta-contracts`（JSON）が SSOT。melta-app に token は持たない（二重化を物理防止）。
 - **公開 DS の純度を守る**: 汎用 UI プリミティブだけを置く。D2I 固有 UI（スポットカード / GPS 軌跡 / ツー活サマリーカード）は **D2I 側**に置き、ここには混ぜない。
 - **依存最小**: 初期は RN `StyleSheet` 固定（nativewind / unistyles 等の runtime styling lib を入れない）。Storybook RN も使わず自前カタログ。
+
+## AI-Ready
+
+人間と AI の両方が読めることを最初から設計に入れている。
+
+- **契約が機械可読**: variants / sizes / states / tokens / a11y はすべて `melta-contracts` の JSON。生成 AI は「それっぽい見た目」ではなく契約を参照して UI を書ける。
+- **実装状態も機械可読**: 各契約の `appStatus`（implemented / planned / not-planned）と `appMapping`（adapted = モバイル慣習への変換）が SSOT。この README のコンポーネント表も、showcase の表も、そこから生成される — 手書きの表はこのリポに存在しない。
+- **ズレは CI が拾う**: 契約と実装の齟齬は conformance テスト、ドキュメントの腐りは drift 検査が落とす。「AI が書いたコードが DS に準拠しているか」を人間の目視でなくハーネスが判定する。
+- web 版には MCP サーバー（`melta-ds-mcp`）もあり、Claude Code / Cursor から契約・トークン・ルールを直接引ける（RN 対応は今後）。
 
 ## ディレクトリ
 
@@ -54,10 +93,10 @@ melta-app/
 | motion duration | "150ms" | 150（数値） |
 | motion easing | cubic-bezier | `[a,b,c,d]` tuple（`Easing.bezier(...)` に展開） |
 
-## セットアップ
+## 開発（このリポを触る人向け）
 
 ```bash
-npm install   # melta-contracts（npm 公開済み）も dependencies として入る
+npm install   # melta-contracts（npm 公開済み）も devDependencies として入る
 
 # theme + contract 型を生成（melta-contracts のノードを読む。
 # 未 install 時のみ隣の melta-ui を fallback で読む開発モード）
@@ -148,7 +187,8 @@ import { Icon } from "melta-app/icons";
 - ✅ layout 6 個（Stack / Row / Screen / Header / Icon / Avatar）— dogfood 不足 1〜4 を解消、TouringFeedScreen は公開 primitive だけで構成
   - 既知の割り切り: Screen の SafeArea は RN core の SafeAreaView（deprecated / iOS のみの最小対応）。依存ゼロ方針を優先した判断で、精度が必要になれば react-native-safe-area-context への adapter 化を検討
 - ✅ form / feedback 10 個（TextField / Toggle / Checkbox / Radio / Alert / Toast / Progress / Modal / ActionSheet / BottomSheet）— checkbox / radio は Pressable + 描画（svg 非依存）、ActionSheet / BottomSheet は select / dropdown の adapted 変換先の受け皿
-- ⬜ showcase（Expo web export → app.melta.tsubotax.com）→ 0.1.0 publish
+- ✅ showcase（https://app.melta.tsubotax.com — melta-ui 様式シェル + 実 RN カタログの Live 埋め込み。表・統計は契約からビルド時生成）
+- ⬜ 0.1.0 publish → React Native Directory 登録
 
 詳細は D2I リポの `.team/specs/requirements-melta-app.md`。
 
