@@ -76,7 +76,7 @@ export function resolveAvatarStyle(
           }),
     },
     text: {
-      color: theme.color.primary["500"],
+      color: theme.color.primary["600"],
       fontWeight: theme.typography.fontWeight.medium,
       fontSize: theme.typography.fontSize[s.fontSize].fontSize,
     },

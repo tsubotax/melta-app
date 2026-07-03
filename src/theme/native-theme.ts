@@ -66,10 +66,10 @@ export const nativeTheme: NativeTheme = {
         "textDark": "#fcd34d"
       },
       "danger": {
-        "base": "#ef4444",
+        "base": "#dc2626",
         "subtleLight": "#fef2f2",
-        "textLight": "#dc2626",
-        "subtleDark": "rgba(239,68,68,0.12)",
+        "textLight": "#b91c1c",
+        "subtleDark": "rgba(220,38,38,0.12)",
         "textDark": "#fca5a5"
       }
     }

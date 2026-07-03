@@ -60,7 +60,7 @@ export function resolveVariant(
     case "neutral":
       return { bg: sem["bg-surface-alt"], pressedBg: sem["border-default"], textColor: sem["text-default"] };
     case "lighted":
-      return { bg: c.primary["50"], pressedBg: c.primary["100"], textColor: c.primary["500"] };
+      return { bg: c.primary["50"], pressedBg: c.primary["100"], textColor: c.primary["600"] };
     case "danger":
       return { bg: c.status.danger.base, pressedBg: c.status.danger.textLight, textColor: sem["text-on-accent"] };
     case "subtle":
