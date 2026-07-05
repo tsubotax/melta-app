@@ -10,7 +10,7 @@
  *   focus-within は RN 非サポートとして Phase1 明示 drop（§2）。
  * - 型で action/link は onPress 必須を強制（§4 の DU 精神。無言で非対話に落ちる事故を防ぐ）。
  * - Card は Image/Metric に依存しない（§1）。media/header/footer/children に呼び出し側が差し込む。
- *   ツー活カードは D2I が slot に Image+Metric を compose する。
+ *   呼び出し側（例: D2I）は用途に応じて slot に Image+Metric を compose する。
  * - media variant は overflow:hidden で角丸に画像をクリップし、body だけにパディング（contract と整合）。
  */
 

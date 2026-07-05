@@ -17,7 +17,7 @@ export function AvatarIconCatalog() {
         {CONTRACTS.avatar.sizes.map((s) => (
           <Avatar key={s} name="Taro Tanaka" size={s} />
         ))}
-        <Avatar name="ezo_rider" source={{ uri: "https://placehold.co/96x96/2b70ef/ffffff/png" }} />
+        <Avatar name="tanaka_pm" source={{ uri: "https://placehold.co/96x96/2b70ef/ffffff/png" }} />
       </Row>
 
       {/* Avatar: status dot（online / away / offline） */}

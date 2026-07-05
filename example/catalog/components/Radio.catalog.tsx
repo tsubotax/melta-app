@@ -12,7 +12,7 @@ export function RadioCatalog() {
   const { theme } = useTheme();
   const [delivery, setDelivery] = useState<string | undefined>("standard");
   const [season, setSeason] = useState<string | undefined>(undefined);
-  const [plan, setPlan] = useState<string | undefined>("touring");
+  const [plan, setPlan] = useState<string | undefined>("standard");
 
   return (
     <View style={{ gap: theme.spacing["6"] }}>
@@ -31,7 +31,7 @@ export function RadioCatalog() {
 
       {/* horizontal（短いラベル向け）+ error（未選択バリデーション） */}
       <Radio
-        label="ツーリング時期"
+        label="契約時期"
         variant="horizontal"
         value={season}
         onChange={setSeason}
@@ -51,14 +51,14 @@ export function RadioCatalog() {
         onChange={setPlan}
         options={[
           {
-            label: "ツーリングプラン",
-            value: "touring",
-            description: "走行ログ・ルート共有・ツー活カードが使える標準プラン",
+            label: "スタンダードプラン",
+            value: "standard",
+            description: "基本機能一式が使える標準プラン",
           },
           {
-            label: "キャンプツーリングプラン",
-            value: "camp",
-            description: "ツーリングプランに加えてキャンプ場検索と装備リストが使える",
+            label: "プレミアムプラン",
+            value: "premium",
+            description: "スタンダードプランに加えて優先サポートと拡張機能が使える",
           },
         ]}
       />

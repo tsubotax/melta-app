@@ -18,7 +18,7 @@ export function AlertCatalog() {
           key={v}
           variant={v}
           title={`variant ${v}`}
-          message="ツーリング記録の同期が完了するとここに通知が出ます。"
+          message="データの同期が完了するとここに通知が出ます。"
         />
       ))}
       {/* title 無し + 閉じるボタン */}

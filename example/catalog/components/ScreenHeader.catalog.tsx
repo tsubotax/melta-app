@@ -1,7 +1,7 @@
 /**
  * ScreenHeader.catalog — Screen / Header の実レンダ（設計書 §6）。
  * Screen は flex:1 の画面骨格なので、catalog 内では固定高の枠に入れてプレビューする
- * （実画面での使用は TouringFeedScreen が担当）。
+ * （実画面での使用は ProjectFeedScreen が担当）。
  */
 
 import { View } from "react-native";
@@ -21,7 +21,7 @@ export function ScreenHeaderCatalog() {
     <Stack gap="4">
       {/* Header 単体（leading / trailing slot） */}
       <Header
-        title="ツー活フィード"
+        title="プロジェクトフィード"
         trailing={<Button variant="subtle" size="small" label="編集" onPress={() => {}} />}
       />
 

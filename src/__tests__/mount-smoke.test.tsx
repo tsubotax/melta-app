@@ -44,15 +44,15 @@ import { Icon } from "../icons";
 
 /** implemented 全コンポーネントの代表 render（DU の全分岐は conformance / catalog の担当、ここは 1 mount）。 */
 const SMOKE_CASES: Array<[name: string, element: ReactElement]> = [
-  ["Text", <Text variant="base">走行 120km</Text>],
+  ["Text", <Text variant="base">距離 120km</Text>],
   ["Button", <Button label="保存" onPress={() => {}} />],
   [
     "Button (iconOnly)",
     <Button iconOnly accessibilityLabel="追加" leadingIcon={<Text>+</Text>} />,
   ],
-  ["Tag (basic)", <Tag label="日帰り" />],
+  ["Tag (basic)", <Tag label="人気" />],
   ["Tag (filter-chip)", <Tag variant="filter-chip" label="絞り込み" selected onToggle={() => {}} />],
-  ["Metric", <Metric value="120" unit="km" label="走行距離" />],
+  ["Metric", <Metric value="120" unit="km" label="距離" />],
   [
     "Card (basic)",
     <Card>
@@ -74,7 +74,7 @@ const SMOKE_CASES: Array<[name: string, element: ReactElement]> = [
   ["Image", <Image source={{ uri: "https://example.com/x.png" }} aspectRatio={1.5} />],
   ["Skeleton (text)", <Skeleton variant="text" lines={2} />],
   ["Skeleton (card)", <Skeleton variant="card" />],
-  ["EmptyState", <EmptyState title="記録がありません" description="最初のツーリングを追加" />],
+  ["EmptyState", <EmptyState title="記録がありません" description="最初のタスクを追加" />],
   [
     "Stack",
     <Stack gap="4">
@@ -105,7 +105,7 @@ const SMOKE_CASES: Array<[name: string, element: ReactElement]> = [
   ["Avatar (initials)", <Avatar name="Taro Tanaka" />],
   [
     "Avatar (image + status)",
-    <Avatar name="ezo_rider" source={{ uri: "https://example.com/a.png" }} status="online" />,
+    <Avatar name="tanaka_pm" source={{ uri: "https://example.com/a.png" }} status="online" />,
   ],
   [
     "Avatar.Group",

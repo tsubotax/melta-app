@@ -20,8 +20,8 @@ export function ToastCatalog() {
       {/* description 付き */}
       <Toast
         variant="success"
-        message="ツー活カードを作成しました"
-        description="走行ログ 248.6km を取り込みました。"
+        message="レポートカードを作成しました"
+        description="最新のレポートデータを取り込みました。"
         onClose={() => {}}
       />
       {/* action 付き */}

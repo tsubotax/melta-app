@@ -12,9 +12,9 @@ export function CheckboxCatalog() {
   const { theme } = useTheme();
   const [agreed, setAgreed] = useState(false);
   const [items, setItems] = useState<Record<string, boolean>>({
-    道東エリア: true,
-    道北エリア: false,
-    道南エリア: false,
+    東京エリア: true,
+    大阪エリア: false,
+    名古屋エリア: false,
   });
   const values = Object.values(items);
   const allChecked = values.every(Boolean);

@@ -10,9 +10,9 @@ import { useTheme } from "melta-app";
 export function TagCatalog() {
   const { theme } = useTheme();
   const [chips, setChips] = useState<Record<string, boolean>>({
-    道東: true,
-    道北: false,
-    絶景: false,
+    都市計画: true,
+    進行中: false,
+    優先度高: false,
   });
   return (
     <View style={{ gap: theme.spacing["3"] }}>

@@ -7,7 +7,7 @@
 - **Showcase / Live Catalog**: https://app.melta.tsubotax.com （Live Catalog は実 RN コンポーネントの web export。HTML 再現デモではない）
 - **Web 版 showcase**: https://melta.tsubotax.com
 
-D2I（北海道ツーリング DB）アプリが最初の adopter / dogfood。最初の実需は「ツーリング記録を Garmin 風サマリーカードに焼いて外部シェア」機能。
+D2I アプリが最初の adopter / dogfood。最初の実需は「活動記録をサマリーカードに焼いて外部シェア」機能。
 
 ## Install
 
@@ -23,11 +23,11 @@ import { ThemeProvider, Screen, Header, Card, Text, Button } from "melta-app";
 export default function App() {
   return (
     <ThemeProvider>
-      <Screen variant="scroll" header={<Header title="ツーリング" />}>
+      <Screen variant="scroll" header={<Header title="ダッシュボード" />}>
         <Card>
-          <Text>道東ぐるり 摩周湖・屈斜路湖</Text>
+          <Text>東京プロジェクト</Text>
         </Card>
-        <Button label="記録する" onPress={() => {}} />
+        <Button label="保存する" onPress={() => {}} />
       </Screen>
     </ThemeProvider>
   );
@@ -39,7 +39,7 @@ export default function App() {
 ## 設計の核
 
 - **契約は共有、実装は各最適**: tokens / 禁止ルール / component 契約は `melta-contracts`（JSON）が SSOT。melta-app に token は持たない（二重化を物理防止）。
-- **公開 DS の純度を守る**: 汎用 UI プリミティブだけを置く。D2I 固有 UI（スポットカード / GPS 軌跡 / ツー活サマリーカード）は **D2I 側**に置き、ここには混ぜない。
+- **公開 DS の純度を守る**: 汎用 UI プリミティブだけを置く。D2I 固有 UI（アプリ固有の画面・機能）は **D2I 側**に置き、ここには混ぜない。
 - **依存最小**: 初期は RN `StyleSheet` 固定（nativewind / unistyles 等の runtime styling lib を入れない）。Storybook RN も使わず自前カタログ。
 
 ## AI-Ready
@@ -184,7 +184,7 @@ import { Icon } from "melta-app/icons";
 - ✅ `melta-contracts` を npm 依存として購読（recipes/app の styleRefs 同梱）
 - ✅ conformance: 契約源 ↔ 生成メタ ↔ `__contract` 宣言の照合 + consumer テスト（契約 subset / token 実在 / contractVersion 同期）+ styleRefs conformance（全実装コンポーネント展開済み）+ RN mount smoke（light/dark × 全公開コンポーネント）
 - ✅ ハーネス: design lint（CI `--max-warnings 0` + PostToolUse hook）/ drift 検査（README・catalog・allowlist 突合）/ installability ゲート（pack → install → import → typecheck）
-- ✅ layout 6 個（Stack / Row / Screen / Header / Icon / Avatar）— dogfood 不足 1〜4 を解消、TouringFeedScreen は公開 primitive だけで構成
+- ✅ layout 6 個（Stack / Row / Screen / Header / Icon / Avatar）— dogfood 不足 1〜4 を解消、ProjectFeedScreen は公開 primitive だけで構成
   - 既知の割り切り: Screen の SafeArea は RN core の SafeAreaView（deprecated / iOS のみの最小対応）。依存ゼロ方針を優先した判断で、精度が必要になれば react-native-safe-area-context への adapter 化を検討
 - ✅ form / feedback 10 個（TextField / Toggle / Checkbox / Radio / Alert / Toast / Progress / Modal / ActionSheet / BottomSheet）— checkbox / radio は Pressable + 描画（svg 非依存）、ActionSheet / BottomSheet は select / dropdown の adapted 変換先の受け皿
 - ✅ showcase（https://app.melta.tsubotax.com — melta-ui 様式シェル + 実 RN カタログの Live 埋め込み。表・統計は契約からビルド時生成）

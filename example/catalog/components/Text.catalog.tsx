@@ -14,7 +14,7 @@ export function TextCatalog() {
     <View style={{ gap: theme.spacing["3"] }}>
       {CONTRACTS.text.variants.map((v) => (
         <Text key={v} variant={v} role="heading" weight="semibold" color="text-heading">
-          {v} · 道ツーいこうぜ
+          {v} · サンプルテキスト
         </Text>
       ))}
       <Text variant="base" color="text-default">

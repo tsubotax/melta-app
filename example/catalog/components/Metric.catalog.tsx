@@ -1,7 +1,7 @@
 /**
  * Metric.catalog — Metric primitive の全 size を実レンダ（設計書 §6）。
- * ツー活カードの主役なので、走行サマリー風に複数 Metric を並べた例も置く（MetricsRow は
- * Phase1 では melta に作らず D2I compose、§1。ここは catalog 内の手 compose）。
+ * カード内の主役指標なので、サマリー風に複数 Metric を並べた例も置く（MetricsRow は
+ * Phase1 では melta に作らず呼び出し側 compose、§1。ここは catalog 内の手 compose）。
  */
 
 import { View } from "react-native";
@@ -16,14 +16,14 @@ export function MetricCatalog() {
       {/* size 別 */}
       <View style={{ flexDirection: "row", gap: theme.spacing["6"], alignItems: "flex-end" }}>
         {CONTRACTS.metric.sizes.map((s) => (
-          <Metric key={s} value="123.4" unit="km" label={`size ${s}`} size={s} />
+          <Metric key={s} value="78" unit="%" label={`size ${s}`} size={s} />
         ))}
       </View>
-      {/* 走行サマリー風（D2I ツー活カードの compose イメージ） */}
+      {/* サマリー風（レポートカードの compose イメージ） */}
       <View style={{ flexDirection: "row", gap: theme.spacing["8"] }}>
-        <Metric value="248.6" unit="km" label="走行距離" size="md" />
-        <Metric value="5:42" unit="h" label="走行時間" size="md" />
-        <Metric value="1,820" unit="m" label="獲得標高" size="md" />
+        <Metric value="78" unit="%" label="進捗率" size="md" />
+        <Metric value="1,240" unit="万円" label="予算消化" size="md" />
+        <Metric value="12" unit="日" label="残日数" size="md" />
       </View>
     </View>
   );

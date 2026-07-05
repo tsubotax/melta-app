@@ -36,16 +36,16 @@ export function LayoutCatalog() {
         <Box label="Stack gap=2 (3)" />
       </Stack>
 
-      {/* Row: 走行サマリー（TouringFeedScreen の生 View 手書きだった並び） */}
+      {/* Row: サマリー指標（ProjectFeedScreen の生 View 手書きだった並び） */}
       <Row gap="6">
-        <Metric value="248.6" unit="km" label="走行距離" size="sm" />
-        <Metric value="5:42" unit="h" label="走行時間" size="sm" />
-        <Metric value="1,820" unit="m" label="獲得標高" size="sm" />
+        <Metric value="78" unit="%" label="進捗率" size="sm" />
+        <Metric value="1,240" unit="万円" label="予算消化" size="sm" />
+        <Metric value="12" unit="日" label="残日数" size="sm" />
       </Row>
 
       {/* Row: タグの折返し */}
       <Row gap="2" wrap>
-        {["道東", "絶景", "日帰り", "ワインディング", "海沿い", "キャンプ"].map((t) => (
+        {["都市計画", "進行中", "優先度高", "レビュー待ち", "予算超過", "完了"].map((t) => (
           <Tag key={t} label={t} />
         ))}
       </Row>
@@ -53,7 +53,7 @@ export function LayoutCatalog() {
       {/* Row: justify=between（左右振り分け） */}
       <Row justify="between">
         <Text variant="sm" color="text-muted">
-          ezo_rider
+          tanaka_pm
         </Text>
         <Text variant="sm">justify=between →</Text>
       </Row>

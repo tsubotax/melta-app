@@ -19,10 +19,10 @@ export function SkeletonEmptyStateCatalog() {
       </View>
       <Skeleton variant="card" />
       <EmptyState
-        icon={<Text variant="3xl">🗺️</Text>}
-        title="まだ記録がありません"
-        description="ツーリングを記録すると、ここにツー活カードが並びます。"
-        action={{ label: "記録をはじめる", onPress: () => {} }}
+        icon={<Text variant="3xl">📋</Text>}
+        title="まだプロジェクトがありません"
+        description="プロジェクトを登録すると、ここにレポートカードが並びます。"
+        action={{ label: "プロジェクトを登録", onPress: () => {} }}
       />
     </View>
   );

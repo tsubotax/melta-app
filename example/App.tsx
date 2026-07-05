@@ -3,7 +3,7 @@ import { StatusBar } from "expo-status-bar";
 import { Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
 import { ThemeProvider, useTheme, type ThemeMode } from "melta-app";
 import { ThemeCatalog } from "./catalog/ThemeCatalog";
-import { TouringFeedScreen } from "./screens/TouringFeedScreen";
+import { ProjectFeedScreen } from "./screens/ProjectFeedScreen";
 
 type View_ = "catalog" | "feed" | "feed-loading" | "feed-empty";
 
@@ -55,11 +55,11 @@ function Root({ mode, onToggleMode }: { mode: ThemeMode; onToggleMode: () => voi
             <ThemeCatalog mode={mode} onToggleMode={onToggleMode} />
           </SafeAreaView>
         ) : view === "feed-loading" ? (
-          <TouringFeedScreen state="loading" />
+          <ProjectFeedScreen state="loading" />
         ) : view === "feed-empty" ? (
-          <TouringFeedScreen state="empty" />
+          <ProjectFeedScreen state="empty" />
         ) : (
-          <TouringFeedScreen state="ready" />
+          <ProjectFeedScreen state="ready" />
         )}
       </View>
       <DevTabs view={view} onChange={setView} />

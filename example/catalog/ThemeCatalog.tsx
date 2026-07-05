@@ -45,7 +45,7 @@ const COMPONENT_SECTIONS: {
   { key: "surface", navLabel: "Surface/Image", title: "Surface (internal) + Image", contracts: ["surface", "image"], Body: SurfaceImageCatalog },
   { key: "button", navLabel: "Button", title: "Button primitive", contracts: ["button"], Body: ButtonCatalog },
   { key: "tag", navLabel: "Tag", title: "Tag primitive", contracts: ["tag"], Body: TagCatalog },
-  { key: "card", navLabel: "Card", title: "Card component（+ ツー活カード compose）", contracts: ["card"], Body: CardCatalog },
+  { key: "card", navLabel: "Card", title: "Card component（+ レポートカード compose）", contracts: ["card"], Body: CardCatalog },
   { key: "skeleton", navLabel: "Skeleton/Empty", title: "Skeleton + EmptyState", contracts: ["skeleton", "emptyState"], Body: SkeletonEmptyStateCatalog },
   { key: "layout", navLabel: "Stack/Row", title: "Stack + Row（layout primitives）", contracts: ["stack", "row"], Body: LayoutCatalog },
   { key: "screen", navLabel: "Screen/Header", title: "Screen + Header（画面骨格）", contracts: ["screen", "header"], Body: ScreenHeaderCatalog },

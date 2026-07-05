@@ -41,7 +41,7 @@ describe("Avatar 構造", () => {
   test("statusDot は overflow:hidden の clip の外（sibling）にある", async () => {
     const { toJSON } = await render(
       <ThemeProvider forcedMode="light">
-        <Avatar name="ezo_rider" source={{ uri: "https://example.com/a.png" }} status="online" />
+        <Avatar name="tanaka_pm" source={{ uri: "https://example.com/a.png" }} status="online" />
       </ThemeProvider>,
     );
     const root = toJSON() as Node;

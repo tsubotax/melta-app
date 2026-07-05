@@ -1,6 +1,6 @@
 /**
  * Metric — 数値 + 単位 + ラベルの指標表示 primitive（設計書 §1、意思決定3）。
- * contract: metric（app 先行定義）。ツー活カードの主役（走行距離 / 時間 / 獲得標高 等）。
+ * contract: metric（app 先行定義）。カード内の主要指標表示に使う（進捗率 / 予算 / 残日数 等）。
  *
  * - value は tabular（fontVariant:["tabular-nums"]）で桁揃え。Text primitive は fontVariant を
  *   公開しないので、value は RN Text を直接使う。
@@ -21,9 +21,9 @@ type MetricSize = SizeOf<"metric">; // "sm" | "md" | "lg"
 interface MetricProps {
   /** 整形済みの数値文字列（整形は呼び出し側）。 */
   value: string;
-  /** 単位（"km" / "m" / "h:mm" 等）。 */
+  /** 単位（"%" / "万円" / "日" 等）。 */
   unit?: string;
-  /** ラベル（"走行距離" 等）。 */
+  /** ラベル（"進捗率" 等）。 */
   label?: string;
   size?: MetricSize;
   align?: "start" | "center";
