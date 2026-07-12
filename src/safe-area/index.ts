@@ -15,13 +15,17 @@
  * Provider の context 値を render 中に同期参照して padding を付けるため、native
  * SafeAreaView の layout/state 更新を待たず、初回 render から inset が反映される。
  *
- * ⚠️ 前提: アプリの root に SafeAreaProvider が必要。初回 render から正しい inset を
- * 使うには Provider に initialMetrics も渡す。React Navigation / Expo Router 利用時は
- * Provider が設置済みのことが多い。
+ * ⚠️ 前提: アプリの root に SafeAreaProvider が必要（無いと useSafeAreaInsets が throw
+ * する）。初回 render から正しい inset を使うには Provider に initialMetrics も渡す。
+ * React Navigation / Expo Router 利用時は Provider が設置済みのことが多い。
+ *
+ * ⚠️ 公開契約: safe-area と合成する padding は数値のみサポート。"5%" 等の非数値は
+ * 基底値として扱えず、対象 edge の padding は inset 値に置き換わる（RNSAC native も
+ * percentage padding 未サポートのため、より弱い保証を契約化はしない）。
  */
 
 import { createElement, useMemo } from "react";
-import { StyleSheet, View, type ViewStyle } from "react-native";
+import { I18nManager, StyleSheet, View, type ViewStyle } from "react-native";
 import {
   useSafeAreaInsets,
   type Edge,
@@ -47,21 +51,36 @@ function additivePadding(
   edges: ReadonlySet<Edge>,
 ): ViewStyle {
   const flat = StyleSheet.flatten(style) ?? {};
+  const num = (value: unknown): number | null => (typeof value === "number" ? value : null);
 
-  const base = (edge: Edge): number => {
-    const edgeValue = flat[`padding${edge[0].toUpperCase()}${edge.slice(1)}` as keyof ViewStyle];
-    const axisValue =
-      edge === "top" || edge === "bottom" ? flat.paddingVertical : flat.paddingHorizontal;
-    const value = edgeValue ?? axisValue ?? flat.padding;
-    return typeof value === "number" ? value : 0;
-  };
+  // 基底 padding の解決は Yoga の優先順位（論理 > 物理 > 軸 > 全体）に合わせる。
+  // 論理キー（paddingStart/End）を読まないと、基底が論理指定のとき取りこぼす。
+  const isRTL = I18nManager.isRTL;
+  const baseVertical = (edge: "top" | "bottom"): number =>
+    num(edge === "top" ? flat.paddingTop : flat.paddingBottom) ??
+    num(flat.paddingVertical) ??
+    num(flat.padding) ??
+    0;
+  const baseHorizontal = (edge: "left" | "right"): number =>
+    num(flat[(edge === "left") === !isRTL ? "paddingStart" : "paddingEnd"]) ??
+    num(edge === "left" ? flat.paddingLeft : flat.paddingRight) ??
+    num(flat.paddingHorizontal) ??
+    num(flat.padding) ??
+    0;
 
-  return {
-    ...(edges.has("top") ? { paddingTop: base("top") + insets.top } : null),
-    ...(edges.has("right") ? { paddingRight: base("right") + insets.right } : null),
-    ...(edges.has("bottom") ? { paddingBottom: base("bottom") + insets.bottom } : null),
-    ...(edges.has("left") ? { paddingLeft: base("left") + insets.left } : null),
-  };
+  // 水平方向は論理キーで出力する。物理キー（paddingLeft/Right）で上書きすると、
+  // 基底 style 側に paddingStart/End があるとき論理キーが Yoga 上で勝ち、
+  // inset の加算結果ごと無視されるため。
+  const out: ViewStyle = {};
+  if (edges.has("top")) out.paddingTop = baseVertical("top") + insets.top;
+  if (edges.has("bottom")) out.paddingBottom = baseVertical("bottom") + insets.bottom;
+  if (edges.has("left")) {
+    out[isRTL ? "paddingEnd" : "paddingStart"] = baseHorizontal("left") + insets.left;
+  }
+  if (edges.has("right")) {
+    out[isRTL ? "paddingStart" : "paddingEnd"] = baseHorizontal("right") + insets.right;
+  }
+  return out;
 }
 
 function createContextSafeAreaView(selectedEdges: readonly Edge[]): SafeAreaViewLike {

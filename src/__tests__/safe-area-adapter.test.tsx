@@ -8,7 +8,7 @@
 import { describe, expect, jest, test } from "@jest/globals";
 import { render } from "@testing-library/react-native";
 import type { ReactNode } from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, type ViewStyle } from "react-native";
 import {
   SafeAreaProvider,
   type EdgeInsets,
@@ -49,7 +49,7 @@ const metrics: Metrics = {
   insets: { top: 24, right: 2, bottom: 16, left: 3 },
 };
 
-function renderScreen(style?: { padding?: number }) {
+function renderScreen(style?: ViewStyle) {
   return render(
     <SafeAreaProvider initialMetrics={metrics}>
       <ThemeProvider forcedMode="light">
@@ -68,7 +68,9 @@ describe("enableSafeAreaContext", () => {
     const { getByTestId } = await renderScreen();
     const style = StyleSheet.flatten(getByTestId("screen").props.style);
 
-    expect(style).toMatchObject({ paddingTop: 24, paddingRight: 2, paddingLeft: 3 });
+    // 水平は論理キーで出力する（LTR: start=left / end=right）。基底 style の
+    // paddingStart/End に物理キーが負けて inset が消えるのを防ぐため
+    expect(style).toMatchObject({ paddingTop: 24, paddingEnd: 2, paddingStart: 3 });
     expect(style).not.toHaveProperty("paddingBottom");
   });
 
@@ -80,9 +82,28 @@ describe("enableSafeAreaContext", () => {
 
     expect(style).toMatchObject({
       paddingTop: 28,
-      paddingRight: 6,
+      paddingEnd: 6,
       paddingBottom: 20,
-      paddingLeft: 7,
+      paddingStart: 7,
     });
+  });
+
+  test("基底の論理 padding（paddingStart）を取りこぼさず inset に加算する", async () => {
+    enableSafeAreaContext({ edges: ["left"] });
+
+    const { getByTestId } = await renderScreen({ paddingStart: 16 });
+    const style = StyleSheet.flatten(getByTestId("screen").props.style);
+
+    // LTR: paddingStart 16 + left inset 3。出力も論理キーなので基底に負けない
+    expect(style).toMatchObject({ paddingStart: 19 });
+  });
+
+  test("非数値（%）padding は基底として扱えず inset のみになる（公開契約）", async () => {
+    enableSafeAreaContext({ edges: ["top"] });
+
+    const { getByTestId } = await renderScreen({ paddingTop: "5%" });
+    const style = StyleSheet.flatten(getByTestId("screen").props.style);
+
+    expect(style).toMatchObject({ paddingTop: 24 });
   });
 });

@@ -193,11 +193,21 @@ npx expo install react-native-safe-area-context
 // アプリの entry（Screen の初回 render より前）で一度だけ
 import { enableSafeAreaContext } from "melta-app/safe-area";
 enableSafeAreaContext();
+
+// ボトムタブバー等が bottom inset を自前処理するアプリは edge を絞る
+// （全 edge のまま使うとタブ内 Screen の bottom が二重余白になる）
+enableSafeAreaContext({ edges: ["top"] });
 ```
 
-⚠️ react-native-safe-area-context の SafeAreaView は祖先に `SafeAreaProvider` が必要
-（React Navigation / Expo Router を使っていれば設置済みのことが多い。無い場合は root を
-`<SafeAreaProvider>` で包むこと — 無いと警告は消えるが inset が効かない）。
+⚠️ 前提と契約:
+
+- 祖先に `SafeAreaProvider` が**必須**（無いと `useSafeAreaInsets` が **throw する**。
+  React Navigation / Expo Router を使っていれば設置済みのことが多い）。初回 render から
+  正しい inset を使うには Provider に `initialMetrics` を渡す
+- adapter は `useSafeAreaInsets()` を render 中に同期参照して View padding に加算する方式
+  （native SafeAreaView の初回フレーム inset 未適用によるフラッシュを避けるため）
+- safe-area と合成する padding は**数値のみ**サポート（`"5%"` 等の非数値は基底として扱えず、
+  対象 edge は inset 値に置き換わる）。RTL / `paddingStart`・`paddingEnd` は対応済み
 
 ## ステータス
 
