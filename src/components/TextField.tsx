@@ -14,10 +14,12 @@
 
 import { useMemo, useState } from "react";
 import {
+  Platform,
   TextInput,
   View,
   Text as RNText,
   type StyleProp,
+  type TextStyle,
   type ViewStyle,
 } from "react-native";
 import { useTheme } from "../theme";
@@ -27,6 +29,31 @@ import {
   resolveTextFieldFocusStyle,
   type TextFieldSize,
 } from "./textfield.styles";
+
+/**
+ * Android の EditText は固定 height と組み合わさると既定の縦 padding で文字が
+ * 上寄り・下端切れになるため、縦 padding を殺して縦センターに揃える。
+ * textAlignVertical は Android 専用、paddingVertical: 0 は iOS の見た目を変えない
+ * （iOS の単一行入力は元々縦センター）。
+ * さらに Android では Noto CJK のフォントメトリクス由来で文字インクが
+ * 1dp 強下寄りになる（Pixel 実機ピクセル実測 +2.7px/density2.5。
+ * includeFontPadding: false は gravity center 下では無効なことも実測済み）ため、
+ * paddingBottom の光学ナッジで打ち消す（gravity center は残り高さの中央に置くので
+ * paddingBottom p で p/2 上がる）。
+ * recipe（styleRefs）の写像ではなく RN 実装の補正なので resolver には置かない。
+ */
+/* eslint-disable melta/no-raw-spacing -- spacing の選択ではなく EditText 既定 padding の打ち消しと CJK 光学ナッジ（実測由来の固定値） */
+/** OS 毎の補正値を返す純関数（jest は Platform=ios 固定のため、Android 分岐はこれを直接検証する）。 */
+export function resolveInputVerticalFix(os: typeof Platform.OS): TextStyle {
+  return {
+    paddingVertical: 0,
+    ...(os === "android" ? { paddingBottom: 2 } : null),
+    textAlignVertical: "center",
+  };
+}
+/* eslint-enable melta/no-raw-spacing */
+
+const INPUT_VERTICAL_FIX = resolveInputVerticalFix(Platform.OS);
 
 interface TextFieldProps {
   /** ラベル（必須。placeholder だけの入力欄を作らせない = FORM_NO_LABEL_OMIT）。 */
@@ -88,7 +115,7 @@ export function TextField({
           if (!disabled) setFocused(true);
         }}
         onBlur={() => setFocused(false)}
-        style={[resolved.input, focused && !disabled ? focusStyle : null]}
+        style={[resolved.input, INPUT_VERTICAL_FIX, focused && !disabled ? focusStyle : null]}
       />
       {helperText != null && !showError && (
         <RNText style={resolved.helperText}>{helperText}</RNText>
