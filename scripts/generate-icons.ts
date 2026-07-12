@@ -1,6 +1,7 @@
 /**
- * generate-icons — assets/icons/*.svg（Charcoal Icons のベンダリング、Apache-2.0）を読み、
- * src/icons/glyphs.ts に path データを codegen する。
+ * generate-icons — assets/icons/*.svg（Charcoal Icons のベンダリング + Charcoal に無い
+ * グリフの Material Symbols Rounded 補完。いずれも Apache-2.0、帰属は THIRD_PARTY_LICENSES.md）
+ * を読み、src/icons/glyphs.ts に path データを codegen する。
  *
  * SSOT→生成→drift の melta 流: SVG（源）→ glyphs.ts（生成物、commit 済みを配布）。
  * 鮮度は icon-conformance テストが「assets の SVG 集合 == glyphs のキー集合」を照合して担保する。
@@ -90,7 +91,7 @@ function main(): void {
 
   const out =
     "// ⚠️ 自動生成ファイル — 手で編集しないこと。\n" +
-    "// 生成元: scripts/generate-icons.ts（入力 assets/icons/*.svg = Charcoal Icons, Apache-2.0）\n" +
+    "// 生成元: scripts/generate-icons.ts（入力 assets/icons/*.svg = Charcoal Icons + Material Symbols Rounded 補完, Apache-2.0）\n" +
     "// 帰属表示は THIRD_PARTY_LICENSES.md を参照。\n\n" +
     "export interface Glyph {\n" +
     "  viewBox: string;\n" +

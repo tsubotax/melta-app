@@ -174,9 +174,26 @@ import { Icon } from "melta-app/icons";
 <Icon name="close" size="sm" color="text-muted" />         // 省略時は装飾扱い（a11y ツリーから除外）
 ```
 
-グリフは Charcoal Icons（pixiv、Apache-2.0）の curated サブセット（`assets/icons/*.svg` →
+グリフは Charcoal Icons（pixiv、Apache-2.0）の curated サブセット + Charcoal に無いグリフの
+Material Symbols Rounded（Google、Apache-2.0）補完（`assets/icons/*.svg` →
 `npm run generate:icons` で `src/icons/glyphs.ts` に codegen、commit 済みを配布）。
 帰属表示は `THIRD_PARTY_LICENSES.md`。
+
+### SafeArea の差し替え（`melta-app/safe-area`）
+
+Screen の SafeArea は default で RN core の SafeAreaView（deprecated / iOS のみの最小対応、
+依存ゼロ維持）。`react-native-safe-area-context` を使うアプリは subpath から一度有効化すると
+Screen が context 版に切り替わり、RN 0.85+ の deprecation 警告も出なくなる:
+
+```bash
+npx expo install react-native-safe-area-context
+```
+
+```tsx
+// アプリの entry（Screen の初回 render より前）で一度だけ
+import { enableSafeAreaContext } from "melta-app/safe-area";
+enableSafeAreaContext();
+```
 
 ## ステータス
 
@@ -185,7 +202,7 @@ import { Icon } from "melta-app/icons";
 - ✅ conformance: 契約源 ↔ 生成メタ ↔ `__contract` 宣言の照合 + consumer テスト（契約 subset / token 実在 / contractVersion 同期）+ styleRefs conformance（全実装コンポーネント展開済み）+ RN mount smoke（light/dark × 全公開コンポーネント）
 - ✅ ハーネス: design lint（CI `--max-warnings 0` + PostToolUse hook）/ drift 検査（README・catalog・allowlist 突合）/ installability ゲート（pack → install → import → typecheck）
 - ✅ layout 6 個（Stack / Row / Screen / Header / Icon / Avatar）— dogfood 不足 1〜4 を解消、ProjectFeedScreen は公開 primitive だけで構成
-  - 既知の割り切り: Screen の SafeArea は RN core の SafeAreaView（deprecated / iOS のみの最小対応）。依存ゼロ方針を優先した判断で、精度が必要になれば react-native-safe-area-context への adapter 化を検討
+  - Screen の SafeArea は adapter registry 化済み: default は RN core SafeAreaView（依存ゼロ維持）、`melta-app/safe-area` の `enableSafeAreaContext()` で react-native-safe-area-context に差し替え可（optional peer）
 - ✅ form / feedback 10 個（TextField / Toggle / Checkbox / Radio / Alert / Toast / Progress / Modal / ActionSheet / BottomSheet）— checkbox / radio は Pressable + 描画（svg 非依存）、ActionSheet / BottomSheet は select / dropdown の adapted 変換先の受け皿
 - ✅ showcase（https://app.melta.tsubotax.com — melta-ui 様式シェル + 実 RN カタログの Live 埋め込み。表・統計は契約からビルド時生成）
 - ✅ [npm publish（0.1.0）](https://www.npmjs.com/package/melta-app)

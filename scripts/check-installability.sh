@@ -26,6 +26,8 @@ for required in \
   "package/src/index.ts" \
   "package/lib/module/icons/index.js" \
   "package/lib/typescript/src/icons/index.d.ts" \
+  "package/lib/module/safe-area/index.js" \
+  "package/lib/typescript/src/safe-area/index.d.ts" \
   "package/THIRD_PARTY_LICENSES.md"; do
   if ! grep -qx "$required" <<<"$LISTING"; then
     echo "❌ tarball に $required がありません（bob build 出力 or files フィールドを確認）"
@@ -185,11 +187,39 @@ JSON
 
 npx tsc -p tsconfig.icons.json
 
+echo "→ react-native-safe-area-context を追加して safe-area subpath を検証（opt-in 利用者の経路）"
+npm install --silent --no-audit --no-fund react-native-safe-area-context@5.5.2 >/dev/null
+
+cat > check-safe-area.tsx <<'TSX'
+// fixture C: react-native-safe-area-context を install した利用者だけが
+// melta-app/safe-area を import できる（Screen の SafeArea adapter 差し替え）
+import { enableSafeAreaContext } from "melta-app/safe-area";
+
+enableSafeAreaContext();
+TSX
+
+cat > tsconfig.safe-area.json <<'JSON'
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true
+  },
+  "include": ["check-safe-area.tsx"]
+}
+JSON
+
+npx tsc -p tsconfig.safe-area.json
+
 echo "→ モジュール解決の実体確認（exports 経由で実在ファイルに解決されること）"
 node --input-type=module -e "
 const { existsSync } = await import('node:fs');
 const { fileURLToPath } = await import('node:url');
-for (const spec of ['melta-app', 'melta-app/icons']) {
+for (const spec of ['melta-app', 'melta-app/icons', 'melta-app/safe-area']) {
   const url = import.meta.resolve(spec, new URL('file://' + process.cwd() + '/'));
   const path = fileURLToPath(url);
   if (!path.includes('lib/module')) throw new Error('exports の解決先が lib/module ではない: ' + path);

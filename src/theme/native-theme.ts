@@ -33,6 +33,7 @@ export const nativeTheme: NativeTheme = {
         "border-strong": "#cbd5e1",
         "input-bg": "#ffffff",
         "input-border": "#cbd5e1",
+        "text-accent": "#2b70ef",
         "text-on-accent": "#ffffff"
       },
       "dark": {
@@ -47,6 +48,7 @@ export const nativeTheme: NativeTheme = {
         "border-strong": "#475569",
         "input-bg": "#0f172a",
         "input-border": "#475569",
+        "text-accent": "#6492ff",
         "text-on-accent": "#ffffff"
       }
     },
@@ -77,6 +79,10 @@ export const nativeTheme: NativeTheme = {
   "typography": {
     "fontFamily": {},
     "fontSize": {
+      "xxs": {
+        "fontSize": 10,
+        "lineHeight": 14
+      },
       "xs": {
         "fontSize": 13,
         "lineHeight": 18

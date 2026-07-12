@@ -8,14 +8,16 @@
  * - padding は spacing token キー限定 | "none"（default "4"）。
  * - 決定ロジックは pure resolver（screen.styles.ts）に分離 — recipe との機械照合対象。
  *
- * ⚠️ SafeArea は RN core の SafeAreaView（deprecated / iOS のみの最小対応）を意図的に使う。
- * 依存ゼロ方針（P1）を安全域の精度より優先した判断。Android の edge-to-edge や notch 精度が
- * 必要になったら react-native-safe-area-context への adapter 化を再検討する（optional peer の
- * 前例は Icon × react-native-svg）。
+ * SafeArea は registry（safe-area-registry.ts）で解決する。default は RN core の
+ * SafeAreaView（deprecated / iOS のみの最小対応）で依存ゼロを維持しつつ、
+ * react-native-safe-area-context 利用者は subpath "melta-app/safe-area" の
+ * enableSafeAreaContext() で差し替えられる（rally-nav dogfood 由来、RN 0.85 の
+ * core SafeAreaView deprecation 警告対応）。
  */
 
 import { useMemo, type ReactNode } from "react";
-import { SafeAreaView, ScrollView, View, type StyleProp, type ViewStyle } from "react-native";
+import { ScrollView, View, type StyleProp, type ViewStyle } from "react-native";
+import { resolveSafeAreaView } from "./safe-area-registry";
 import { useTheme } from "../theme";
 import { CONTRACTS, type VariantOf } from "../contracts/contract-types";
 import { resolveScreenStyle, type ScreenPadding, type ScreenStyle } from "./screen.styles";
@@ -47,15 +49,17 @@ export function Screen({
     [theme, mode, variant, padding],
   );
 
+  const SafeArea = resolveSafeAreaView();
+
   return (
-    <SafeAreaView style={[safeAreaStyle, style]} testID={testID}>
+    <SafeArea style={[safeAreaStyle, style]} testID={testID}>
       {header}
       {variant === "scroll" ? (
         <ScrollView contentContainerStyle={contentStyle}>{children}</ScrollView>
       ) : (
         <View style={contentStyle}>{children}</View>
       )}
-    </SafeAreaView>
+    </SafeArea>
   );
 }
 

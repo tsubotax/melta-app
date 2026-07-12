@@ -14,8 +14,8 @@ export interface ContractShape {
 export const CONTRACTS = {
   text: {
     id: "text",
-    version: "0.1.0",
-    variants: ["xs", "sm", "base", "lg", "xl", "2xl", "3xl"],
+    version: "0.2.0",
+    variants: ["xxs", "xs", "sm", "base", "lg", "xl", "2xl", "3xl"],
     sizes: [],
     states: ["default"],
   },

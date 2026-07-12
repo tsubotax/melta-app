@@ -35,6 +35,7 @@ export interface SemanticColors {
   "border-strong": string;
   "input-bg": string;
   "input-border": string;
+  "text-accent": string;
   "text-on-accent": string;
 }
 
@@ -54,7 +55,7 @@ export interface ThemeColor {
   status: { success: StatusColors; warning: StatusColors; danger: StatusColors };
 }
 
-export type FontSizeKey = "xs" | "sm" | "base" | "lg" | "xl" | "2xl" | "3xl";
+export type FontSizeKey = "xxs" | "xs" | "sm" | "base" | "lg" | "xl" | "2xl" | "3xl";
 export type FontWeightKey = "normal" | "medium" | "semibold" | "bold";
 /** RN の fontWeight は文字列。tokens の数値(400 等)を文字列化したもの。 */
 export type FontWeightValue = "400" | "500" | "600" | "700";

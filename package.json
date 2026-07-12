@@ -1,6 +1,6 @@
 {
   "name": "melta-app",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "melta for APP — melta デザインシステムの React Native UI kit。melta-contracts（デザイン契約）を single source of truth に RN 実装でその契約を満たす。アプリ本体ではなくライブラリ。",
   "license": "MIT",
   "homepage": "https://app.melta.tsubotax.com",
@@ -31,6 +31,12 @@
       "import": "./lib/module/icons/index.js",
       "default": "./lib/module/icons/index.js"
     },
+    "./safe-area": {
+      "types": "./lib/typescript/src/safe-area/index.d.ts",
+      "react-native": "./lib/module/safe-area/index.js",
+      "import": "./lib/module/safe-area/index.js",
+      "default": "./lib/module/safe-area/index.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -46,9 +52,13 @@
   "peerDependencies": {
     "react": "*",
     "react-native": "*",
+    "react-native-safe-area-context": ">=4",
     "react-native-svg": ">=15"
   },
   "peerDependenciesMeta": {
+    "react-native-safe-area-context": {
+      "optional": true
+    },
     "react-native-svg": {
       "optional": true
     }
@@ -66,6 +76,7 @@
     "react": "19.2.3",
     "react-native": "0.85.3",
     "react-native-builder-bob": "^0.40.13",
+    "react-native-safe-area-context": "^5.5.2",
     "react-native-svg": "^15.15.4",
     "tsx": "^4.19.0",
     "typescript": "~6.0.3",
@@ -80,7 +91,8 @@
     "build:showcase": "bash scripts/build-showcase.sh",
     "generate:theme": "tsx scripts/generate-native-theme.ts",
     "generate:contracts": "tsx scripts/generate-contract-types.ts",
-    "generate": "npm run generate:theme && npm run generate:contracts",
+    "generate:icons": "tsx scripts/generate-icons.ts",
+    "generate": "npm run generate:theme && npm run generate:contracts && npm run generate:icons",
     "build": "bob build",
     "prepare": "bob build",
     "test": "tsx --test scripts/lib/*.test.ts",

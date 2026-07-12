@@ -13,6 +13,14 @@ melta-app は以下のサードパーティ製アイコンを同梱していま�
 - **Location**: repository source: `assets/icons/`（melta-ui からの curated サブセット SVG。npm tarball には含まない）/ packaged output: `src/icons/glyphs.ts` + `lib/module/icons/`（SVG から codegen した path データ、これが配布物）
 - **Modifications**: 単色 tint 契約のため fill が currentColor でない path（白抜き backdrop）を codegen 時に除外（scripts/generate-icons.ts）
 
+## Material Symbols (Rounded)
+
+- **License**: Apache License, Version 2.0（下記の条文は Charcoal Icons と共通）
+- **Copyright**: Copyright Google LLC
+- **Source**: https://github.com/google/material-design-icons
+- **Location**: `assets/icons/Map.svg` / `assets/icons/Route.svg`（Charcoal に存在しないグリフの補完。packaged output は Charcoal と同じ `src/icons/glyphs.ts` + `lib/module/icons/`）
+- **Modifications**: fill を currentColor に変更し melta の SVG 形式（path のみ）に整形
+
 ### Apache License, Version 2.0
 
 ```
