@@ -4,8 +4,9 @@
  * 本体エントリは依存ゼロ方針（P1）のため、default は RN core の SafeAreaView
  * （deprecated / iOS のみの最小対応）。react-native-safe-area-context を使う利用者は
  * subpath "melta-app/safe-area" の enableSafeAreaContext() をアプリ起動時に一度呼ぶと
- * Screen の SafeArea が差し替わる（optional peer の前例 = Icon × react-native-svg。
- * ただし Screen は本体エントリ所属のため subpath 分離ではなく registry で切り替える）。
+ * Screen の SafeArea が context hook + View adapter に差し替わる（optional peer の前例 =
+ * Icon × react-native-svg。ただし Screen は本体エントリ所属のため subpath 分離ではなく
+ * registry で切り替える）。
  *
  * ⚠️ RN 0.85 は react-native の SafeAreaView プロパティへの getter アクセス時点で
  * deprecation 警告を出す。adapter 登録済みの利用者に警告を出さないため、core への

@@ -11,8 +11,8 @@
  * SafeArea は registry（safe-area-registry.ts）で解決する。default は RN core の
  * SafeAreaView（deprecated / iOS のみの最小対応）で依存ゼロを維持しつつ、
  * react-native-safe-area-context 利用者は subpath "melta-app/safe-area" の
- * enableSafeAreaContext() で差し替えられる（rally-nav dogfood 由来、RN 0.85 の
- * core SafeAreaView deprecation 警告対応）。
+ * enableSafeAreaContext() で context hook + View adapter に差し替えられる
+ * （rally-nav dogfood 由来、RN 0.85 Fabric/Android の初回 inset flash 対応）。
  */
 
 import { useMemo, type ReactNode } from "react";
