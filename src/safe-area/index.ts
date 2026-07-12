@@ -13,6 +13,10 @@
  *
  * これで Screen の SafeArea が react-native-safe-area-context の SafeAreaView に
  * 切り替わり、RN core SafeAreaView の deprecation 警告（RN 0.85+）も出なくなる。
+ *
+ * ⚠️ 前提: アプリの root に SafeAreaProvider が必要（context 版 SafeAreaView は
+ * nearest provider から inset を取る。無いと inset が効かない）。React Navigation /
+ * Expo Router 利用時は設置済みのことが多い。
  */
 
 import { SafeAreaView } from "react-native-safe-area-context";

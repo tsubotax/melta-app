@@ -195,6 +195,10 @@ import { enableSafeAreaContext } from "melta-app/safe-area";
 enableSafeAreaContext();
 ```
 
+⚠️ react-native-safe-area-context の SafeAreaView は祖先に `SafeAreaProvider` が必要
+（React Navigation / Expo Router を使っていれば設置済みのことが多い。無い場合は root を
+`<SafeAreaProvider>` で包むこと — 無いと警告は消えるが inset が効かない）。
+
 ## ステータス
 
 - ✅ ライブラリ化（root=ライブラリ / example=カタログアプリ、peerDeps react + react-native、runtime deps ゼロ）

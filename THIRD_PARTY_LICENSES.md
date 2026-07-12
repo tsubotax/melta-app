@@ -19,7 +19,8 @@ melta-app は以下のサードパーティ製アイコンを同梱していま�
 - **Copyright**: Copyright Google LLC
 - **Source**: https://github.com/google/material-design-icons
 - **Location**: `assets/icons/Map.svg` / `assets/icons/Route.svg`（Charcoal に存在しないグリフの補完。packaged output は Charcoal と同じ `src/icons/glyphs.ts` + `lib/module/icons/`）
-- **Modifications**: fill を currentColor に変更し melta の SVG 形式（path のみ）に整形
+- **Origin**: `symbols/web/{map,route}/materialsymbolsrounded/{map,route}_24px.svg`（google/material-design-icons、2026-07-12 取得）
+- **Modifications**: viewBox "0 -960 960 960" を "0 0 24 24" に affine 座標変換（x/40, (y+960)/40、小数3桁丸め）+ fill を currentColor に変更し melta の SVG 形式（path のみ）に整形
 
 ### Apache License, Version 2.0
 
