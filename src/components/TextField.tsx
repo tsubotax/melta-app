@@ -5,11 +5,18 @@
  * - variant は検証状態（default/error/success）。disabled=true で variant を "disabled" に上書きし、
  *   editable=false + accessibilityState.disabled を併せて適用する（recipe description の規約）。
  * - error 時は errorText を必ずテキストで表示する（FORM_NO_COLOR_ONLY_ERROR = 色だけで伝えない）。
- *   RN には aria-describedby 相当が無いため、accessibilityState ではなく Text の実表示で伝える。
+ *   RN には aria-describedby 相当が無いため、(a) errorText を input の accessibilityLabel に合成
+ *   （再フォーカス時に読み上げ）、(b) errorText 側に accessibilityLiveRegion="polite"（Android は
+ *   出現時に通知。iOS の即時通知が要る画面は submit 時に announceForAccessibility を併用する —
+ *   docs/patterns.md 参照）。
  * - focus は内部 state（onFocus/onBlur）で recipe states.focus の inputStyle 差分
- *   （borderColor=primary.500）を重ねる。disabled 時は focus させない。
+ *   （borderColor=primary.500）を重ねる。disabled 時は focus スタイルを付けない。
+ *   外部の onFocus/onBlur は RN の event ごと常に透過する（内部の視覚 state と分離）。
  * - 色・寸法の決定は pure resolver（textfield.styles.ts）に分離。
  *   recipes/app/textfield.recipe.json との機械照合は scripts/lib/textfield-conformance.test.ts が行う。
+ * - RN TextInput へ透過するのは入力メソッド系 props（keyboardType / autoCapitalize / autoCorrect /
+ *   maxLength / returnKeyType / onSubmitEditing / onBlur / onFocus）のみ。style 系 props は
+ *   透過しない（token 純度維持）。
  */
 
 import { useMemo, useState } from "react";
@@ -18,6 +25,9 @@ import {
   TextInput,
   View,
   Text as RNText,
+  type KeyboardTypeOptions,
+  type ReturnKeyTypeOptions,
+  type TextInputProps,
   type StyleProp,
   type TextStyle,
   type ViewStyle,
@@ -70,6 +80,16 @@ interface TextFieldProps {
   helperText?: string;
   /** variant="error" 時に表示するエラーメッセージ（色だけでなくテキストで伝える）。 */
   errorText?: string;
+  /** キーボード種別（RN TextInput へ透過）。 */
+  keyboardType?: KeyboardTypeOptions;
+  autoCapitalize?: "none" | "sentences" | "words" | "characters";
+  autoCorrect?: boolean;
+  maxLength?: number;
+  returnKeyType?: ReturnKeyTypeOptions;
+  onSubmitEditing?: TextInputProps["onSubmitEditing"];
+  /** blur 時コールバック（blur 検証用）。RN の event ごと透過し、内部の focus スタイル制御と分離。 */
+  onBlur?: TextInputProps["onBlur"];
+  onFocus?: TextInputProps["onFocus"];
   style?: StyleProp<ViewStyle>;
   testID?: string;
 }
@@ -84,6 +104,14 @@ export function TextField({
   size = "medium",
   helperText,
   errorText,
+  keyboardType,
+  autoCapitalize,
+  autoCorrect,
+  maxLength,
+  returnKeyType,
+  onSubmitEditing,
+  onBlur,
+  onFocus,
   style,
   testID,
 }: TextFieldProps) {
@@ -109,18 +137,32 @@ export function TextField({
         placeholder={placeholder}
         placeholderTextColor={colors["text-muted"]}
         editable={!disabled}
-        accessibilityLabel={label}
+        keyboardType={keyboardType}
+        autoCapitalize={autoCapitalize}
+        autoCorrect={autoCorrect}
+        maxLength={maxLength}
+        returnKeyType={returnKeyType}
+        onSubmitEditing={onSubmitEditing}
+        accessibilityLabel={showError ? `${label}。エラー: ${errorText}` : label}
         accessibilityState={{ disabled }}
-        onFocus={() => {
+        onFocus={(e) => {
           if (!disabled) setFocused(true);
+          onFocus?.(e);
         }}
-        onBlur={() => setFocused(false)}
+        onBlur={(e) => {
+          setFocused(false);
+          onBlur?.(e);
+        }}
         style={[resolved.input, INPUT_VERTICAL_FIX, focused && !disabled ? focusStyle : null]}
       />
       {helperText != null && !showError && (
         <RNText style={resolved.helperText}>{helperText}</RNText>
       )}
-      {showError && <RNText style={resolved.errorText}>{errorText}</RNText>}
+      {showError && (
+        <RNText accessibilityLiveRegion="polite" style={resolved.errorText}>
+          {errorText}
+        </RNText>
+      )}
     </View>
   );
 }

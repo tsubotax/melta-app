@@ -7,8 +7,8 @@
  * 入力文字が上寄り・下端切れになる（Pixel 実機で発見・修正した実バグの回帰ガード）。
  */
 
-import { describe, test, expect } from "@jest/globals";
-import { render } from "@testing-library/react-native";
+import { describe, test, expect, jest } from "@jest/globals";
+import { fireEvent, render } from "@testing-library/react-native";
 import { ThemeProvider, TextField } from "../index";
 import { resolveInputVerticalFix } from "../components/TextField";
 
@@ -56,5 +56,35 @@ describe("TextField 構造", () => {
     // jest の Platform は ios 固定のため、OS 分岐は純関数を直接検証する（Codex レビュー反映）
     expect(resolveInputVerticalFix("android").paddingBottom).toBe(2);
     expect(resolveInputVerticalFix("ios").paddingBottom).toBeUndefined();
+  });
+
+  // ----- 透過 props（入力メソッド系のみ透過する規約。§3.4）-----
+
+  test("onBlur が blur で呼ばれる（内部 focus 制御と合成される）", async () => {
+    const onBlur = jest.fn();
+    const { getByLabelText } = await render(
+      <ThemeProvider forcedMode="light">
+        <TextField label="通知先メールアドレス" value="" onChangeText={() => {}} onBlur={onBlur} />
+      </ThemeProvider>,
+    );
+    const input = getByLabelText("通知先メールアドレス");
+    await fireEvent(input, "focus");
+    await fireEvent(input, "blur");
+    expect(onBlur).toHaveBeenCalledTimes(1);
+  });
+
+  test("keyboardType が TextInput に渡る", async () => {
+    const { getByLabelText } = await render(
+      <ThemeProvider forcedMode="light">
+        <TextField
+          label="通知先メールアドレス"
+          value=""
+          onChangeText={() => {}}
+          keyboardType="email-address"
+        />
+      </ThemeProvider>,
+    );
+    const input = getByLabelText("通知先メールアドレス");
+    expect(input.props.keyboardType).toBe("email-address");
   });
 });

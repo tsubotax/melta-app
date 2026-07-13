@@ -136,12 +136,15 @@ export function Radio({
       </View>
       {hasError ? (
         // danger.text-light は SemanticColors 外なので style で上書き（Button の textColor と同じ扱い）。
-        <Text
-          variant="xs"
-          style={{ color: group.errorTextStyle.color, marginTop: group.errorTextStyle.marginTop }}
-        >
-          {error}
-        </Text>
+        // View の liveRegion で出現を通知（melta Text は a11y props を透過しないため）。
+        <View accessibilityLiveRegion="polite">
+          <Text
+            variant="xs"
+            style={{ color: group.errorTextStyle.color, marginTop: group.errorTextStyle.marginTop }}
+          >
+            {error}
+          </Text>
+        </View>
       ) : null}
     </View>
   );

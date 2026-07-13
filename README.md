@@ -219,6 +219,7 @@ enableSafeAreaContext({ edges: ["top"] });
   - Screen の SafeArea は adapter registry 化済み: default は RN core SafeAreaView（依存ゼロ維持）、`melta-app/safe-area` の `enableSafeAreaContext()` で react-native-safe-area-context に差し替え可（optional peer）
 - ✅ form / feedback 10 個（TextField / Toggle / Checkbox / Radio / Alert / Toast / Progress / Modal / ActionSheet / BottomSheet）— checkbox / radio は Pressable + 描画（svg 非依存）、ActionSheet / BottomSheet は select / dropdown の adapted 変換先の受け皿
 - ✅ showcase（https://app.melta.tsubotax.com — melta-ui 様式シェル + 実 RN カタログの Live 埋め込み。表・統計は契約からビルド時生成）
+- ✅ AI 入口: [llms.txt](https://app.melta.tsubotax.com/llms.txt)（契約から生成・drift 検査対象）+ [docs/patterns.md](docs/patterns.md)（フォームの組み方規範。スニペットは実コードと機械同期）
 - ✅ [npm publish（0.1.0）](https://www.npmjs.com/package/melta-app)
 - ⬜ React Native Directory 登録（[PR #2606](https://github.com/react-native-community/directory/pull/2606) レビュー待ち）
 

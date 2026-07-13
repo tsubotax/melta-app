@@ -1,0 +1,62 @@
+# melta-app
+
+> melta デザインシステムの React Native（Expo）UI kit。web 版 melta-ui と同じデザイン契約（melta-contracts、全 40 契約）を SSOT に、RN 実装 25 個で契約を満たす（planned 9 / not-planned 6 / adapted 形 4）。アプリ本体ではなく `npm install melta-app` で使うライブラリ。必須 peerDependencies は react / react-native のみ（optional peer: react-native-svg = Icon 用 / react-native-safe-area-context = SafeArea 差替用）。
+
+UI を組む前に docs/patterns.md（組み方の規範）を読むこと。exact value（トークン・契約・禁止ルール）の SSOT は melta-contracts。melta-app にトークンの手書きは存在しない（theme は契約からの生成物）。デザイン言語の一次資料は web 版 https://melta.tsubotax.com/llms.txt。
+
+## Docs
+
+- [README.md](https://github.com/tsubotax/melta-app#readme): 全体像（Install / 設計の核 / トークン正規化 / コンポーネント表）
+- [patterns.md](https://app.melta.tsubotax.com/docs/patterns.md): フォーム等「組み方」の規範 + コピペ可能スニペット（実コードと drift 検査済み）
+- [showcase](https://app.melta.tsubotax.com/): Live Catalog（実 RN コンポーネントの web export）+ 実装状態の全量表
+- [tokens.json](https://melta.tsubotax.com/design/contracts/tokens.json): デザイントークン（契約 SSOT の配信面）
+- [rules.json](https://melta.tsubotax.com/design/contracts/rules.json): 禁止ルール
+
+## Components
+
+- [action-sheet](https://melta.tsubotax.com/design/contracts/components/action-sheet.contract.json): ✅ `ActionSheet` — 画面下から出るアクション/選択リスト。web の select / dropdown を APP に adapted 変換する際の受け皿（構造的 P0）。destructive アクションは色で区別しラベルでも伝える。
+- [alert](https://melta.tsubotax.com/design/contracts/components/alert.contract.json): ✅ `Alert` — インラインアラート通知。Info / Success / Warning / Error の4タイプ。
+- [avatar](https://melta.tsubotax.com/design/contracts/components/avatar.contract.json): ✅ `Avatar` — ユーザーアバター。Image / Initials / Status / Group。
+- [bottom-sheet](https://melta.tsubotax.com/design/contracts/components/bottom-sheet.contract.json): ✅ `BottomSheet` — 画面下から出る汎用シート container（content は自由 slot）。フィルタ・詳細・複雑な選択 UI の受け皿。ActionSheet がリスト特化なのに対しこちらは容器。
+- [button](https://melta.tsubotax.com/design/contracts/components/button.contract.json): ✅ `Button` — CTA / secondary / icon button。3階層ヒエラルキー。
+- [card](https://melta.tsubotax.com/design/contracts/components/card.contract.json): ✅ `Card` — コンテンツコンテナ。Basic / Metrics / Media / Action / Link の5バリエーション。
+- [checkbox](https://melta.tsubotax.com/design/contracts/components/checkbox.contract.json): ✅ `Checkbox` — 複数選択フォームコントロール。CSS 18px サイズ。
+- [empty-state](https://melta.tsubotax.com/design/contracts/components/empty-state.contract.json): ✅ `EmptyState` — データ無し時のプレースホルダー（アイコン + タイトル + 説明 + 任意のアクション）。Text + Button の compose。
+- [header](https://melta.tsubotax.com/design/contracts/components/header.contract.json): ✅ `Header` — 画面ヘッダー primitive（title + leading? / trailing? slot、下 border）。Screen の header slot に差して使う想定。title は text-heading の見出しとして読
+- [icon](https://melta.tsubotax.com/design/contracts/components/icon.contract.json): ✅ `Icon` — 統一アイコン primitive。name prop でグリフを選択し（グリフ集合は実装側の公開面 = assets/icons の Charcoal セット由来）、色は semantic token キー限定の prop（default 
+- [image](https://melta.tsubotax.com/design/contracts/components/image.contract.json): ✅ `Image` — 画像表示 primitive。aspectRatio / radius / contentFit / onError fallback を持つ。Phase1 は RN コア Image、expo-image は Phase2。
+- [metric](https://melta.tsubotax.com/design/contracts/components/metric.contract.json): ✅ `Metric` — 数値 + 単位 + ラベルの指標表示 primitive（距離 / 時間 / 獲得標高 等の走行サマリー表示）。tabular-nums で桁揃え。sizes の height は数値テキストの想定行高(px)で、実 fontSize は実
+- [modal](https://melta.tsubotax.com/design/contracts/components/modal.contract.json): ✅ `Modal` — フォーカストラップとバックドロップを備えたモーダルダイアログ。
+- [progress](https://melta.tsubotax.com/design/contracts/components/progress.contract.json): ✅ `Progress` — リニアプログレスバー。aria-valuenow/min/max必須。
+- [radio](https://melta.tsubotax.com/design/contracts/components/radio.contract.json): ✅ `Radio` — 単一選択フォームコントロール。fieldsetラッパー必須。
+- [row](https://melta.tsubotax.com/design/contracts/components/row.contract.json): ✅ `Row` — 子要素を横に並べる layout primitive。gap は spacing token キー限定の prop。折返し（wrap）と主軸配置（justify）を持ち、タグ列・メトリクス列・ヘッダー行の生 flexbox 手書きを置き換え
+- [screen](https://melta.tsubotax.com/design/contracts/components/screen.contract.json): ✅ `Screen` — 画面骨格 primitive（SafeArea + bg-page + content padding）。header slot を scroll 外に固定し、毎画面手書きされる SafeAreaView + ScrollView + ヘッ
+- [skeleton](https://melta.tsubotax.com/design/contracts/components/skeleton.contract.json): ✅ `Skeleton` — ローディングプレースホルダー。aria-busy="true"必須。
+- [stack](https://melta.tsubotax.com/design/contracts/components/stack.contract.json): ✅ `Stack` — 子要素を縦に積む layout primitive。gap は spacing token キー限定の prop（省略時 gap なし）。画面の縦リズムを生 flexbox 手書きから置き換える（dogfood 不足-1）。
+- [surface](https://melta.tsubotax.com/design/contracts/components/surface.contract.json): ✅ `Surface` — Card / Skeleton / EmptyState の共通土台となる箱 primitive（bg / radius / elevation / padding）。melta-app では internal（未 export）。
+- [tag](https://melta.tsubotax.com/design/contracts/components/tag.contract.json): ✅ `Tag` — 削除可能なタグ / フィルターチップ。
+- [text](https://melta.tsubotax.com/design/contracts/components/text.contract.json): ✅ `Text` — 本文・見出し・キャプションの基本テキスト primitive。fontSize variant と semantic color、heading/body で letterSpacing を切替。
+- [textfield](https://melta.tsubotax.com/design/contracts/components/textfield.contract.json): ✅ `TextField` — テキスト入力フィールド。Default / Error / Disabled / Success の4状態。
+- [toast](https://melta.tsubotax.com/design/contracts/components/toast.contract.json): ✅ `Toast` — 一時的な通知メッセージ。4タイプ（success/error/warning/info）。
+- [toggle](https://melta.tsubotax.com/design/contracts/components/toggle.contract.json): ✅ `Toggle` — ON/OFFスイッチコンポーネント。role="switch"必須。
+- [accordion](https://melta.tsubotax.com/design/contracts/components/accordion.contract.json): ⬜ planned
+- [badge](https://melta.tsubotax.com/design/contracts/components/badge.contract.json): ⬜ planned
+- [datepicker](https://melta.tsubotax.com/design/contracts/components/datepicker.contract.json): ⬜ planned（adapted: カレンダー自作はしない。OS 標準の日付ピッカー（@react-native-community/datetimepicker 等）への委譲でトークンのみ供給）
+- [divider](https://melta.tsubotax.com/design/contracts/components/divider.contract.json): ⬜ planned
+- [dropdown](https://melta.tsubotax.com/design/contracts/components/dropdown.contract.json): ⬜ planned（adapted: hover 起動は存在しない。タップ起動の Menu（アンカー付き）or ActionSheet に変換）
+- [list](https://melta.tsubotax.com/design/contracts/components/list.contract.json): ⬜ planned
+- [select](https://melta.tsubotax.com/design/contracts/components/select.contract.json): ⬜ planned（adapted: web のドロップリストは持ち込まない。ActionSheet / BottomSheet / OS Picker で開く選択 UI に変換（gluestack/Tamagui も native では Sheet 化））
+- [stepper](https://melta.tsubotax.com/design/contracts/components/stepper.contract.json): ⬜ planned
+- [tabs](https://melta.tsubotax.com/design/contracts/components/tabs.contract.json): ⬜ planned（adapted: トップタブ / SegmentedControl 型として実装（web の下線タブ意味論を M3 segmented / iOS UISegmentedControl に写像））
+- [breadcrumb](https://melta.tsubotax.com/design/contracts/components/breadcrumb.contract.json): 🚫 not-planned — RN 主要ライブラリ提供 0/5。Apple HIG が multisegment breadcrumb を明示的に否定。back ボタン + nav bar タイトルで代替
+- [copy-button](https://melta.tsubotax.com/design/contracts/components/copy-button.contract.json): 🚫 not-planned — DS プリミティブでなくアプリ層のコンポジット（button + clipboard + toast）
+- [pagination](https://melta.tsubotax.com/design/contracts/components/pagination.contract.json): 🚫 not-planned — モバイルは無限スクロール（FlatList onEndReached）で代替。カルーセル文脈は PageControl の領分
+- [sidebar](https://melta.tsubotax.com/design/contracts/components/sidebar.contract.json): 🚫 not-planned — Navigation Drawer の領分＝react-navigation 側の責務。DS はトークン供給のみ
+- [table](https://melta.tsubotax.com/design/contracts/components/table.contract.json): 🚫 not-planned — モバイルは単列リスト / Card への再構成が定石（M3 に data table なし）。list + metric で分解表現する
+- [tooltip](https://melta.tsubotax.com/design/contracts/components/tooltip.contract.json): 🚫 not-planned — hover 前提のため。iPhone HIG に tooltip 概念なし。必要になれば長押し Hint として別契約を切る
+
+## Optional
+
+- [melta-ui llms.txt](https://melta.tsubotax.com/llms.txt): web 版デザインシステムの AI 入口（デザイン言語の一次資料）
+- [npm](https://www.npmjs.com/package/melta-app): パッケージ（Icon は melta-app/icons、SafeArea 差替は melta-app/safe-area サブパス）
+- [THIRD_PARTY_LICENSES.md](https://github.com/tsubotax/melta-app/blob/main/THIRD_PARTY_LICENSES.md): Icon グリフの帰属表示

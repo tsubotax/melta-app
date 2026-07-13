@@ -20,6 +20,8 @@ import { resolve, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { MVP_CONTRACT_IDS, toComponentName } from "./lib/conformance.js";
 import { resolveContractsRoot } from "./lib/recipe-conformance.js";
+import { renderLlmsTxt } from "./build-llms-txt.js";
+import { checkPatternsSync } from "./lib/check-patterns-sync.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, "..");
@@ -166,6 +168,28 @@ for (const id of MVP_CONTRACT_IDS) {
   }
 }
 if (staleClaims === 0) ok("実装済みコンポーネントへの「未実装」主張なし");
+
+// --- 4. llms.txt freshness（契約から生成した内容と commit 済みが一致するか） ---
+section("4. llms.txt（契約から生成）");
+
+const llmsPath = resolve(root, "llms.txt");
+const expectedLlms = renderLlmsTxt();
+if (!existsSync(llmsPath)) {
+  drift("llms.txt が無い（npm run build:llms で生成）");
+} else if (readFileSync(llmsPath, "utf8") !== expectedLlms) {
+  if (writeMode) {
+    writeFileSync(llmsPath, expectedLlms);
+    ok("llms.txt を再生成した（--write）");
+  } else {
+    drift("llms.txt が契約と不一致（npm run build:llms か --write で再生成）");
+  }
+} else {
+  ok("llms.txt が契約と一致");
+}
+
+// --- 5. docs/*.md スニペット同期（実コードからの抜粋が verbatim か） ---
+section("5. docs スニペット同期");
+checkPatternsSync(root, { drift, ok });
 
 // --- 結果 ---
 console.log("");

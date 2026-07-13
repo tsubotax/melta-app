@@ -1,6 +1,6 @@
 {
   "name": "melta-app",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "melta for APP — melta デザインシステムの React Native UI kit。melta-contracts（デザイン契約）を single source of truth に RN 実装でその契約を満たす。アプリ本体ではなくライブラリ。",
   "license": "MIT",
   "homepage": "https://app.melta.tsubotax.com",
@@ -43,6 +43,8 @@
     "lib",
     "src",
     "!src/**/*.test.*",
+    "llms.txt",
+    "docs",
     "THIRD_PARTY_LICENSES.md"
   ],
   "sideEffects": false,
@@ -100,7 +102,8 @@
     "typecheck": "tsc --noEmit && tsc --noEmit -p example/tsconfig.json && tsc --noEmit -p scripts/tsconfig.json",
     "lint": "eslint . --max-warnings 0",
     "check:drift": "tsx scripts/check-drift.ts",
-    "check:installability": "bash scripts/check-installability.sh"
+    "check:installability": "bash scripts/check-installability.sh",
+    "build:llms": "tsx scripts/build-llms-txt.ts"
   },
   "jest": {
     "preset": "@react-native/jest-preset",

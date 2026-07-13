@@ -4,14 +4,16 @@ import { Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
 import { ThemeProvider, useTheme, type ThemeMode } from "melta-app";
 import { ThemeCatalog } from "./catalog/ThemeCatalog";
 import { ProjectFeedScreen } from "./screens/ProjectFeedScreen";
+import { FormValidationScreen } from "./screens/FormValidationScreen";
 
-type View_ = "catalog" | "feed" | "feed-loading" | "feed-empty";
+type View_ = "catalog" | "feed" | "feed-loading" | "feed-empty" | "form";
 
 /** 下部の簡易タブ（catalog ⇄ dogfood 実画面）。dogfood 確認用、DS の一部ではない。 */
 function DevTabs({ view, onChange }: { view: View_; onChange: (v: View_) => void }) {
   const { colors, theme } = useTheme();
   const tabs: { key: View_; label: string }[] = [
     { key: "catalog", label: "Catalog" },
+    { key: "form", label: "Form" },
     { key: "feed", label: "Feed" },
     { key: "feed-loading", label: "Loading" },
     { key: "feed-empty", label: "Empty" },
@@ -58,6 +60,8 @@ function Root({ mode, onToggleMode }: { mode: ThemeMode; onToggleMode: () => voi
           <ProjectFeedScreen state="loading" />
         ) : view === "feed-empty" ? (
           <ProjectFeedScreen state="empty" />
+        ) : view === "form" ? (
+          <FormValidationScreen />
         ) : (
           <ProjectFeedScreen state="ready" />
         )}

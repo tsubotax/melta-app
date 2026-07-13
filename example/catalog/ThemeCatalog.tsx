@@ -29,6 +29,7 @@ import { ProgressCatalog } from "./components/Progress.catalog";
 import { ModalCatalog } from "./components/Modal.catalog";
 import { ActionSheetCatalog } from "./components/ActionSheet.catalog";
 import { BottomSheetCatalog } from "./components/BottomSheet.catalog";
+import { FormValidationCatalog } from "./components/FormValidation.catalog";
 
 const t = nativeTheme;
 
@@ -54,6 +55,7 @@ const COMPONENT_SECTIONS: {
   { key: "toggle", navLabel: "Toggle", title: "Toggle（form）", contracts: ["toggle"], Body: ToggleCatalog },
   { key: "checkbox", navLabel: "Checkbox", title: "Checkbox（form）", contracts: ["checkbox"], Body: CheckboxCatalog },
   { key: "radio", navLabel: "Radio", title: "Radio（form）", contracts: ["radio"], Body: RadioCatalog },
+  { key: "formPattern", navLabel: "Form pattern", title: "フォーム検証パターン（TextField + Checkbox + Radio + Toggle compose）", contracts: ["textfield", "toggle", "checkbox", "radio"], Body: FormValidationCatalog },
   { key: "alert", navLabel: "Alert", title: "Alert（feedback）", contracts: ["alert"], Body: AlertCatalog },
   { key: "toast", navLabel: "Toast", title: "Toast（feedback）", contracts: ["toast"], Body: ToastCatalog },
   { key: "progress", navLabel: "Progress", title: "Progress（feedback）", contracts: ["progress"], Body: ProgressCatalog },

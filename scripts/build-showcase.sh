@@ -25,4 +25,10 @@ curl -fsSL https://melta.tsubotax.com/scripts/ds-showcase.css -o "$root/dist-sit
 # 3. showcase シェルに契約由来の表・統計を注入して配置
 npx tsx "$root/scripts/generate-showcase.ts"
 
+# 4. AI 入口（llms.txt）とパターン文書を配信面へ同梱
+#    （set -euo pipefail 下なので欠品 = build 失敗で明示検知。curl 手当てと同方針）
+cp "$root/llms.txt" "$root/dist-site/llms.txt"
+mkdir -p "$root/dist-site/docs"
+cp "$root/docs/patterns.md" "$root/dist-site/docs/patterns.md"
+
 echo "✅ dist-site を組み立てた（showcase + /catalog）"
