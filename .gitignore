@@ -46,5 +46,9 @@ yarn-error.*
 # showcase サイトのビルド出力（build-showcase.sh が生成）
 /dist-site/
 
+# npm pack の成果物。ローカル検証で消費者に file: で食わせることがあるが、
+# 版番が同じで中身が違う tarball が残ると「npm 公開版と別物」の事故になるため追跡しない
+/*.tgz
+
 # Local Netlify folder
 .netlify
