@@ -7,7 +7,9 @@
 - **Showcase / Live Catalog**: https://app.melta.tsubotax.com （Live Catalog は実 RN コンポーネントの web export。HTML 再現デモではない）
 - **Web 版 showcase**: https://melta.tsubotax.com
 
-D2I アプリが最初の adopter / dogfood。最初の実需は「活動記録をサマリーカードに焼いて外部シェア」機能。
+**現在の adopter は 1 つ**（非公開プロジェクトのモバイルアプリ）。dogfood はそこで回している。
+D2I は当初想定していた最初の adopter だが、mobile 側はまだ melta-app を導入していない
+（D2I の web 側が使っているのは melta-ui）。
 
 ## Install
 
@@ -100,7 +102,7 @@ const theme = defineTheme({
 ## 設計の核
 
 - **契約は共有、実装は各最適**: tokens / 禁止ルール / component 契約は `melta-contracts`（JSON）が SSOT。melta-app に token は持たない（二重化を物理防止）。
-- **公開 DS の純度を守る**: 汎用 UI プリミティブだけを置く。D2I 固有 UI（アプリ固有の画面・機能）は **D2I 側**に置き、ここには混ぜない。
+- **公開 DS の純度を守る**: 汎用 UI プリミティブだけを置く。アプリ固有の UI（特定サービスの画面・機能・語彙）は**各アプリ側**に置き、ここには混ぜない。
 - **依存最小**: 初期は RN `StyleSheet` 固定（nativewind / unistyles 等の runtime styling lib を入れない）。Storybook RN も使わず自前カタログ。
 
 ## AI-Ready
