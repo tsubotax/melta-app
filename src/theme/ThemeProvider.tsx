@@ -6,47 +6,109 @@
  * useColorScheme() を Provider 内で1回だけ読む（RN コア、追加依存なし）。
  *
  * context value は useMemo 必須（§3）: 毎レンダで新オブジェクトを配ると全 consumer が再レンダする。
+ *
+ * theme 注入（Step 2-①）: `theme` を渡すと消費者ブランドの theme で塗り替わる。未指定なら
+ * 従来どおり codegen 済みの `nativeTheme`（＝既存消費者に破壊的変更なし）。渡せるのは
+ * `defineTheme()` の戻り値だけ（define-theme.ts 参照）。
  */
 
 import { createContext, useContext, useMemo, type ReactNode } from "react";
 import { useColorScheme } from "react-native";
 import { nativeTheme } from "./native-theme";
-import type { NativeTheme, SemanticColors } from "./types";
+import { defineTheme, isDev, resolveMode, type ResolvedCapabilities, type ResolvedNativeTheme, type ThemeModeViolation } from "./define-theme";
+import type { NativeTheme, SemanticColors, ThemeMode } from "./types";
 
-export type ThemeMode = "light" | "dark";
+export type { ThemeMode };
 
 export interface ThemeContextValue {
-  /** 正規化済み theme 全体（色以外の形状トークンもここから取る）。 */
+  /**
+   * 正規化済み theme 全体（色以外の形状トークンもここから取る）。
+   *
+   * 注: 単一 colorScheme の theme を注入した場合、`color.semantic` は**宣言された mode しか持たない**
+   * （型は両方あるように見える）。持たない側を直接読むと原因を名指しするエラーで落ちる。
+   * 現在 mode の色は `colors` を使うこと。
+   */
   theme: NativeTheme;
   /** 現在の表示モード。 */
   mode: ThemeMode;
   /** 現在 mode の semantic 色（= theme.color.semantic[mode]）。最頻アクセスなので展開済みで配る。 */
   colors: SemanticColors;
+  /** theme が持つ能力（`color.semantic` のキー集合などから導出済み）。 */
+  capabilities: ResolvedCapabilities;
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
+
+/**
+ * 既定 theme。melta-contracts 由来の codegen 結果を注入経路と同じ形に通す（自分でも dogfood する）。
+ * 副作用として dev では `nativeTheme` の入れ子オブジェクト（トークン群）も freeze される
+ * — 生成物のトークンを実行時に書き換える経路は元々無いので、意図した副作用として許容する。
+ */
+const DEFAULT_THEME: ResolvedNativeTheme = defineTheme({ ...nativeTheme, id: "melta" });
+
+/** 同じ矛盾を毎レンダー報告しないためのラッチ（StrictMode の二重 render も1回に畳む）。 */
+const reportedViolations = new Set<string>();
+
+function reportViolation(themeId: string | undefined, violation: ThemeModeViolation): void {
+  const key = `${themeId ?? "(id 未設定)"}:${violation.requested}`;
+  if (reportedViolations.has(key)) return;
+  reportedViolations.add(key);
+  console.error(
+    `melta: forcedMode="${violation.requested}" が指定されたが、この theme は ` +
+      `colorScheme=${violation.colorScheme} なので "${violation.resolved}" で描画する。` +
+      `useTheme().capabilities.colorScheme を見て、対応していない mode は UI 側で出さないこと。`,
+  );
+}
 
 interface ThemeProviderProps {
   children: ReactNode;
   /**
    * 明示モード。指定時は OS の colorScheme を無視して固定する。
    * カタログの light/dark トグル（§6）や、特定画面の固定表示に使う。
+   *
+   * theme が対応していない mode を渡した場合は theme 側の mode に clamp する（描画は止めない）。
+   * dev ではその矛盾を console.error で1回だけ報告する。
    */
   forcedMode?: ThemeMode;
+  /**
+   * 消費者ブランドの theme。未指定なら melta 既定（`nativeTheme`）。
+   * `defineTheme()` の戻り値を **module スコープで保持したもの**を渡すこと
+   * （render 中に組み立てると毎レンダー参照が変わり、全 consumer が再レンダする）。
+   */
+  theme?: ResolvedNativeTheme;
 }
 
-export function ThemeProvider({ children, forcedMode }: ThemeProviderProps) {
+export function ThemeProvider({ children, forcedMode, theme }: ThemeProviderProps) {
   const system = useColorScheme();
-  const mode: ThemeMode = forcedMode ?? (system === "dark" ? "dark" : "light");
+  const activeTheme = theme ?? DEFAULT_THEME;
 
-  const value = useMemo<ThemeContextValue>(
-    () => ({
-      theme: nativeTheme,
-      mode,
-      colors: nativeTheme.color.semantic[mode],
-    }),
-    [mode],
+  const { mode, violation } = resolveMode(
+    activeTheme.capabilities.colorScheme,
+    forcedMode,
+    system === "dark" ? "dark" : "light",
   );
+  if (isDev && violation) reportViolation(activeTheme.id, violation);
+
+  const value = useMemo<ThemeContextValue>(() => {
+    const colors = activeTheme.color.semantic[mode];
+    if (!colors) {
+      // resolveMode が capability に従って選んだ mode なので、ここに来るのは theme が壊れている場合だけ。
+      // 色が undefined のまま下流に流れると全 component が別々の場所で死ぬので、ここで落とす。
+      throw new Error(
+        `melta: theme "${activeTheme.id ?? "(id 未設定)"}" に mode="${mode}" の semantic 色が無い。`,
+      );
+    }
+    return {
+      // 配布時の型は NativeTheme のまま（既存の全 style resolver の署名を維持するため）。
+      // 単一 colorScheme の theme では持たない mode のキーが実体に無く、型が実体より広い。
+      // 到達しうる読みは resolveMode が保証した現在 mode だけで、他 mode を直接読んだ場合は
+      // define-theme.ts の guard getter が原因を名指しして落とす。
+      theme: activeTheme as unknown as NativeTheme,
+      mode,
+      colors,
+      capabilities: activeTheme.capabilities,
+    };
+  }, [activeTheme, mode]);
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }

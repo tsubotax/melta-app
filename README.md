@@ -36,6 +36,44 @@ export default function App() {
 
 テーマは `ThemeProvider` が OS の light / dark に自動追従（`forcedMode` で固定も可）。トークンは `useTheme()` / `nativeTheme` から取れる。Icon だけは subpath（[後述](#icon-だけ-subpath-エントリmelta-appicons)）。
 
+### ブランドテーマを注入する
+
+`theme` を渡すと自分のブランドトークンで塗り替わる。未指定なら melta 既定（`nativeTheme`）。
+
+```tsx
+import { defineTheme, ThemeProvider } from "melta-app";
+
+// module スコープで1回だけ組み立てる（render 中に作ると毎レンダー参照が変わり全体が再レンダーする）
+const theme = defineTheme({
+  id: "acme",
+  color: { /* primary / body / semantic / status */ },
+  typography: { /* … */ },
+  spacing: { /* … */ }, radius: { /* … */ },
+  elevation: { /* … */ }, motion: { /* … */ }, zIndex: { /* … */ },
+});
+
+export default function App() {
+  return <ThemeProvider theme={theme}>{/* … */}</ThemeProvider>;
+}
+```
+
+**単一の配色しか持たないブランド**（例: dark しか作らない）は、持っていない mode を **書かない**。
+
+```tsx
+const theme = defineTheme({
+  id: "acme",
+  color: { /* … */ semantic: { dark: darkColors } },  // light は書かない
+  /* … */
+});
+```
+
+- `useTheme().capabilities.colorScheme` が `"single-dark"` として導出される（宣言する欄は無い。`color.semantic` のキー集合がそのまま能力になる）
+- OS が light を返しても **dark で描画する**（警告は出さない。light を作らないのは設計判断で、OS 設定は事故ではない）
+- `forcedMode="light"` のように**対応していない mode を明示指定**した場合も描画は止めず clamp するが、開発時は `console.error` で1回報告する。light/dark トグル UI を出すなら `capabilities.colorScheme` を見て出し分けること
+- `theme.color.semantic.light` を直接読むと、原因を名指しするエラーで落ちる（値を捏造して静かに間違った色を返すことはしない）。現在 mode の色は `useTheme().colors` から取る
+
+> 現状 `color.primary` / `text-accent` / `elevation` / status の light 値は、単一 dark のテーマでも**必須のまま**。省略できるのは `color.semantic` の mode だけで、他の軸を「持たない」と宣言する仕組みは後続で入れる。
+
 ## 設計の核
 
 - **契約は共有、実装は各最適**: tokens / 禁止ルール / component 契約は `melta-contracts`（JSON）が SSOT。melta-app に token は持たない（二重化を物理防止）。

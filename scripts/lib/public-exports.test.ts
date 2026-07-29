@@ -65,3 +65,33 @@ test("theme エントリが ThemeProvider / useTheme / nativeTheme を公開し�
     assert.match(theme, new RegExp(`\\b${name}\\b`), `theme/index.ts が ${name} を export していない`);
   }
 });
+
+/** barrel の値 export（`export type` は除く）を集める。複数名の1ブロック記法にも対応。 */
+function listRuntimeExports(relPath: string): string[] {
+  const source = readFileSync(resolve(srcRoot, relPath), "utf8");
+  const names: string[] = [];
+  for (const match of source.matchAll(/^export \{([^}]*)\} from/gm)) {
+    names.push(...match[1].split(",").map((name) => name.trim()).filter(Boolean));
+  }
+  for (const match of source.matchAll(/^export function (\w+)/gm)) {
+    names.push(match[1]);
+  }
+  return names.sort();
+}
+
+test("theme エントリの値 export 集合が意図どおり（公開面の無断拡張を防ぐ）", () => {
+  // src/index.ts が `export * from "./theme"` するので、ここに足したものは即 npm 公開 API になる。
+  // コンポーネント側と違って契約に対応物が無く drift 検査も効かないため、明示的に pin する。
+  assert.deepEqual(listRuntimeExports("theme/index.ts"), [
+    "ThemeProvider",
+    "declaredModes",
+    "defineTheme",
+    "deriveColorScheme",
+    "nativeTheme",
+    "resolveLetterSpacing",
+    "resolveMode",
+    "supportedModes",
+    "useTheme",
+    "validateTheme",
+  ].sort());
+});

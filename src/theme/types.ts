@@ -8,6 +8,12 @@
 
 import type { ViewStyle } from "react-native";
 
+/**
+ * 表示モード。ThemeProvider が OS の colorScheme / forcedMode / theme の能力から解決する。
+ * （define-theme.ts と ThemeProvider.tsx の相互 import を避けるため型の実体はここに置く）
+ */
+export type ThemeMode = "light" | "dark";
+
 /** primary パレット（50〜950）。値は hex 文字列。 */
 export type PrimaryScale =
   | "50"
