@@ -207,9 +207,17 @@ const FONT_WEIGHT_KEYS = keysOf<Record<FontWeightKey, true>>({
 // capability の導出
 // ---------------------------------------------------------------------------
 
-/** theme が実際に値を持っている mode（enumerable なキーのみ ＝ dev getter を踏まない）。 */
+/**
+ * theme が実際に値を持っている mode。
+ *
+ * **enumerable な own key だけを見る**こと。`hasOwnProperty` は non-enumerable な own
+ * プロパティにも true を返すので、それで判定すると「持っていない mode に置いた番人の getter」を
+ * 値として数えてしまい、解決後の theme に対して常に light / dark 両方を返す（0.4.0 の不具合）。
+ * 入力（素のデータプロパティ）と解決後（番人つき）のどちらに対しても正しく答える必要がある。
+ */
 export function declaredModes(semantic: Partial<Record<ThemeMode, SemanticColors>>): ThemeMode[] {
-  return MODES.filter((mode) => Object.prototype.hasOwnProperty.call(semantic, mode));
+  const withValue = new Set(Object.keys(semantic));
+  return MODES.filter((mode) => withValue.has(mode));
 }
 
 /** colorScheme capability を `color.semantic` のキー集合から導出する。 */

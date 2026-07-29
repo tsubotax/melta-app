@@ -50,6 +50,14 @@ test("declaredModes は宣言順に依らず light / dark の順で返す", () =
   assert.deepEqual(declaredModes(singleDarkThemeOptions.color.semantic), ["dark"]);
 });
 
+test("declaredModes は解決後の theme（番人つき）でも値を持つ mode だけを返す", () => {
+  // 回帰ガード: hasOwnProperty で判定していた 0.4.0 は non-enumerable な番人の getter を
+  // 値として数え、single-dark の theme に対して ["light","dark"] を返していた。
+  const resolved = defineTheme(singleDarkThemeOptions);
+  assert.deepEqual(declaredModes(resolved.color.semantic), ["dark"]);
+  assert.deepEqual(declaredModes(defineTheme(dualThemeOptions).color.semantic), ["light", "dark"]);
+});
+
 test("supportedModes が capability と一致する", () => {
   assert.deepEqual(supportedModes("light-dark"), ["light", "dark"]);
   assert.deepEqual(supportedModes("single-dark"), ["dark"]);
