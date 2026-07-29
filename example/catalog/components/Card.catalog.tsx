@@ -6,10 +6,44 @@
  * 画像化(PNG capture) 等のドメイン固有機能は呼び出し側アプリの機能（意思決定2）。ここは見た目まで。
  */
 
+import { useState } from "react";
 import { View } from "react-native";
 import { Card, Image } from "melta-app";
 import { Button, Text, Metric, Tag } from "melta-app";
 import { useTheme } from "melta-app";
+
+/**
+ * 二重発火の手動 smoke（native の実機確認用）。
+ *
+ * jest（RNTL）の fireEvent は responder negotiation を再現しないので、実機で
+ * 「primaryAction を押したときに面の onPress も発火しないか」は目で確かめるしかない。
+ * 面と primaryAction に独立したカウンタを出し、**primaryAction を1回タップして
+ * 内側だけ +1**（面のカウンタが動かない）ことを iOS / Android で確認する。
+ */
+function NestedPressSmoke() {
+  const { theme } = useTheme();
+  const [surface, setSurface] = useState(0);
+  const [action, setAction] = useState(0);
+  return (
+    <Card
+      variant="action"
+      onPress={() => setSurface((n) => n + 1)}
+      primaryAction={
+        <Button label="primaryAction を押す" onPress={() => setAction((n) => n + 1)} />
+      }
+    >
+      <Text variant="lg" role="heading" weight="semibold" color="text-heading">
+        二重発火 smoke
+      </Text>
+      <Text variant="sm" color="text-muted">
+        面: {surface} 回 / primaryAction: {action} 回
+      </Text>
+      <Text variant="xs" color="text-muted">
+        ボタンを1回押して「面」が増えなければ正常。増えたら二重発火。
+      </Text>
+    </Card>
+  );
+}
 
 export function CardCatalog() {
   const { theme } = useTheme();
@@ -24,6 +58,8 @@ export function CardCatalog() {
           非インタラクティブなコンテナ。
         </Text>
       </Card>
+
+      <NestedPressSmoke />
 
       {/* action（pressed で影が深くなる）。
           面自体は操作要素にしないので（contract 2.1.0）、キーボード / スクリーンリーダーからの

@@ -31,11 +31,22 @@
  * - media variant は overflow:hidden で角丸に画像をクリップし、body だけにパディング（contract と整合）。
  */
 
-import type { ReactElement, ReactNode } from "react";
+import { useEffect, type ReactElement, type ReactNode } from "react";
 import { Pressable, View, type StyleProp, type ViewStyle } from "react-native";
 import { useTheme } from "../theme";
 import { CONTRACTS } from "../contracts/contract-types";
+import { isDev } from "../theme/define-theme";
 import { CARD_INTERACTIVE, resolveCardShape, resolveCardBodyStyle } from "./card.styles";
+import { validateCardProps } from "./card.validate";
+
+/**
+ * 同じ問題を毎レンダー報告しないためのラッチ。
+ *
+ * **報告は effect の中で行う**（render 中ではない）。render 中だと、React が破棄する
+ * speculative render や StrictMode の二重 render でもラッチが消費され、実際に commit された
+ * 違反が報告されなくなりうる。検査の中身は card.validate.ts の純関数側でテストする。
+ */
+const reported = new Set<string>();
 
 interface CardBase {
   header?: ReactNode;
@@ -77,6 +88,15 @@ export function Card({
 }: CardProps) {
   const { theme, mode } = useTheme();
   const interactive = CARD_INTERACTIVE[variant] && onPress != null;
+
+  useEffect(() => {
+    if (!isDev) return;
+    for (const problem of validateCardProps({ variant, onPress, primaryAction })) {
+      if (reported.has(problem)) continue;
+      reported.add(problem);
+      console.error(`melta: ${problem}`);
+    }
+  }, [variant, onPress, primaryAction]);
   const isMedia = variant === "media";
 
   const inner = (

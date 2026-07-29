@@ -7,6 +7,27 @@
 
 ---
 
+## 0.5.1 — 2026-07-29
+
+公開 API の変更なし。開発時の診断とテストの追加のみ。
+
+### 追加
+
+- **Card の props を開発時に検査するようになった。** 型は TypeScript を使う利用者にしか
+  効かないので、JavaScript から contract 2.1.0 の要求が静かに破られるのを防ぐ。
+  検出するのは `primaryAction` / `onPress` の欠落と型違い、非インタラクティブ variant への
+  誤った prop、存在しない variant（typo）。production では実行されない
+- example カタログに**二重発火の手動 smoke** を追加。面と `primaryAction` に独立した
+  カウンタを出し、`primaryAction` を1回タップして内側だけ +1 になることを実機で確認できる
+
+### 内部
+
+- 入れ子の押下（面と `primaryAction`）の回帰テストを追加。
+  ⚠️ RNTL の `fireEvent` は responder negotiation を再現しないため、保証できるのは
+  「RNTL が内側のハンドラを選び、面のハンドラを直接は呼ばない」という構造まで。
+  実機の二重発火はカタログの手動 smoke が担う（web は react-native-web が
+  `stopPropagation` を呼ぶことをソースで確認済み）
+
 ## 0.5.0 — 2026-07-29
 
 ### 破壊的変更
