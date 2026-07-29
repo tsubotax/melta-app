@@ -74,6 +74,29 @@ const theme = defineTheme({
 
 > 現状 `color.primary` / `text-accent` / `elevation` / status の light 値は、単一 dark のテーマでも**必須のまま**。省略できるのは `color.semantic` の mode だけで、他の軸を「持たない」と宣言する仕組みは後続で入れる。
 
+### 押せるカード（`variant="action"` / `"link"`）
+
+**カード面そのものは操作要素ではない。** 面を押せるのはポインタ利用者向けの近道で、
+キーボードとスクリーンリーダーからの到達手段は**カード内の操作要素**が担う。
+そのため `primaryAction` が必須になっている。
+
+```tsx
+<Card
+  variant="action"
+  onPress={openLog}
+  primaryAction={<Button label="製作ログを見る" onPress={openLog} />}
+>
+  <Text variant="lg" role="heading">工房 #12</Text>
+</Card>
+```
+
+- `primaryAction` は面の `onPress` と**同じ操作**を指す（別の遷移先にしない）
+- ラベルは `primaryAction` 側に付ける。カードは名前を持たない（`role="article"` の領域）
+- カード内に操作要素が複数あってよい。`primaryAction` に置くのは**主アクション**（面を押したときの遷移先と一致するもの）
+- 面に `accessibilityRole="button"` は付かない。`Button` を内包しても DOM が壊れない
+
+0.4.x からの移行は [CHANGELOG](./CHANGELOG.md#050--2026-07-29) を参照。
+
 ## 設計の核
 
 - **契約は共有、実装は各最適**: tokens / 禁止ルール / component 契約は `melta-contracts`（JSON）が SSOT。melta-app に token は持たない（二重化を物理防止）。
