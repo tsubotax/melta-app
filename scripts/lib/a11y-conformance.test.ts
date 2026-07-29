@@ -24,8 +24,12 @@
  * - 双方向に見る: 名乗ってはいけない role を名乗っていないか（過剰）と、
  *   契約が要求する role が実装から消えていないか（欠落）の両方。
  *
- * 条件分岐・variant・子コンポーネント経由の意味的な保証までは静的検査の担当外
- * （RN render tree のテストの仕事）。ここは「ソース上で名乗られている role の集合」を見る層。
+ * ## この層で保証できないこと（意識的な限界）
+ *
+ * 見ているのは **ファイル単位の「名乗られている role の集合」**であって、分岐ごとの保証ではない。
+ * 例: Card は非インタラクティブ分岐とインタラクティブ分岐の両方に role="article" を付けているが、
+ * 片方だけ消しても集合は変わらないのでここでは検出できない（実測で確認済み）。
+ * variant ごと・条件ごと・子コンポーネント経由の保証は RN render tree のテストの担当。
  */
 
 import { test } from "node:test";
@@ -42,10 +46,17 @@ const srcRoot = resolve(here, "../../src");
 interface RoleRule {
   /** 契約の a11y.role の控え。契約が変わったら落ちる（表が実装に追従する抜け道を塞ぐ）。 */
   contractRole: string;
-  /** RN 実装が名乗ってよい role。空 = 名乗ってはいけない。 */
+  /** RN 実装が `accessibilityRole` で名乗ってよい値。空 = 名乗ってはいけない。 */
   allowed: string[];
-  /** 実装から消えたら困る role（契約が要求している能力）。allowed の部分集合。 */
+  /** `accessibilityRole` から消えたら困る値（契約が要求している能力）。allowed の部分集合。 */
   required: string[];
+  /**
+   * W3C 準拠の `role` prop（`accessibilityRole` とは別系統）で名乗ってよい値。
+   * react-native-web はこれを実要素に変換する（role="article" → `<article>`）。
+   */
+  w3cAllowed?: string[];
+  /** `role` prop から消えたら困る値。 */
+  w3cRequired?: string[];
   note: string;
 }
 
@@ -74,7 +85,11 @@ const ROLE_RULES: Record<string, RoleRule> = {
     contractRole: "article",
     allowed: [],
     required: [],
-    note: "RN に article は無いので role は名乗らない。中に操作可能物を含むコンテナ（契約 states の focus-within）",
+    w3cAllowed: ["article"],
+    w3cRequired: ["article"],
+    note:
+      "accessibilityRole に article は無いが、W3C 準拠の role prop は article を受ける" +
+      "（RNW は <article> 要素に変換する）。面自体を操作要素にしないのが contract 2.1.0 の要求",
   },
   image: {
     contractRole: "image",
@@ -170,15 +185,9 @@ const ROLE_RULES: Record<string, RoleRule> = {
  * `contractVersion` は再承認の強制装置 — 契約が改訂されたら例外の妥当性を必ず見直す。
  */
 const KNOWN_DIVERGENCES: Record<string, { roles: string[]; contractVersion: string; reason: string }> = {
-  card: {
-    roles: ["button"],
-    contractVersion: "2.0.0",
-    reason:
-      "variant=action/link が accessibilityRole='button' を名乗っている（契約は article）。" +
-      "melta の Button を内包すると web で <button> の入れ子になり React #418 の原因になる。" +
-      "解消には契約側に『主アクションの操作要素を内包すること』を明記する改訂が要る。" +
-      "実装だけ先に変えると『カードのアクションがキーボード / スクリーンリーダーから到達不能』に置き換わるため、契約改訂とセットで直す。",
-  },
+  // 空にできた。card の乖離は contract 2.1.0（カード面自体を操作要素にしない）と
+  // Card.tsx の実装変更（role 除去 + primaryAction 必須化）が揃って解消した。
+  // ここが空である状態を保つのが目標。
 };
 
 /** contract id → 実装ファイル。 */
@@ -193,8 +202,27 @@ function implementationFile(id: string): string {
   return found;
 }
 
+/**
+ * `role` prop を検査してよい JSX 要素（RN の host component）。
+ *
+ * **タグ名で絞るのが要点。** melta 自身の `Text` は独自の `role` prop（"heading" 等）を
+ * 持っており（Header.tsx / EmptyState.tsx が使う）、タグを見ずに `role=` を拾うと
+ * それを W3C role と誤認する。
+ */
+const RN_HOST_TAGS = new Set([
+  "View",
+  "Pressable",
+  "ScrollView",
+  "TextInput",
+  "Modal",
+  "RNText",
+  "SafeAreaView",
+]);
+
 interface RoleScan {
   roles: Set<string>;
+  /** W3C 準拠の `role` prop の値（RN host 要素に付いているものだけ）。 */
+  w3cRoles: Set<string>;
   /** 静的に値を決められなかった式。無視せず fail させるために集める。 */
   unanalyzable: string[];
 }
@@ -231,7 +259,17 @@ function collectFromExpression(node: ts.Expression, scan: RoleScan): void {
   scan.unanalyzable.push(node.getText());
 }
 
-/** 実装ソースの accessibilityRole を AST で走査する。 */
+/** JSX 属性が付いている要素のタグ名。 */
+function jsxTagName(attribute: ts.JsxAttribute): string | null {
+  const attributes = attribute.parent;
+  const element = attributes.parent;
+  if (ts.isJsxOpeningElement(element) || ts.isJsxSelfClosingElement(element)) {
+    return element.tagName.getText();
+  }
+  return null;
+}
+
+/** 実装ソースの accessibilityRole / role を AST で走査する。 */
 function scanRoles(file: string): RoleScan {
   const source = ts.createSourceFile(
     file,
@@ -240,9 +278,23 @@ function scanRoles(file: string): RoleScan {
     true,
     ts.ScriptKind.TSX,
   );
-  const scan: RoleScan = { roles: new Set(), unanalyzable: [] };
+  const scan: RoleScan = { roles: new Set(), w3cRoles: new Set(), unanalyzable: [] };
 
   const visit = (node: ts.Node): void => {
+    if (ts.isJsxAttribute(node) && node.name.getText() === "role") {
+      const tag = jsxTagName(node);
+      if (tag != null && RN_HOST_TAGS.has(tag)) {
+        const w3c: RoleScan = { roles: new Set(), w3cRoles: new Set(), unanalyzable: [] };
+        const initializer = node.initializer;
+        if (initializer !== undefined && ts.isStringLiteral(initializer)) {
+          w3c.roles.add(initializer.text);
+        } else if (initializer !== undefined && ts.isJsxExpression(initializer) && initializer.expression) {
+          collectFromExpression(initializer.expression, w3c);
+        }
+        for (const value of w3c.roles) scan.w3cRoles.add(value);
+        scan.unanalyzable.push(...w3c.unanalyzable.map((expr) => `role={${expr}}`));
+      }
+    }
     if (ts.isJsxAttribute(node) && node.name.getText() === "accessibilityRole") {
       const initializer = node.initializer;
       if (initializer === undefined) {
@@ -325,6 +377,31 @@ for (const id of MVP_CONTRACT_IDS) {
       `${id} が契約にない role を名乗っている: ${unexpected.join(", ")}\n` +
         `  許可: ${rule.allowed.length > 0 ? rule.allowed.join(", ") : "(role を名乗らない)"}\n` +
         `  根拠: ${rule.note}`,
+    );
+  });
+
+  test(`${id}: W3C の role prop が許可集合の内側`, () => {
+    const permitted = new Set(ROLE_RULES[id].w3cAllowed ?? []);
+    const unexpected = [...scanRoles(implementationFile(id)).w3cRoles]
+      .filter((role) => !permitted.has(role))
+      .sort();
+    assert.deepEqual(
+      unexpected,
+      [],
+      `${id} が許可外の role prop を名乗っている: ${unexpected.join(", ")}\n` +
+        `  許可: ${permitted.size > 0 ? [...permitted].join(", ") : "(role prop を使わない)"}`,
+    );
+  });
+
+  test(`${id}: 契約が要求する role prop が実装から消えていない`, () => {
+    const w3cRequired = ROLE_RULES[id].w3cRequired ?? [];
+    if (w3cRequired.length === 0) return;
+    const actual = scanRoles(implementationFile(id)).w3cRoles;
+    const missing = w3cRequired.filter((role) => !actual.has(role)).sort();
+    assert.deepEqual(
+      missing,
+      [],
+      `${id} から role prop が消えている: ${missing.join(", ")}\n  根拠: ${ROLE_RULES[id].note}`,
     );
   });
 

@@ -61,7 +61,13 @@ const SMOKE_CASES: Array<[name: string, element: ReactElement]> = [
   ],
   [
     "Card (action)",
-    <Card variant="action" onPress={() => {}}>
+    // action/link は primaryAction 必須（contract 2.1.0: 面自体は操作要素にしないので、
+    // キーボード / スクリーンリーダーからの到達手段を内包する）。
+    <Card
+      variant="action"
+      onPress={() => {}}
+      primaryAction={<Button label="開く" onPress={() => {}} />}
+    >
       <Text>タップ可能</Text>
     </Card>,
   ],

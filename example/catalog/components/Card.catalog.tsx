@@ -8,7 +8,7 @@
 
 import { View } from "react-native";
 import { Card, Image } from "melta-app";
-import { Text, Metric, Tag } from "melta-app";
+import { Button, Text, Metric, Tag } from "melta-app";
 import { useTheme } from "melta-app";
 
 export function CardCatalog() {
@@ -25,8 +25,14 @@ export function CardCatalog() {
         </Text>
       </Card>
 
-      {/* action（pressed で影が深くなる） */}
-      <Card variant="action" onPress={() => {}} accessibilityLabel="アクションカード">
+      {/* action（pressed で影が深くなる）。
+          面自体は操作要素にしないので（contract 2.1.0）、キーボード / スクリーンリーダーからの
+          到達手段として primaryAction が必須。 */}
+      <Card
+        variant="action"
+        onPress={() => {}}
+        primaryAction={<Button label="詳細を見る" onPress={() => {}} />}
+      >
         <Text variant="lg" role="heading" weight="semibold" color="text-heading">
           action カード
         </Text>
@@ -36,7 +42,11 @@ export function CardCatalog() {
       </Card>
 
       {/* link（action と同じく Pressable、用途差はリンク遷移） */}
-      <Card variant="link" onPress={() => {}} accessibilityLabel="リンクカード">
+      <Card
+        variant="link"
+        onPress={() => {}}
+        primaryAction={<Button variant="subtle" label="リンク先へ" onPress={() => {}} />}
+      >
         <Text variant="lg" role="heading" weight="semibold" color="text-heading">
           link カード
         </Text>

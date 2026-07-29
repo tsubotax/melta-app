@@ -21,7 +21,7 @@ export const CONTRACTS = {
   },
   button: {
     id: "button",
-    version: "2.0.0",
+    version: "2.1.0",
     variants: ["contained", "outlined", "brand-outline", "neutral", "lighted", "danger", "subtle"],
     sizes: ["small", "medium", "large"],
     states: ["default", "hover", "focus", "disabled", "loading"],
@@ -35,7 +35,7 @@ export const CONTRACTS = {
   },
   card: {
     id: "card",
-    version: "2.0.0",
+    version: "2.1.0",
     variants: ["basic", "media", "action", "link"],
     sizes: [],
     states: ["default", "hover", "focus-within"],
