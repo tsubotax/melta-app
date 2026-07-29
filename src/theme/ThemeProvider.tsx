@@ -46,13 +46,23 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
  */
 const DEFAULT_THEME: ResolvedNativeTheme = defineTheme({ ...nativeTheme, id: "melta" });
 
-/** 同じ矛盾を毎レンダー報告しないためのラッチ（StrictMode の二重 render も1回に畳む）。 */
-const reportedViolations = new Set<string>();
+/**
+ * 同じ矛盾を毎レンダー報告しないためのラッチ（StrictMode の二重 render も1回に畳む）。
+ *
+ * キーは **theme の参照**。id 文字列にすると、id 未設定の theme 同士や同じ id を持つ別 theme が
+ * 互いの警告を打ち消してしまう（報告されるべき矛盾が黙る）。WeakMap なので theme が捨てられれば
+ * エントリも消える＝動的に theme を作るアプリでも溜まらない。
+ */
+const reportedViolations = new WeakMap<ResolvedNativeTheme, Set<ThemeMode>>();
 
-function reportViolation(themeId: string | undefined, violation: ThemeModeViolation): void {
-  const key = `${themeId ?? "(id 未設定)"}:${violation.requested}`;
-  if (reportedViolations.has(key)) return;
-  reportedViolations.add(key);
+function reportViolation(theme: ResolvedNativeTheme, violation: ThemeModeViolation): void {
+  let reported = reportedViolations.get(theme);
+  if (reported === undefined) {
+    reported = new Set();
+    reportedViolations.set(theme, reported);
+  }
+  if (reported.has(violation.requested)) return;
+  reported.add(violation.requested);
   console.error(
     `melta: forcedMode="${violation.requested}" が指定されたが、この theme は ` +
       `colorScheme=${violation.colorScheme} なので "${violation.resolved}" で描画する。` +
@@ -87,7 +97,7 @@ export function ThemeProvider({ children, forcedMode, theme }: ThemeProviderProp
     forcedMode,
     system === "dark" ? "dark" : "light",
   );
-  if (isDev && violation) reportViolation(activeTheme.id, violation);
+  if (isDev && violation) reportViolation(activeTheme, violation);
 
   const value = useMemo<ThemeContextValue>(() => {
     const colors = activeTheme.color.semantic[mode];

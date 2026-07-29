@@ -233,11 +233,26 @@ export function deriveColorScheme(
   );
 }
 
-/** capability が実際に描ける mode。 */
+/**
+ * capability が実際に描ける mode。
+ *
+ * 未知の値は**黙って light-dark 扱いにしない**。TypeScript を使わない消費者や、将来
+ * capability の値が増えたときに、誤った値が「両対応の theme」として通ってしまうと、
+ * 持っていない mode で描画されて初めて壊れる（＝原因から遠い場所で落ちる）。
+ */
 export function supportedModes(colorScheme: ColorSchemeCapability): ThemeMode[] {
-  if (colorScheme === "single-dark") return ["dark"];
-  if (colorScheme === "single-light") return ["light"];
-  return ["light", "dark"];
+  switch (colorScheme) {
+    case "light-dark":
+      return ["light", "dark"];
+    case "single-dark":
+      return ["dark"];
+    case "single-light":
+      return ["light"];
+    default: {
+      const unknown: never = colorScheme;
+      throw new Error(`melta: 未知の colorScheme capability "${String(unknown)}"。`);
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -261,6 +276,10 @@ export function resolveMode(
 ): { mode: ThemeMode; violation?: ThemeModeViolation } {
   const supported = supportedModes(colorScheme);
   const requested = forcedMode ?? systemMode;
+  // 未知の mode を supported[0] へ黙って倒すと、typo が「正常な light 表示」に化ける。
+  if (!(MODES as string[]).includes(requested)) {
+    throw new Error(`melta: 未知の mode "${String(requested)}"。light / dark のみ。`);
+  }
   if (supported.includes(requested)) return { mode: requested };
 
   const resolved = supported[0];
@@ -276,9 +295,25 @@ export function resolveMode(
 // validation（開発時のみ。純関数なのでテストからも直接呼べる）
 // ---------------------------------------------------------------------------
 
+/**
+ * 欠けているキーを返す。**accessor で埋めた欄も「ある」と数える**（消費者が「まだ埋められない欄」に
+ * getter を置くのは正当な使い方なので、descriptor の存在だけを見る）。
+ *
+ * data property のときは値も見る（`undefined` を入れて型検査だけすり抜けた欄を拾う）。
+ * accessor は**呼ばない** — 呼ぶと消費者の開発用プローブが theme 構築時に全部発火し、
+ * 「melta が実際にどの欄を読んだか」の信号を壊してしまう。
+ */
 function missingKeys(target: object | undefined, keys: readonly (string | number)[]): string[] {
   if (target === null || typeof target !== "object") return [...keys].map(String);
-  return keys.filter((key) => !Object.prototype.hasOwnProperty.call(target, key)).map(String);
+  return keys
+    .filter((key) => {
+      const descriptor = Object.getOwnPropertyDescriptor(target, key);
+      if (descriptor === undefined) return true;
+      // accessor は値を読まずに「ある」とみなす
+      if (!("value" in descriptor)) return false;
+      return descriptor.value === undefined;
+    })
+    .map(String);
 }
 
 /**
@@ -287,6 +322,12 @@ function missingKeys(target: object | undefined, keys: readonly (string | number
  * 「宣言した mode の色が欠けている」「as キャストでキーが抜けた」といった、型を通り抜けた欠落を拾う。
  * `defineTheme()` が dev で1回だけ呼ぶ。**render 中に呼ばないこと**（theme-ui は Provider の
  * render body で毎レンダー全色を再帰走査して性能を落とした前例がある）。
+ *
+ * ⚠️ **完全な runtime validation ではない**。キーの存在と（data property のときだけ）
+ * `undefined` でないことを見るだけで、値の型・範囲・accessor の戻り値までは検査しない。
+ * 意図的にそうしている（上の missingKeys のコメント参照）。
+ *
+ * @experimental 公開しているが安定 API ではない。検査範囲とメッセージは予告なく変わりうる。
  */
 export function validateTheme(options: ThemeOptions): string[] {
   const problems: string[] = [];
@@ -386,13 +427,53 @@ function installMissingModeGuards(
   }
 }
 
-/** dev 限定の再帰 freeze。enumerable なキーだけ辿るので上の guard getter は踏まない。 */
+/** プレーンなオブジェクト（クラスインスタンスや null プロトタイプ以外の特殊物を除く）か。 */
+function isPlainObject(value: unknown): value is Record<PropertyKey, unknown> {
+  if (typeof value !== "object" || value === null) return false;
+  const proto: unknown = Object.getPrototypeOf(value);
+  return proto === Object.prototype || proto === null;
+}
+
+/**
+ * トークンの木を**複製する**。melta が自分のコピーを所有するために要る。
+ *
+ * なぜ単純な spread や structuredClone でないか:
+ * - **accessor を呼ばない**。消費者は「まだ埋められない欄」に getter を置くことがある
+ *   （capability が無い軸を検出する開発用プローブ）。値を読んで複製すると、theme を
+ *   組み立てた時点で全部発火し、「melta が実際にどの欄を読んだか」の信号が壊れる。
+ *   descriptor をそのまま移せば、getter は getter のまま運ばれる。
+ * - 再帰するのは plain object / array の **data property** だけ。それ以外（関数・
+ *   クラスインスタンス・accessor）は素通しする。
+ */
+function cloneTokenTree<T>(value: T): T {
+  if (Array.isArray(value)) return value.map((item: unknown) => cloneTokenTree(item)) as T;
+  if (!isPlainObject(value)) return value;
+
+  const source = Object.getOwnPropertyDescriptors(value);
+  const target: PropertyDescriptorMap = {};
+  for (const key of Reflect.ownKeys(source)) {
+    const descriptor = source[key as keyof typeof source] as PropertyDescriptor;
+    target[key as string] =
+      "value" in descriptor
+        ? { ...descriptor, value: cloneTokenTree(descriptor.value) }
+        : descriptor;
+  }
+  return Object.defineProperties({}, target) as T;
+}
+
+/**
+ * dev 限定の再帰 freeze。**accessor は呼ばずに素通りする**（cloneTokenTree と同じ理由）。
+ * 呼ぶ相手は cloneTokenTree で作った melta 所有のコピーだけ。消費者の入力や、公開 export の
+ * `nativeTheme` の入れ子は凍らせない（凍らせると `{...nativeTheme}` からの派生が dev で壊れる）。
+ */
 function deepFreeze(value: unknown): void {
-  if (value === null || typeof value !== "object") return;
+  if (!isPlainObject(value) && !Array.isArray(value)) return;
   if (Object.isFrozen(value)) return;
   Object.freeze(value);
-  for (const key of Object.keys(value)) {
-    deepFreeze((value as Record<string, unknown>)[key]);
+  const descriptors = Object.getOwnPropertyDescriptors(value);
+  for (const descriptor of Object.values<PropertyDescriptor>(descriptors)) {
+    // accessor は呼ばない（呼ぶと消費者の開発用プローブが発火する）
+    if ("value" in descriptor) deepFreeze(descriptor.value);
   }
 }
 
@@ -414,12 +495,15 @@ export function defineTheme(options: ThemeOptions): ResolvedNativeTheme {
     }
   }
 
-  const semantic: Partial<Record<ThemeMode, SemanticColors>> = { ...options.color.semantic };
+  // 入力と参照を共有しない。共有すると (a) 呼び出し側の後からの書き換えが解決済み theme に
+  // 波及し（再レンダーは起きないので画面ごとに新旧が混在する）(b) dev の deepFreeze が
+  // 呼び出し側の入力と公開 export の nativeTheme まで凍らせて、正当な派生を壊す。
+  const owned = cloneTokenTree(options);
+  const semantic = owned.color.semantic;
   const colorScheme = deriveColorScheme(semantic);
 
   const theme: ResolvedNativeTheme = {
-    ...options,
-    color: { ...options.color, semantic },
+    ...owned,
     capabilities: { colorScheme },
     $$melta: true,
   };

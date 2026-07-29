@@ -23,6 +23,7 @@ import {
   resolveMode,
   supportedModes,
   validateTheme,
+  type ColorSchemeCapability,
   type ThemeOptions,
 } from "../../src/theme/define-theme.js";
 import {
@@ -30,6 +31,7 @@ import {
   singleLightThemeOptions,
 } from "./fixtures/single-dark.theme.js";
 import { nativeTheme } from "../../src/theme/native-theme.js";
+import type { ThemeMode } from "../../src/theme/types.js";
 
 const dualThemeOptions: ThemeOptions = { ...nativeTheme, id: "fixture-light-dark" };
 
@@ -62,6 +64,17 @@ test("supportedModes が capability と一致する", () => {
   assert.deepEqual(supportedModes("light-dark"), ["light", "dark"]);
   assert.deepEqual(supportedModes("single-dark"), ["dark"]);
   assert.deepEqual(supportedModes("single-light"), ["light"]);
+});
+
+test("未知の capability / mode は黙って light 扱いにせず throw する", () => {
+  assert.throws(
+    () => supportedModes("dark-only" as ColorSchemeCapability),
+    /未知の colorScheme capability/,
+  );
+  assert.throws(
+    () => resolveMode("light-dark", "Light" as ThemeMode, "dark"),
+    /未知の mode/,
+  );
 });
 
 // --- mode 解決 ---------------------------------------------------------------
@@ -214,6 +227,51 @@ test("dev では壊れた theme を defineTheme が throw する", () => {
     color: { ...singleDarkThemeOptions.color, semantic: {} },
   } as ThemeOptions;
   assert.throws(() => defineTheme(broken), /theme の形が不正/);
+});
+
+test("defineTheme は消費者の accessor を1度も呼ばない", () => {
+  // 消費者は「まだ埋められない欄」に getter を置いて、melta が実際にそこを読んだかを
+  // 検出することがある（capability の不足を炙り出す開発用プローブ）。theme 構築時に
+  // 全部発火させてしまうと、その信号が丸ごと壊れる。
+  let reads = 0;
+  const probed: ThemeOptions = {
+    ...singleDarkThemeOptions,
+    id: "probe",
+    color: { ...singleDarkThemeOptions.color, primary: {} as ThemeOptions["color"]["primary"] },
+  };
+  for (const key of ["50", "100", "200", "300", "400", "500", "600", "700", "800", "900", "950"]) {
+    Object.defineProperty(probed.color.primary, key, {
+      enumerable: true,
+      configurable: true,
+      get: () => {
+        reads++;
+        return "#ff00ff";
+      },
+    });
+  }
+
+  const theme = defineTheme(probed);
+  assert.equal(reads, 0, "validate / 複製 / freeze のいずれも accessor を呼んではいけない");
+  // 呼べばちゃんと生きている（descriptor が accessor のまま運ばれている）
+  assert.equal(theme.color.primary["500"], "#ff00ff");
+  assert.equal(reads, 1);
+});
+
+test("defineTheme は呼び出し側の入力を凍らせない（正当な派生を壊さない）", () => {
+  const input: ThemeOptions = structuredClone(singleDarkThemeOptions);
+  defineTheme(input);
+  assert.equal(Object.isFrozen(input.spacing), false, "入力の入れ子を凍らせない");
+  assert.equal(Object.isFrozen(input.color.semantic.dark), false);
+  input.spacing["4"] = 999; // throw しないこと
+  assert.equal(input.spacing["4"], 999);
+});
+
+test("defineTheme 後に入力を書き換えても解決済み theme に波及しない", () => {
+  const input: ThemeOptions = structuredClone(singleDarkThemeOptions);
+  const before = input.spacing["4"];
+  const theme = defineTheme(input);
+  input.spacing["4"] = 999;
+  assert.equal(theme.spacing["4"], before, "トークンの木は melta が所有する");
 });
 
 test("dev では成果物が freeze される（トークンの後からの書き換えを防ぐ）", () => {

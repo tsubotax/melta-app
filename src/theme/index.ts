@@ -8,8 +8,13 @@ export * from "./types";
 export { nativeTheme } from "./native-theme";
 export { ThemeProvider, useTheme } from "./ThemeProvider";
 export type { ThemeContextValue, ThemeMode } from "./ThemeProvider";
+export { defineTheme } from "./define-theme";
+/**
+ * 以下は theme の解決規則を外から検証・再利用するためのヘルパ。
+ * **@experimental — 安定 API ではない。** 挙動・シグネチャ・メッセージは予告なく変わりうる。
+ * アプリの実行時ロジックが依存する場合は、useTheme().capabilities を使うほうが安全。
+ */
 export {
-  defineTheme,
   validateTheme,
   resolveMode,
   supportedModes,

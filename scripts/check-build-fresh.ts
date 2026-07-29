@@ -55,8 +55,41 @@ if (!existsSync(libDir)) {
   process.exit(1);
 }
 
+/** src の相対パス（拡張子なし）の集合。lib 側に対応物があるかの照合に使う。 */
+function sourceStems(dir: string, base = dir, acc = new Set<string>()): Set<string> {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      if (entry.name === "__tests__") continue;
+      sourceStems(full, base, acc);
+      continue;
+    }
+    if (!/\.tsx?$/.test(entry.name)) continue;
+    if (entry.name.includes(".test.")) continue;
+    acc.add(full.slice(base.length + 1).replace(/\.tsx?$/, ""));
+  }
+  return acc;
+}
+
 const src = scan(join(root, "src"), [".ts", ".tsx"]);
 const lib = scan(libDir, [".js", ".d.ts"]);
+
+// mtime だけでは「src を消したのに lib に残っている」「一部だけ出力されていない」を見逃す。
+// bob は lib を clean してから作るので孤児は出ないが、出力欠けはどこも見ていない。
+const stems = sourceStems(join(root, "src"));
+const missing = [...stems].filter(
+  (stem) =>
+    !existsSync(join(libDir, "module", `${stem}.js`)) ||
+    !existsSync(join(libDir, "typescript", "src", `${stem}.d.ts`)),
+);
+if (missing.length > 0) {
+  console.error(
+    `✖ src にあるのに lib に出力が無いモジュールが ${missing.length} 件:\n` +
+      missing.map((stem) => `    ${stem}`).join("\n") +
+      "\n  `npm run build` を走らせてから publish すること。",
+  );
+  process.exit(1);
+}
 
 if (lib.count === 0) {
   console.error("✖ lib/ に出力が無い。`npm run build` を先に走らせること。");
