@@ -219,6 +219,14 @@ npx tsc -p tsconfig.safe-area.json
 echo "→ eslint plugin の import + ルール実体検査（存在チェックだけでは exports 誤記・export 名変更・ルール欠落を検出できない）"
 node --input-type=module -e "
 const expected = ['no-raw-color', 'no-raw-radius', 'no-raw-spacing', 'no-raw-fontsize'];
+// configs.recommended は severity の配布経路（消費者が手書きするとドリフトする）。
+// 中身まで照合しないと「config はあるが空」「severity が入れ替わった」を検出できない。
+const expectedSeverity = {
+  'melta/no-raw-color': 'error',
+  'melta/no-raw-radius': 'error',
+  'melta/no-raw-spacing': 'warn',
+  'melta/no-raw-fontsize': 'warn',
+};
 for (const spec of ['melta-app/eslint-plugin', 'melta-app/eslint-rules/melta.mjs']) {
   const mod = await import(spec);
   if (!mod.meltaPlugin) throw new Error(spec + ': meltaPlugin named export がない');
@@ -226,7 +234,21 @@ for (const spec of ['melta-app/eslint-plugin', 'melta-app/eslint-rules/melta.mjs
   for (const r of expected) {
     if (!rules.includes(r)) throw new Error(spec + ': ルール ' + r + ' が欠落（実際: ' + rules.join(',') + '）');
   }
-  console.log('  plugin OK:', spec, '→', rules.join(', '));
+  const recommended = mod.meltaPlugin.configs?.recommended;
+  if (!recommended) throw new Error(spec + ': configs.recommended が無い（severity の配布経路が欠落）');
+  if (recommended.plugins?.melta !== mod.meltaPlugin) {
+    throw new Error(spec + ': configs.recommended が plugins.melta に自分自身を登録していない（1行導入が壊れる）');
+  }
+  const got = recommended.rules ?? {};
+  if (Object.keys(got).length !== Object.keys(expectedSeverity).length) {
+    throw new Error(spec + ': configs.recommended のルール数が想定外（実際: ' + Object.keys(got).join(',') + '）');
+  }
+  for (const [id, severity] of Object.entries(expectedSeverity)) {
+    if (got[id] !== severity) {
+      throw new Error(spec + ': configs.recommended の ' + id + ' が ' + severity + ' でない（実際: ' + got[id] + '）');
+    }
+  }
+  console.log('  plugin OK:', spec, '→', rules.join(', '), '/ recommended', Object.keys(got).length, '本');
 }
 "
 

@@ -8,6 +8,10 @@
  * - no-raw-radius  : borderRadius 系プロパティに数値リテラル直書き → error
  * - no-raw-spacing : padding/margin/gap 系に数値リテラル直書き → warn（false positive 多）
  * - no-raw-fontsize: fontSize に数値リテラル直書き → warn
+ *
+ * この severity は `meltaPlugin.configs.recommended`（flat config）として機械可読な形で配布する。
+ * 消費者が手で書き写すとドリフト源になるため（rally-nav の外部導入 T6、2026-08-04）、
+ * 推奨値の正本はこのファイルの RECOMMENDED_RULES であってドキュメントではない。
  */
 
 const COLOR_RE = /#[0-9a-fA-F]{3,8}\b|\brgba?\s*\(|\bhsla?\s*\(/;
@@ -94,5 +98,27 @@ export const meltaPlugin = {
         };
       },
     },
+  },
+};
+
+/**
+ * 推奨 severity の正本。
+ * error = 契約違反として止める / warn = false positive がありうるので助言に留める。
+ */
+const RECOMMENDED_RULES = {
+  "melta/no-raw-color": "error",
+  "melta/no-raw-radius": "error",
+  "melta/no-raw-spacing": "warn",
+  "melta/no-raw-fontsize": "warn",
+};
+
+// flat config 慣行に従い、plugin 自身を参照する config は定義後に後付けする（自己参照の循環を避ける）。
+// `files` はあえて指定しない — 適用範囲は消費者側の config 構成に委ねる
+// （TS/TSX に絞りたい場合は spread して `files` を足す。README「カスタマイズする場合」参照）。
+meltaPlugin.configs = {
+  recommended: {
+    name: "melta/recommended",
+    plugins: { melta: meltaPlugin },
+    rules: { ...RECOMMENDED_RULES },
   },
 };

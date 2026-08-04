@@ -23,14 +23,10 @@ export default tseslint.config(
     ],
   },
   {
+    // severity は配布物の configs.recommended をそのまま食べる（ドッグフード。手書きするとドリフトする）。
+    // 適用範囲だけこのリポの事情に合わせて上書きする
+    ...meltaPlugin.configs.recommended,
     files: ["src/**/*.{ts,tsx}"],
     languageOptions: { parser: tseslint.parser },
-    plugins: { melta: meltaPlugin },
-    rules: {
-      "melta/no-raw-color": "error",
-      "melta/no-raw-radius": "error",
-      "melta/no-raw-spacing": "warn",
-      "melta/no-raw-fontsize": "warn",
-    },
   },
 );

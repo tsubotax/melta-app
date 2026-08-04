@@ -276,10 +276,42 @@ enableSafeAreaContext({ edges: ["top"] });
 ### lint plugin（`melta-app/eslint-plugin`）
 
 melta 契約からの逸脱を機械検知する eslint カスタムルール 4 本を同梱している。
-消費者プロジェクトの flat config に組み込むと、生値の直書きが lint で止まる:
+消費者プロジェクトの flat config に組み込むと、生値の直書きが lint で止まる。
+推奨 severity 込みの config を配布しているので **1 行で入る**:
 
 ```js
 // eslint.config.mjs
+import { meltaPlugin } from "melta-app/eslint-plugin";
+
+export default [meltaPlugin.configs.recommended];
+```
+
+`configs.recommended`（flat config 形式）は plugin の登録とルール 4 本の severity を含む。
+**severity の正本は plugin 側**なので、消費者がドキュメントから写して持つ必要はない。
+
+適用範囲は指定していない（消費者側の config 構成に委ねる）。TS/TSX だけに絞る、
+severity を変える、といった**カスタマイズをする場合**は spread して上書きする:
+
+```js
+// eslint.config.mjs（カスタマイズする場合）
+import { meltaPlugin } from "melta-app/eslint-plugin";
+
+export default [
+  {
+    ...meltaPlugin.configs.recommended,
+    files: ["src/**/*.{ts,tsx}"],
+    rules: {
+      ...meltaPlugin.configs.recommended.rules,
+      "melta/no-raw-spacing": "off", // 例: false positive が多い環境では落とす
+    },
+  },
+];
+```
+
+plugin の登録とルール指定を最初から自分で書く形（従来の書き方）も動く:
+
+```js
+// eslint.config.mjs（すべて手書きする場合）
 import { meltaPlugin } from "melta-app/eslint-plugin";
 
 export default [
@@ -297,6 +329,7 @@ export default [
 
 - 依存ゼロの自己完結 ESM（eslint 本体以外に何も要らない）。ESLint 9+ の flat config を想定（このリポでは 10.x で検証）
 - `meltaPlugin` は **named export のみ**（default export なし）
+- eslintrc（`.eslintrc.*`）からは登録できない（ESM の named export のみのため）。flat config への移行が要る
 - 検知は AST の構文形状ベースの補助線。変数経由・spread は漏れるので、値の純度の本丸は
   token 経由（`theme.*`）で書く習慣の側にある
 
@@ -311,7 +344,7 @@ export default [
 - ✅ form / feedback 10 個（TextField / Toggle / Checkbox / Radio / Alert / Toast / Progress / Modal / ActionSheet / BottomSheet）— checkbox / radio は Pressable + 描画（svg 非依存）、ActionSheet / BottomSheet は select / dropdown の adapted 変換先の受け皿
 - ✅ showcase（https://app.melta.tsubotax.com — melta-ui 様式シェル + 実 RN カタログの Live 埋め込み。表・統計は契約からビルド時生成）
 - ✅ AI 入口: [llms.txt](https://app.melta.tsubotax.com/llms.txt)（契約から生成・drift 検査対象）+ [docs/patterns.md](docs/patterns.md)（フォームの組み方規範。スニペットは実コードと機械同期）
-- ✅ lint 強制層の npm 配布（0.5.2）: `melta-app/eslint-plugin` を公開 subpath 化。消費者プロジェクトの flat config に組めば、生値の直書きが消費者側でも lint で止まる
+- ✅ lint 強制層の npm 配布（0.5.2）: `melta-app/eslint-plugin` を公開 subpath 化。消費者プロジェクトの flat config に組めば、生値の直書きが消費者側でも lint で止まる。推奨 severity は `configs.recommended` で配布（0.5.3。消費者が手書きで写さない）
 - ✅ [npm publish（0.5.2）](https://www.npmjs.com/package/melta-app)
 - ⬜ React Native Directory 登録（[PR #2606](https://github.com/react-native-community/directory/pull/2606) レビュー待ち）
 

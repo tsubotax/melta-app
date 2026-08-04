@@ -7,6 +7,36 @@
 
 ---
 
+## 0.5.3 — 2026-08-04
+
+既存 API（コンポーネント・subpath）の変更なし。**lint plugin に推奨 config を追加**。
+外部消費者 rally-nav での実導入フィードバック（`melta-harness-install-log.md` の T6 / T11 / T12）由来。
+
+### 追加
+
+- **`meltaPlugin.configs.recommended` を追加した。** これまで推奨 severity
+  （color / radius = error、spacing / fontsize = warn）は `eslint-rules/melta.mjs` 先頭の
+  **コメントにしか無く**、消費者は README から手で書き写すしかなかった＝ドリフト源。
+  flat config 形式の config オブジェクト（plugin 登録 + ルール 4 本）を配布物に含めたので、
+  `export default [meltaPlugin.configs.recommended];` の 1 行で導入できる。
+  適用範囲（`files`）はあえて持たせておらず、消費者側で spread して上書きする
+- check-installability に `configs.recommended` の検査を追加（存在 + `plugins.melta` の自己参照 +
+  ルール 4 本の severity 値まで照合）。config はあるが空・severity が入れ替わった、を検出する
+
+### 内部
+
+- **PostToolUse hook を bash から node 実装へ差し替えた**（`scripts/hook-lint.sh` →
+  `scripts/hook-lint.mjs`）。旧実装は `|| true` と `2>/dev/null` で eslint の実行失敗
+  （設定の構文エラー・plugin 解決失敗・強制終了）を握り潰し、**クリーン時と同じ無出力**を
+  返していた＝ハーネスが死んでも誰も気づかず違反が素通りする。新実装は eslint 不在・
+  exit 2 以上・出力破損・入力 JSON 破損をすべて `additionalContext` で必ず表に出す（fail-loud）。
+  `file_path` は `grep`/`sed` ではなく `JSON.parse` で取るので、引用符や `\uXXXX` を含むパスでも
+  途中打ち切りにならない。bash 依存も落とした（Windows 互換）
+- hook の入出力契約の E2E を追加（`scripts/lib/hook-lint.test.ts`、13 ケース）。
+  「無出力を期待する」ケースだけでは hook が常に無出力になるバグを見逃すため、
+  **故障系の陽性確認**（eslint 不在 / exit 2 / 出力破損 / 入力 JSON 破損 / 引用符入りパス）を含む
+- このリポ自身の `eslint.config.mjs` を `configs.recommended` の spread に切り替えた（ドッグフード）
+
 ## 0.5.2 — 2026-08-04
 
 既存 API（コンポーネント・subpath）の変更なし。**lint plugin の公開 subpath を新規追加**。
