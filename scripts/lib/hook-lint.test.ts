@@ -174,6 +174,21 @@ test("e-4. 壊れた入力 JSON → 無出力ではなく additionalContext", ()
   assert.match(out.hookSpecificOutput?.additionalContext ?? "", /入力 JSON/);
 });
 
+test("e-5. eslint が hang → timeout で中断し additionalContext（無期限に固まらない）", () => {
+  // plugin/parser の無限ループを模す: 出力せずに居座る偽 bin。timeout はテスト用 seam で短縮
+  const fakeBin = join(OUTSIDE_DIR, "eslint-hang.mjs");
+  writeFileSync(fakeBin, "#!/usr/bin/env node\nsetTimeout(() => {}, 60_000);\n");
+  chmodSync(fakeBin, 0o755);
+  const started = Date.now();
+  const out = runHook(writeFixture("hang.tsx", RAW_COLOR_SOURCE), {
+    HOOK_LINT_ESLINT_BIN: fakeBin,
+    HOOK_LINT_TIMEOUT_MS: "500",
+  });
+  assert.ok(Date.now() - started < 10_000, "timeout が効かず hang している");
+  assert.ok(out, "timeout が無出力（＝クリーンと区別できない）");
+  assert.match(out.hookSpecificOutput?.additionalContext ?? "", /完了せず中断/);
+});
+
 // --- f. パスの JSON エスケープで壊れない ---
 
 test("f. 引用符・空白を含むパスでも違反を検出する", () => {

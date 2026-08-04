@@ -15,11 +15,11 @@
 ### 追加
 
 - **`meltaPlugin.configs.recommended` を追加した。** これまで推奨 severity
-  （color / radius = error、spacing / fontsize = warn）は `eslint-rules/melta.mjs` 先頭の
-  **コメントにしか無く**、消費者は README から手で書き写すしかなかった＝ドリフト源。
+  （color / radius = error、spacing / fontsize = warn）は**機械可読な公開 API として
+  存在せず**（melta.mjs のコメントと README の記述のみ）、消費者が手で書き写す＝ドリフト源だった。
   flat config 形式の config オブジェクト（plugin 登録 + ルール 4 本）を配布物に含めたので、
-  `export default [meltaPlugin.configs.recommended];` の 1 行で導入できる。
-  適用範囲（`files`）はあえて持たせておらず、消費者側で spread して上書きする
+  parser を持つ base config の上に `meltaPlugin.configs.recommended` を足すだけで導入できる。
+  適用範囲（`files`）と parser はあえて持たせておらず、消費者側の構成に委ねる
 - check-installability に `configs.recommended` の検査を追加（存在 + `plugins.melta` の自己参照 +
   ルール 4 本の severity 値まで照合）。config はあるが空・severity が入れ替わった、を検出する
 
@@ -32,9 +32,14 @@
   exit 2 以上・出力破損・入力 JSON 破損をすべて `additionalContext` で必ず表に出す（fail-loud）。
   `file_path` は `grep`/`sed` ではなく `JSON.parse` で取るので、引用符や `\uXXXX` を含むパスでも
   途中打ち切りにならない。bash 依存も落とした（Windows 互換）
-- hook の入出力契約の E2E を追加（`scripts/lib/hook-lint.test.ts`、13 ケース）。
+- hook の入出力契約の E2E を追加（`scripts/lib/hook-lint.test.ts`、14 ケース）。
   「無出力を期待する」ケースだけでは hook が常に無出力になるバグを見逃すため、
-  **故障系の陽性確認**（eslint 不在 / exit 2 / 出力破損 / 入力 JSON 破損 / 引用符入りパス）を含む
+  **故障系の陽性確認**（eslint 不在 / exit 2 / **hang（timeout）** / 出力破損 / 入力 JSON 破損 /
+  引用符入りパス）を含む。eslint 実行には timeout（既定 30s）と maxBuffer を設定し、
+  plugin/parser の hang や巨大出力も「無言の死」にせず additionalContext で表に出す
+- 旧 bash 版との意図的な挙動差が 1 つある: 明示指定ファイルが eslint の ignores 対象のときの
+  「File ignored」案内は違反ではないため additionalContext に流さなくなった
+  （生成物の編集で毎回鳴るのを止めた。parse error はフィルタしない）
 - このリポ自身の `eslint.config.mjs` を `configs.recommended` の spread に切り替えた（ドッグフード）
 
 ## 0.5.2 — 2026-08-04

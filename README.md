@@ -289,6 +289,10 @@ export default [meltaPlugin.configs.recommended];
 `configs.recommended`（flat config 形式）は plugin の登録とルール 4 本の severity を含む。
 **severity の正本は plugin 側**なので、消費者がドキュメントから写して持つ必要はない。
 
+⚠️ **前提**: この config は parser を提供しない。TS/TSX を lint するには、既存の base config
+（`@react-native/eslint-config/flat` や typescript-eslint 等、parser を持つもの）の**上に追加**すること。
+recommended 単独の構成では TS/TSX の構文解析に失敗する。
+
 適用範囲は指定していない（消費者側の config 構成に委ねる）。TS/TSX だけに絞る、
 severity を変える、といった**カスタマイズをする場合**は spread して上書きする:
 

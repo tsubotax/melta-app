@@ -33,6 +33,11 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 // HOOK_LINT_ESLINT_BIN はテストから故障を注入するための seam（実行可能ファイルを直指定）。
 const ESLINT_BIN_OVERRIDE = process.env.HOOK_LINT_ESLINT_BIN;
 const ESLINT_JS = path.join(ROOT, "node_modules", "eslint", "bin", "eslint.js");
+// eslint が hang すると PostToolUse ごと無期限に固まり、additionalContext に到達しない =
+// fail-loud の欠落になる（Codex レビュー 2026-08-04）。timeout も故障として必ず表に出す。
+// HOOK_LINT_TIMEOUT_MS はテストから短縮するための seam。
+const TIMEOUT_MS = Number(process.env.HOOK_LINT_TIMEOUT_MS) || 30_000;
+const MAX_BUFFER = 16 * 1024 * 1024;
 
 /** 何も言わずに通す（lint 対象外のファイル）。 */
 function pass() {
@@ -100,10 +105,23 @@ try {
     cwd: ROOT,
     encoding: "utf8",
     stdio: ["ignore", "pipe", "pipe"],
+    timeout: TIMEOUT_MS,
+    maxBuffer: MAX_BUFFER,
   });
 } catch (err) {
   // eslint 未インストール（npm install 前）は silent no-op にせず、その旨を注入する
   if (err.code === "ENOENT") notify(NOT_INSTALLED);
+  // timeout（SIGTERM で kill される）と出力サイズ超過も「無言の死」にせず必ず表に出す
+  if (err.code === "ETIMEDOUT" || (err.signal && err.status == null)) {
+    notify(
+      `melta-app: design lint が ${TIMEOUT_MS}ms 以内に完了せず中断しました（plugin/parser の hang の可能性）。ハーネスが無効になっているため違反を検出できません。`,
+    );
+  }
+  if (err.code === "ENOBUFS") {
+    notify(
+      "melta-app: design lint の出力が大きすぎて取得できませんでした。ハーネスが無効になっているため違反を検出できません。",
+    );
+  }
   // exit 1 = 違反あり（正常系。stdout に JSON が入る）/ exit 2 以上 = 設定破損などの致命的失敗
   if (err.status === 1 && typeof err.stdout === "string") {
     stdout = err.stdout;
