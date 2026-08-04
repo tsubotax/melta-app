@@ -349,7 +349,8 @@ export default [
 - ✅ showcase（https://app.melta.tsubotax.com — melta-ui 様式シェル + 実 RN カタログの Live 埋め込み。表・統計は契約からビルド時生成）
 - ✅ AI 入口: [llms.txt](https://app.melta.tsubotax.com/llms.txt)（契約から生成・drift 検査対象）+ [docs/patterns.md](docs/patterns.md)（フォームの組み方規範。スニペットは実コードと機械同期）
 - ✅ lint 強制層の npm 配布（0.5.2）: `melta-app/eslint-plugin` を公開 subpath 化。消費者プロジェクトの flat config に組めば、生値の直書きが消費者側でも lint で止まる。推奨 severity は `configs.recommended` で配布（0.5.3。消費者が手書きで写さない）
-- ✅ [npm publish（0.5.2）](https://www.npmjs.com/package/melta-app)
+- ✅ 消費者プロジェクトでの実導入検証（2026-08-04）: 外部の RN アプリ（非公開）に npm 経由で導入し、AI が違反コードを書いた直後に検出 → 修正フィードバック → 自己修正、のループを実測で確認。導入時に見つかった hook の欠陥（実行失敗時に無言で素通りする）は同日中に本体へ還元し、故障系を含む E2E 14 ケースで固定（0.5.3）
+- ✅ [npm publish（0.5.3）](https://www.npmjs.com/package/melta-app)
 - ⬜ React Native Directory 登録（[PR #2606](https://github.com/react-native-community/directory/pull/2606) レビュー待ち）
 
 詳細は D2I リポの `.team/specs/requirements-melta-app.md`。
