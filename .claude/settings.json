@@ -10,7 +10,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR\"/scripts/hook-lint.sh"
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/scripts/hook-lint.mjs"
           }
         ]
       }
