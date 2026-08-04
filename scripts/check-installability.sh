@@ -28,6 +28,7 @@ for required in \
   "package/lib/typescript/src/icons/index.d.ts" \
   "package/lib/module/safe-area/index.js" \
   "package/lib/typescript/src/safe-area/index.d.ts" \
+  "package/eslint-rules/melta.mjs" \
   "package/THIRD_PARTY_LICENSES.md"; do
   if ! grep -qx "$required" <<<"$LISTING"; then
     echo "❌ tarball に $required がありません（bob build 出力 or files フィールドを確認）"

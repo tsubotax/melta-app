@@ -1,6 +1,6 @@
 {
   "name": "melta-app",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "melta for APP — melta デザインシステムの React Native UI kit。melta-contracts（デザイン契約）を single source of truth に RN 実装でその契約を満たす。アプリ本体ではなくライブラリ。",
   "license": "MIT",
   "homepage": "https://app.melta.tsubotax.com",
@@ -37,12 +37,14 @@
       "import": "./lib/module/safe-area/index.js",
       "default": "./lib/module/safe-area/index.js"
     },
+    "./eslint-rules/melta.mjs": "./eslint-rules/melta.mjs",
     "./package.json": "./package.json"
   },
   "files": [
     "lib",
     "src",
     "!src/**/*.test.*",
+    "eslint-rules",
     "llms.txt",
     "docs",
     "THIRD_PARTY_LICENSES.md"
