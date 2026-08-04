@@ -261,3 +261,5 @@ form ライブラリを DS として強制しない。素の React で必要十�
 | disabled-until-valid の常用 | 「なぜ押せないか」を伝えられない。常時活性 + submit 時全量検証 + サマリー Alert |
 | placeholder をラベル代わりにする | 入力を始めた瞬間に文脈が消える。placeholder は例示専用 |
 | 生値スタイル（hex / 数値 spacing 直書き） | lint（--max-warnings 0）が落とす。`theme.color.*` / `theme.spacing[*]` 経由のみ |
+
+※ この lint はこのリポジトリ専用ではない。消費者プロジェクトでも `melta-app/eslint-plugin` を flat config に組めば（`plugins: { melta: meltaPlugin }` + `melta/no-raw-color` 等）、同じルールが同じように効く。設定は README の「lint plugin」節を参照。

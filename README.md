@@ -36,7 +36,7 @@ export default function App() {
 }
 ```
 
-テーマは `ThemeProvider` が OS の light / dark に自動追従（`forcedMode` で固定も可）。トークンは `useTheme()` / `nativeTheme` から取れる。Icon だけは subpath（[後述](#icon-だけ-subpath-エントリmelta-appicons)）。
+テーマは `ThemeProvider` が OS の light / dark に自動追従（`forcedMode` で固定も可）。トークンは `useTheme()` / `nativeTheme` から取れる。本体エントリ以外は subpath 3 つ（[Icon](#subpath-エントリ-iconmelta-appicons) / [SafeArea 差替](#safearea-の差し替えmelta-appsafe-area) / [lint plugin](#lint-pluginmelta-appeslint-plugin)）。
 
 ### ブランドテーマを注入する
 
@@ -221,9 +221,10 @@ npm run ios   # または android / web
 | tooltip | — | 🚫 not-planned | — | hover 前提のため。iPhone HIG に tooltip 概念なし。必要になれば長押し Hint として別契約を切る |
 <!-- END GENERATED: component-status -->
 
-### Icon だけ subpath エントリ（`melta-app/icons`）
+### subpath エントリ: Icon（`melta-app/icons`）
 
-Icon は唯一 `react-native-svg`（optional peerDependency）に依存するため、本体エントリから分離している。
+subpath は Icon / SafeArea 差替（`melta-app/safe-area`）/ lint plugin（`melta-app/eslint-plugin`）の 3 つ。
+このうち Icon は唯一 `react-native-svg`（optional peerDependency）に依存するため、本体エントリから分離している。
 本体 `melta-app` は依存ゼロのまま — Icon を使うアプリだけが以下を行う:
 
 ```bash
@@ -294,7 +295,7 @@ export default [
 ];
 ```
 
-- 依存ゼロの自己完結 ESM（eslint 本体以外に何も要らない）。ESLint 9 の flat config を想定
+- 依存ゼロの自己完結 ESM（eslint 本体以外に何も要らない）。ESLint 9+ の flat config を想定（このリポでは 10.x で検証）
 - `meltaPlugin` は **named export のみ**（default export なし）
 - 検知は AST の構文形状ベースの補助線。変数経由・spread は漏れるので、値の純度の本丸は
   token 経由（`theme.*`）で書く習慣の側にある
@@ -304,13 +305,14 @@ export default [
 - ✅ ライブラリ化（root=ライブラリ / example=カタログアプリ、peerDeps react + react-native、runtime deps ゼロ）
 - ✅ `melta-contracts` を npm 依存として購読（recipes/app の styleRefs 同梱）
 - ✅ conformance: 契約源 ↔ 生成メタ ↔ `__contract` 宣言の照合 + consumer テスト（契約 subset / token 実在 / contractVersion 同期）+ styleRefs conformance（全実装コンポーネント展開済み）+ RN mount smoke（light/dark × 全公開コンポーネント）
-- ✅ ハーネス: design lint（CI `--max-warnings 0` + PostToolUse hook）/ drift 検査（README・catalog・allowlist 突合）/ installability ゲート（pack → install → import → typecheck）
+- ✅ ハーネス: design lint（CI `--max-warnings 0` + PostToolUse hook）/ drift 検査（README・catalog・allowlist 突合）/ installability ゲート（pack → tarball 実体検査 → fixture へ install → 本体 / icons / safe-area の import + typecheck → eslint plugin を実 import してルール 4 本の実在を照合 → exports の解決先確認。`npm run release` チェーンの必須ステップ）
 - ✅ layout 6 個（Stack / Row / Screen / Header / Icon / Avatar）— dogfood 不足 1〜4 を解消、ProjectFeedScreen は公開 primitive だけで構成
   - Screen の SafeArea は adapter registry 化済み: default は RN core SafeAreaView（依存ゼロ維持）、`melta-app/safe-area` の `enableSafeAreaContext()` で react-native-safe-area-context に差し替え可（optional peer）
 - ✅ form / feedback 10 個（TextField / Toggle / Checkbox / Radio / Alert / Toast / Progress / Modal / ActionSheet / BottomSheet）— checkbox / radio は Pressable + 描画（svg 非依存）、ActionSheet / BottomSheet は select / dropdown の adapted 変換先の受け皿
 - ✅ showcase（https://app.melta.tsubotax.com — melta-ui 様式シェル + 実 RN カタログの Live 埋め込み。表・統計は契約からビルド時生成）
 - ✅ AI 入口: [llms.txt](https://app.melta.tsubotax.com/llms.txt)（契約から生成・drift 検査対象）+ [docs/patterns.md](docs/patterns.md)（フォームの組み方規範。スニペットは実コードと機械同期）
-- ✅ [npm publish（0.1.0）](https://www.npmjs.com/package/melta-app)
+- ✅ lint 強制層の npm 配布（0.5.2）: `melta-app/eslint-plugin` を公開 subpath 化。消費者プロジェクトの flat config に組めば、生値の直書きが消費者側でも lint で止まる
+- ✅ [npm publish（0.5.2）](https://www.npmjs.com/package/melta-app)
 - ⬜ React Native Directory 登録（[PR #2606](https://github.com/react-native-community/directory/pull/2606) レビュー待ち）
 
 詳細は D2I リポの `.team/specs/requirements-melta-app.md`。

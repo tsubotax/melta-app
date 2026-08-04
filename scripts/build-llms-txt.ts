@@ -141,7 +141,7 @@ ${componentLines.join("\n")}
 ## Optional
 
 - [melta-ui llms.txt](${CONTRACTS_BASE}/llms.txt): web 版デザインシステムの AI 入口（デザイン言語の一次資料）
-- [npm](https://www.npmjs.com/package/melta-app): パッケージ（Icon は melta-app/icons、SafeArea 差替は melta-app/safe-area サブパス）
+- [npm](https://www.npmjs.com/package/melta-app): パッケージ（サブパスは Icon = melta-app/icons、SafeArea 差替 = melta-app/safe-area、lint 強制層 = melta-app/eslint-plugin の 3 つ）
 - [THIRD_PARTY_LICENSES.md](https://github.com/tsubotax/melta-app/blob/main/THIRD_PARTY_LICENSES.md): Icon グリフの帰属表示
 `;
 }
