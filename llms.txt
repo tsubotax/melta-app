@@ -6,7 +6,8 @@ UI を組む前に docs/patterns.md（組み方の規範）を読むこと。exa
 
 ## Docs
 
-- [README.md](https://github.com/tsubotax/melta-app#readme): 全体像（Install / 設計の核 / トークン正規化 / コンポーネント表）
+- [README.md](https://github.com/tsubotax/melta-app#readme): 使う側の全体像（Quickstart / 利用側コードの lint 強制層 / コンポーネント表 / テーマ注入 / 制約）
+- [architecture.md](https://github.com/tsubotax/melta-app/blob/main/docs/architecture.md): 触る側の台帳（ディレクトリ構成 / トークン正規化 web→RN / 実装ステータス詳細 / CI）
 - [patterns.md](https://app.melta.tsubotax.com/docs/patterns.md): フォーム等「組み方」の規範 + コピペ可能スニペット（実コードと drift 検査済み）
 - [showcase](https://app.melta.tsubotax.com/): Live Catalog（実 RN コンポーネントの web export）+ 実装状態の全量表
 - [tokens.json](https://melta.tsubotax.com/design/contracts/tokens.json): デザイントークン（契約 SSOT の配信面）
