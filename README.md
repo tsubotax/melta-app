@@ -14,8 +14,10 @@
 
 ## Proof（機械で担保している範囲）
 
-主張はすべて実行できる形で置いてある。証拠として挙げたリポジトリ内のパスとアンカーは
-drift 検査（`npm run check:drift`）が実在を照合するので、リンクが腐れば CI が落ちる。
+このリポジトリで検証できる主張には実行コマンドを付けてある。証拠として挙げたリポジトリ内の
+パスとアンカーは drift 検査（`npm run check:drift`）が実在を照合するので、リンクが腐れば CI が落ちる。
+※実導入検証（下記 2 項目め）だけは非公開プロジェクトでの**実測報告**で、読者が再実行できるのは
+同じ欠陥を固定した E2E テストまで。
 
 - **ドキュメントは契約からの生成物** — 下の[コンポーネント表](#コンポーネント)・[llms.txt](https://app.melta.tsubotax.com/llms.txt)・showcase の統計は `melta-contracts` から生成し、手書きの表はこのリポに存在しない。腐りは drift 検査が落とす（[scripts/check-drift.ts](./scripts/check-drift.ts) / [CI](./.github/workflows/check.yml)）
 - **消費者プロジェクトでの実導入検証（2026-08-04）** — 別リポジトリの自プロジェクト（非公開 RN アプリ）に npm 経由で導入し、AI が違反コードを書いた直後に検出 → 修正フィードバック → 自己修正、のループを実測で確認。導入時に見つかった hook の欠陥（実行失敗時に無言で素通りする）は同日中に本体へ還元し、故障系を含む E2E 14 ケースで固定（[scripts/lib/hook-lint.test.ts](./scripts/lib/hook-lint.test.ts) / [CHANGELOG 0.5.3](./CHANGELOG.md#053--2026-08-04)）
@@ -71,7 +73,7 @@ import { meltaPlugin } from "melta-app/eslint-plugin";
 
 export default [
   // theme 定義ファイルはブランドの生値そのものなので lint 対象から外す
-  { ignores: ["theme.ts"] },
+  { ignores: ["**/theme.ts"] },
 
   // 1. RN 標準の base config。parser（TS/TSX）と React / RN ルールはこちらが持つ
   ...rnConfig,
