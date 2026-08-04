@@ -17,7 +17,9 @@ D2I は当初想定していた最初の adopter だが、mobile 側はまだ me
 npm install melta-app
 ```
 
-peerDependencies は `react` / `react-native` のみ（Expo でも素の RN でも可、runtime 依存ゼロ）。
+必須の peerDependencies は `react` / `react-native` の 2 つ（runtime 依存ゼロ）。機能別の optional peer が 2 つ — `react-native-svg`（`melta-app/icons` を使う場合のみ）と `react-native-safe-area-context`（`melta-app/safe-area` を使う場合のみ）。検証済み構成は Expo 56 / RN 0.85 / React 19.2。
+
+> ⚠️ **0.x 系につき破壊的変更は minor で入る**（CHANGELOG 方針）。`^` 範囲でなく**バージョン固定か `~` 範囲**を推奨。
 
 ```tsx
 import { ThemeProvider, Screen, Header, Card, Text, Button } from "melta-app";
@@ -101,7 +103,7 @@ const theme = defineTheme({
 
 ## 設計の核
 
-- **契約は共有、実装は各最適**: tokens / 禁止ルール / component 契約は `melta-contracts`（JSON）が SSOT。melta-app に token は持たない（二重化を物理防止）。
+- **契約は共有、実装は各最適**: tokens / 禁止ルール / component 契約は `melta-contracts`（JSON）が SSOT。melta-app に**手書きの token 正本**は持たない（`native-theme.ts` は契約からの生成物。二重管理を物理防止）。
 - **公開 DS の純度を守る**: 汎用 UI プリミティブだけを置く。アプリ固有の UI（特定サービスの画面・機能・語彙）は**各アプリ側**に置き、ここには混ぜない。
 - **依存最小**: 初期は RN `StyleSheet` 固定（nativewind / unistyles 等の runtime styling lib を入れない）。Storybook RN も使わず自前カタログ。
 
@@ -111,7 +113,7 @@ const theme = defineTheme({
 
 - **契約が機械可読**: variants / sizes / states / tokens / a11y はすべて `melta-contracts` の JSON。生成 AI は「それっぽい見た目」ではなく契約を参照して UI を書ける。
 - **実装状態も機械可読**: 各契約の `appStatus`（implemented / planned / not-planned）と `appMapping`（adapted = モバイル慣習への変換）が SSOT。この README のコンポーネント表も、showcase の表も、そこから生成される — 手書きの表はこのリポに存在しない。
-- **ズレは CI が拾う**: 契約と実装の齟齬は conformance テスト、ドキュメントの腐りは drift 検査が落とす。「AI が書いたコードが DS に準拠しているか」を人間の目視でなくハーネスが判定する。
+- **ズレは CI が拾う**: ライブラリ内部の契約準拠は conformance テストが機械判定し、ドキュメントの腐りは drift 検査が落とす。利用側コードは consumer lint（`melta-app/eslint-plugin`）が**直接リテラル 4 類型を補助検査**する（変数・spread 経由は漏れる。純度の本丸は token 経由で書く習慣の側）。
 - web 版には MCP サーバー（`melta-ds-mcp`）もあり、Claude Code / Cursor から契約・トークン・ルールを直接引ける（RN 対応は今後）。
 
 ## ディレクトリ
@@ -349,11 +351,10 @@ export default [
 - ✅ showcase（https://app.melta.tsubotax.com — melta-ui 様式シェル + 実 RN カタログの Live 埋め込み。表・統計は契約からビルド時生成）
 - ✅ AI 入口: [llms.txt](https://app.melta.tsubotax.com/llms.txt)（契約から生成・drift 検査対象）+ [docs/patterns.md](docs/patterns.md)（フォームの組み方規範。スニペットは実コードと機械同期）
 - ✅ lint 強制層の npm 配布（0.5.2）: `melta-app/eslint-plugin` を公開 subpath 化。消費者プロジェクトの flat config に組めば、生値の直書きが消費者側でも lint で止まる。推奨 severity は `configs.recommended` で配布（0.5.3。消費者が手書きで写さない）
-- ✅ 消費者プロジェクトでの実導入検証（2026-08-04）: 外部の RN アプリ（非公開）に npm 経由で導入し、AI が違反コードを書いた直後に検出 → 修正フィードバック → 自己修正、のループを実測で確認。導入時に見つかった hook の欠陥（実行失敗時に無言で素通りする）は同日中に本体へ還元し、故障系を含む E2E 14 ケースで固定（0.5.3）
+- ✅ 消費者プロジェクトでの実導入検証（2026-08-04）: 別リポジトリの自プロジェクト（非公開 RN アプリ）に npm 経由で導入し、AI が違反コードを書いた直後に検出 → 修正フィードバック → 自己修正、のループを実測で確認。導入時に見つかった hook の欠陥（実行失敗時に無言で素通りする）は同日中に本体へ還元し、故障系を含む E2E 14 ケースで固定（0.5.3）
 - ✅ [npm publish（0.5.3）](https://www.npmjs.com/package/melta-app)
 - ⬜ React Native Directory 登録（[PR #2606](https://github.com/react-native-community/directory/pull/2606) レビュー待ち）
 
-詳細は D2I リポの `.team/specs/requirements-melta-app.md`。
 
 ## License
 
