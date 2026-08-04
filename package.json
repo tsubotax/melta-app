@@ -37,6 +37,7 @@
       "import": "./lib/module/safe-area/index.js",
       "default": "./lib/module/safe-area/index.js"
     },
+    "./eslint-plugin": "./eslint-rules/melta.mjs",
     "./eslint-rules/melta.mjs": "./eslint-rules/melta.mjs",
     "./package.json": "./package.json"
   },
@@ -106,7 +107,7 @@
     "check:drift": "tsx scripts/check-drift.ts",
     "check:installability": "bash scripts/check-installability.sh",
     "check:build-fresh": "tsx scripts/check-build-fresh.ts",
-    "release": "npm run build && npm run typecheck && npm run lint && npm test && npm run test:rn && npm run check:drift && npm run check:build-fresh && npm publish",
+    "release": "npm run build && npm run typecheck && npm run lint && npm test && npm run test:rn && npm run check:drift && npm run check:build-fresh && npm run check:installability && npm publish",
     "build:llms": "tsx scripts/build-llms-txt.ts"
   },
   "jest": {

@@ -272,6 +272,33 @@ enableSafeAreaContext({ edges: ["top"] });
 - safe-area と合成する padding は**数値のみ**サポート（`"5%"` 等の非数値は基底として扱えず、
   対象 edge は inset 値に置き換わる）。RTL / `paddingStart`・`paddingEnd` は対応済み
 
+### lint plugin（`melta-app/eslint-plugin`）
+
+melta 契約からの逸脱を機械検知する eslint カスタムルール 4 本を同梱している。
+消費者プロジェクトの flat config に組み込むと、生値の直書きが lint で止まる:
+
+```js
+// eslint.config.mjs
+import { meltaPlugin } from "melta-app/eslint-plugin";
+
+export default [
+  {
+    plugins: { melta: meltaPlugin },
+    rules: {
+      "melta/no-raw-color": "error",    // 生 hex/rgb/hsl → theme.color.*
+      "melta/no-raw-radius": "error",   // borderRadius 数値直書き → theme.radius.*
+      "melta/no-raw-spacing": "warn",   // padding/margin/gap 数値直書き（false positive あり）
+      "melta/no-raw-fontsize": "warn",  // fontSize 数値直書き
+    },
+  },
+];
+```
+
+- 依存ゼロの自己完結 ESM（eslint 本体以外に何も要らない）。ESLint 9 の flat config を想定
+- `meltaPlugin` は **named export のみ**（default export なし）
+- 検知は AST の構文形状ベースの補助線。変数経由・spread は漏れるので、値の純度の本丸は
+  token 経由（`theme.*`）で書く習慣の側にある
+
 ## ステータス
 
 - ✅ ライブラリ化（root=ライブラリ / example=カタログアプリ、peerDeps react + react-native、runtime deps ゼロ）

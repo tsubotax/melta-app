@@ -216,6 +216,20 @@ JSON
 
 npx tsc -p tsconfig.safe-area.json
 
+echo "→ eslint plugin の import + ルール実体検査（存在チェックだけでは exports 誤記・export 名変更・ルール欠落を検出できない）"
+node --input-type=module -e "
+const expected = ['no-raw-color', 'no-raw-radius', 'no-raw-spacing', 'no-raw-fontsize'];
+for (const spec of ['melta-app/eslint-plugin', 'melta-app/eslint-rules/melta.mjs']) {
+  const mod = await import(spec);
+  if (!mod.meltaPlugin) throw new Error(spec + ': meltaPlugin named export がない');
+  const rules = Object.keys(mod.meltaPlugin.rules ?? {});
+  for (const r of expected) {
+    if (!rules.includes(r)) throw new Error(spec + ': ルール ' + r + ' が欠落（実際: ' + rules.join(',') + '）');
+  }
+  console.log('  plugin OK:', spec, '→', rules.join(', '));
+}
+"
+
 echo "→ モジュール解決の実体確認（exports 経由で実在ファイルに解決されること）"
 node --input-type=module -e "
 const { existsSync } = await import('node:fs');

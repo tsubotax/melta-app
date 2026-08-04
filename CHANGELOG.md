@@ -9,17 +9,20 @@
 
 ## 0.5.2 — 2026-08-04
 
-公開 API（コンポーネント）の変更なし。配布物の追加のみ。
+既存 API（コンポーネント・subpath）の変更なし。**lint plugin の公開 subpath を新規追加**。
 
 ### 追加
 
 - **`eslint-rules/` を npm 配布に含めるようにした。** これまで tarball に入っておらず、
   melta-app を npm 依存する消費者プロジェクトへ **lint 強制層を配る手段が無かった**
   （コピペ配布は契約と実装が離れるので採らない）。`files` に `eslint-rules` を追加し、
-  `exports` に `./eslint-rules/melta.mjs` の subpath を開いた。消費者側は
-  `import { meltaPlugin } from "melta-app/eslint-rules/melta.mjs";` で flat config に組み込める
-- check-installability の tarball 実体検査に `eslint-rules/melta.mjs` を追加。
-  再び配布物から落ちたら CI で落ちる
+  `exports` に subpath を開いた。**推奨エントリは論理名 `melta-app/eslint-plugin`**
+  （物理ファイル名を互換性契約にしないため。`./eslint-rules/melta.mjs` も互換用に併設）:
+  `import { meltaPlugin } from "melta-app/eslint-plugin";` で flat config に組み込める
+- check-installability に eslint plugin の**実 import 検査**を追加（両 subpath から import し
+  `meltaPlugin.rules` の 4 キーまで照合）。存在チェックだけでは exports 誤記・export 名変更・
+  ルール欠落を検出できないため。`release` チェーンにも `check:installability` を組み込み、
+  publish 前の必須ゲートにした
 
 ## 0.5.1 — 2026-07-29
 
