@@ -41,7 +41,7 @@ melta-app/
 | spacing / radius / fontSize | rem + px | px の数値を採用（RN は unitless） |
 | shadow | CSS box-shadow | iOS shadow* + Android elevation に分解（1 ViewStyle に同居） |
 | fontFamily | 配列 | 単一文字列（先頭採用、未ロード時 OS デフォルト fallback） |
-| lineHeight | 比率（"2.0"） | `fontSize × ratio` を px 算出 |
+| lineHeight | 比率（"2.0"） | `fontSize × ratio` を px 算出（四捨五入）し、安全下限 `ceil(fontSize × minLineHeightRatio)`（既定 1.45）でクランプ（RN Android の字形欠け対策。根拠は `src/theme/line-height.ts`） |
 | letterSpacing | em | **em ratio の数値で保持**（fontSize 相対のため token 単体で px 化不可。適用側が `fontSize × ratio` で解決） |
 | motion duration | "150ms" | 150（数値） |
 | motion easing | cubic-bezier | `[a,b,c,d]` tuple（`Easing.bezier(...)` に展開） |

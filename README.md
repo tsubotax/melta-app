@@ -307,13 +307,19 @@ export const theme = defineTheme({
   typography: {
     fontFamily: {},  // 未指定 = OS デフォルト（RN の fontFamily は string 一本。embed は expo-font 側の責務）
     fontSize: {
-      xxs: { fontSize: 10, lineHeight: 14 }, xs: { fontSize: 12, lineHeight: 18 },
+      // lineHeight は fontSize × minLineHeightRatio（既定 1.45）以上にする。未満を書いても
+      // 実行時に下限へクランプされ、宣言値と描画値がズレるだけ（機序は src/theme/line-height.ts）
+      xxs: { fontSize: 10, lineHeight: 15 }, xs: { fontSize: 12, lineHeight: 18 },
       sm: { fontSize: 14, lineHeight: 21 }, base: { fontSize: 16, lineHeight: 26 },
-      lg: { fontSize: 18, lineHeight: 27 }, xl: { fontSize: 20, lineHeight: 28 },
-      "2xl": { fontSize: 24, lineHeight: 31 }, "3xl": { fontSize: 30, lineHeight: 36 },
+      lg: { fontSize: 18, lineHeight: 27 }, xl: { fontSize: 20, lineHeight: 29 },
+      "2xl": { fontSize: 24, lineHeight: 35 }, "3xl": { fontSize: 30, lineHeight: 44 },
     },
     fontWeight: { normal: "400", medium: "500", semibold: "600", bold: "700" },
     letterSpacingRatio: { heading: -0.02, body: 0 },  // em 比率（px ではない）
+    // フォントを同梱するなら、そのフォントが要求する最小行間比を宣言する（例: LINE Seed JP = 1.61。
+    // 下回る lineHeight は RN Android で字形が欠けるため実行時に下限へクランプされる）。
+    // 未宣言は日本語安全側の 1.45（Android system の Noto Sans CJK JP 実測）:
+    // minLineHeightRatio: 1.61,
   },
   spacing: { "1": 4, "2": 8, "3": 12, "4": 16, "5": 20, "6": 24, "8": 32, "10": 40, "12": 48, "14": 56, "16": 64 },
   radius: { sm: 4, md: 8, lg: 16, full: 9999 },
