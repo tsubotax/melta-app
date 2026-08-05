@@ -59,9 +59,13 @@ export function Text({
   // `style={{lineHeight: 16}}` を止められない。flatten した**最終値**に行間の安全下限を掛ける
   // （fontSize の上書きにも追随させるため、下限は最終 fontSize から算出。機序は theme/line-height.ts）。
   const flat: TextStyle = StyleSheet.flatten([shape, { color: colors[color] }, style]);
+  // `fontSize: undefined` の明示上書き（flatten は undefined でも上書きする）は、RN 既定サイズで
+  // 描画されるのにクランプ基準だけ variant 値になる齟齬を生む。variant の fontSize を復元して
+  // 「Text の文字サイズは variant が決める」契約とクランプ基準を一致させる。
+  if (typeof flat.fontSize !== "number") flat.fontSize = shape.fontSize;
   if (flat.lineHeight !== undefined) {
     const floor = minLineHeightFor(
-      flat.fontSize ?? shape.fontSize ?? 0,
+      flat.fontSize ?? 0,
       theme.typography.minLineHeightRatio ?? DEFAULT_MIN_LINE_HEIGHT_RATIO,
     );
     if (flat.lineHeight < floor) flat.lineHeight = floor;

@@ -25,7 +25,7 @@ export const DEFAULT_MIN_LINE_HEIGHT_RATIO = 1.45;
 
 /**
  * fontSize に対する安全な最小 lineHeight（px）。
- * **切り上げ**であることが要点: 四捨五入だと 10 × 1.45 = 14.5 → 14 で下限を割る。
+ * **切り上げ**であることが要点: 四捨五入だと 32 × 1.45 = 46.4 → 46 で下限を割る。
  */
 export function minLineHeightFor(fontSize: number, minRatio: number): number {
   return Math.ceil(fontSize * minRatio);

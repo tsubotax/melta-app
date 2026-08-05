@@ -19,8 +19,8 @@ import { resolveMetricStyles } from "../../src/primitives/metric.styles.js";
 import { nativeTheme } from "../../src/theme/native-theme.js";
 import type { NativeTheme } from "../../src/theme/types.js";
 
-test("minLineHeightFor: 切り上げで下限を割らない（round だと 14.5 → 14 で割る）", () => {
-  assert.equal(minLineHeightFor(10, 1.45), 15); // 14.5 → 15
+test("minLineHeightFor: 切り上げで下限を割らない（round だと 46.4 → 46 で割る）", () => {
+  assert.equal(minLineHeightFor(32, 1.45), 47); // 46.4 → 47（round なら 46 で下限割れ）
   assert.equal(minLineHeightFor(13, 1.45), 19); // 18.85 → 19
   assert.equal(minLineHeightFor(20, 1.45), 29); // ちょうど 29
 });
@@ -28,6 +28,12 @@ test("minLineHeightFor: 切り上げで下限を割らない（round だと 14.5
 test("clampLineHeight: 詰める方向だけ止める（広げる方向は宣言のまま）", () => {
   assert.equal(clampLineHeight(18, 36, 1.45), 36); // 2.0 宣言はそのまま
   assert.equal(clampLineHeight(13, 18, 1.45), 19); // 1.4 宣言は下限へ
+});
+
+test("clampLineHeight: 既定より低い比率の宣言（ラテン専用フォント等）ならクランプしない", () => {
+  // CHANGELOG が公開仕様として許可している「下げる宣言」。1.21 なら 13px の 16 は合法のまま
+  assert.equal(clampLineHeight(13, 16, 1.21), 16); // ceil(13 × 1.21) = 16 ちょうど
+  assert.equal(clampLineHeight(13, 15, 1.21), 16); // 下限未満は 16 へ（下限自体は効き続ける）
 });
 
 /** typography だけ差し替えたカスタム theme を作る（他は既定を流用）。 */

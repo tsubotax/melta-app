@@ -132,6 +132,49 @@ test("宣言した mode の色が欠けていたら拾う", () => {
   assert.match(problems[0], /text-heading/);
 });
 
+test("minLineHeightRatio の不正値を拾う（未宣言は合法）", () => {
+  // 未宣言 = 既定 1.45 へ倒れるので問題なし
+  assert.deepEqual(validateTheme(singleDarkThemeOptions), []);
+  for (const bad of [Number.NaN, Number.POSITIVE_INFINITY, 0.9, "1.61" as unknown as number]) {
+    const broken: ThemeOptions = {
+      ...singleDarkThemeOptions,
+      typography: { ...singleDarkThemeOptions.typography, minLineHeightRatio: bad },
+    };
+    const problems = validateTheme(broken);
+    assert.equal(problems.length, 1, `${String(bad)} を拾えていない`);
+    assert.match(problems[0], /minLineHeightRatio が不正/);
+  }
+  // 正当な宣言（フォント実測値）は通る
+  const declared: ThemeOptions = {
+    ...singleDarkThemeOptions,
+    typography: { ...singleDarkThemeOptions.typography, minLineHeightRatio: 1.61 },
+  };
+  assert.deepEqual(validateTheme(declared), []);
+});
+
+test("minLineHeightRatio に置いた accessor は validation で発火しない（プローブ契約の一貫性）", () => {
+  // missingKeys と同じ方針: accessor は「ある」とみなして値を読まない。
+  // 値の直読みで検査すると「defineTheme は accessor を1度も呼ばない」契約が破れる。
+  let reads = 0;
+  const probed: ThemeOptions = {
+    ...singleDarkThemeOptions,
+    typography: { ...singleDarkThemeOptions.typography },
+  };
+  Object.defineProperty(probed.typography, "minLineHeightRatio", {
+    enumerable: true,
+    configurable: true,
+    get: () => {
+      reads++;
+      return 1.61;
+    },
+  });
+  const theme = defineTheme(probed);
+  assert.equal(reads, 0, "validate / 複製 / freeze のいずれも accessor を呼んではいけない");
+  // descriptor が accessor のまま運ばれていて、読めばちゃんと生きている
+  assert.equal(theme.typography.minLineHeightRatio, 1.61);
+  assert.equal(reads, 1);
+});
+
 test("mode を1つも持たない theme を拾う", () => {
   const broken: ThemeOptions = {
     ...singleDarkThemeOptions,

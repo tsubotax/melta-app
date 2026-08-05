@@ -9,8 +9,9 @@
  */
 
 import { describe, test, expect } from "@jest/globals";
+import { StyleSheet } from "react-native";
 import { render } from "@testing-library/react-native";
-import { ThemeProvider, Text } from "../index";
+import { ThemeProvider, Text, defineTheme, nativeTheme } from "../index";
 
 /** render().toJSON() の最小 shape（react-test-renderer 型に依存しない）。 */
 interface Node {
@@ -65,5 +66,70 @@ describe("Text 行間の安全下限", () => {
   test("上書きなしの既定はクランプ済み theme の値", async () => {
     const style = await renderedStyle(<Text variant="xs">ギュネイ</Text>);
     expect(style.lineHeight).toBe(19); // native-theme（codegen 済み）の xs
+  });
+
+  test("StyleSheet.create の registered style でもクランプされる", async () => {
+    const s = StyleSheet.create({ tight: { lineHeight: 10 } });
+    const style = await renderedStyle(
+      <Text variant="xs" style={s.tight}>
+        ギュネイ
+      </Text>,
+    );
+    expect(style.lineHeight).toBe(19);
+  });
+
+  test("入れ子配列の style でもクランプされる", async () => {
+    const style = await renderedStyle(
+      <Text variant="xs" style={[[{ lineHeight: 10 }]]}>
+        ギュネイ
+      </Text>,
+    );
+    expect(style.lineHeight).toBe(19);
+  });
+
+  test("lineHeight: 0 もクランプされる（0 は『無指定』ではなく極端な詰め）", async () => {
+    const style = await renderedStyle(
+      <Text variant="xs" style={{ lineHeight: 0 }}>
+        ギュネイ
+      </Text>,
+    );
+    expect(style.lineHeight).toBe(19);
+  });
+
+  test("lineHeight: undefined の明示上書きは自然行高（フォント既定 metrics）に戻り、安全", async () => {
+    const style = await renderedStyle(
+      <Text variant="xs" style={{ lineHeight: undefined }}>
+        ギュネイ
+      </Text>,
+    );
+    expect(style.lineHeight).toBeUndefined();
+  });
+
+  test("fontSize: undefined の明示上書きは variant の fontSize に復元される（クランプ基準との齟齬防止）", async () => {
+    const style = await renderedStyle(
+      <Text variant="xs" style={{ fontSize: undefined, lineHeight: 10 }}>
+        ギュネイ
+      </Text>,
+    );
+    expect(style.fontSize).toBe(13); // variant xs の値（RN 既定サイズで描かれる齟齬を作らない）
+    expect(style.lineHeight).toBe(19); // クランプ基準も同じ 13
+  });
+
+  test("カスタム theme の宣言比率（1.61）が消費者上書きのクランプにも効く", async () => {
+    // LINE Seed JP 同梱の消費者を模す。下限 ceil(13 × 1.61) = 21
+    const lineSeed = defineTheme({
+      ...nativeTheme,
+      id: "lineseed-test",
+      typography: { ...nativeTheme.typography, minLineHeightRatio: 1.61 },
+    });
+    const { toJSON } = await render(
+      <ThemeProvider theme={lineSeed} forcedMode="light">
+        <Text variant="xs" style={{ lineHeight: 19 }}>
+          ギュネイ
+        </Text>
+      </ThemeProvider>,
+    );
+    const style = flatStyle(toJSON() as unknown as Node);
+    expect(style.lineHeight).toBe(21); // 既定 1.45 なら 19 のままのはずが、宣言 1.61 で 21 へ
   });
 });

@@ -376,14 +376,19 @@ export function validateTheme(options: ThemeOptions): string[] {
   // minLineHeightRatio は任意欄だが、書くなら実在しうる比率であること
   // （0.9 のような「詰め」を宣言されると clamp が下限の意味を失う。上限は設けない——
   //  行間をいくら広げても字形は欠けないので、広い分には嘘にならない）。
-  const minRatio = options.typography?.minLineHeightRatio;
-  if (
-    minRatio !== undefined &&
-    (typeof minRatio !== "number" || !Number.isFinite(minRatio) || minRatio < 1)
-  ) {
-    problems.push(
-      `${where}: typography.minLineHeightRatio が不正 — ${String(minRatio)}（フォント実測の 1 以上の有限数を宣言する。根拠は theme/line-height.ts）`,
-    );
+  // missingKeys と同じ方針で **accessor は呼ばない**（値の直読みは消費者の開発用プローブを
+  // 発火させ、「defineTheme は accessor を1度も呼ばない」契約を破る）。data property のみ検査する。
+  const minRatioDesc =
+    options.typography !== null && typeof options.typography === "object"
+      ? Object.getOwnPropertyDescriptor(options.typography, "minLineHeightRatio")
+      : undefined;
+  if (minRatioDesc !== undefined && "value" in minRatioDesc && minRatioDesc.value !== undefined) {
+    const minRatio: unknown = minRatioDesc.value;
+    if (typeof minRatio !== "number" || !Number.isFinite(minRatio) || minRatio < 1) {
+      problems.push(
+        `${where}: typography.minLineHeightRatio が不正 — ${String(minRatio)}（フォント実測の 1 以上の有限数を宣言する。根拠は theme/line-height.ts）`,
+      );
+    }
   }
 
   const status = options.color?.status;

@@ -25,7 +25,7 @@ modelog dogfood で実害が出た「行間不足による Android の字形欠�
     system フォント環境を基準にする。iOS には この clip 機序が無いため基準にしない
   - フォントを同梱する消費者は theme の `typography.minLineHeightRatio` に実測値を宣言する
     （例: LINE Seed JP = 1.61。ラテン専用フォントなら下げる宣言も可）
-  - 下限の丸めは**切り上げ**（四捨五入だと 10 × 1.45 = 14.5 → 14 で下限を割る）
+  - 下限の丸めは**切り上げ**（四捨五入だと 32 × 1.45 = 46.4 → 46 で下限を割る）
 - **既定 theme の lineHeight が 5 段変わる**: xxs 14→15 / xs 18→19 / xl 31→32 /
   2xl 36→38 / 3xl 45→47（sm / base / lg は宣言比率が下限より広いため据え置き）。
   web 共有の contracts tokens には手を入れていない（web に clip 機序が無いため、
