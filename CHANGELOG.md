@@ -7,6 +7,44 @@
 
 ---
 
+## 0.6.0 — 2026-08-06
+
+**破壊的変更（0.x 運用なので minor で表現）: 8 段中 5 段の lineHeight が +1〜2px 広がる。**
+modelog dogfood で実害が出た「行間不足による Android の字形欠け」（濁点 clip、「ギ」が「チ」に
+見える）への対策。固定高・行数制限・詰め込みレイアウトを持つ消費者は表示を確認すること。
+
+### 変更
+
+- **行間に安全下限（`minLineHeightRatio`）を導入した。** RN Android の `CustomLineHeightSpan` は
+  `lineHeight < ascent + descent` のとき字形の描画領域そのものを削り、`overflow: hidden` で
+  はみ出しが消える（機序・実測・既定値の根拠は `src/theme/line-height.ts` のコメント）。
+  消費者側に安全な回避策が無い（`includeFontPadding` 等はすべて検証済みで不成立）ため、
+  DS 側で下限を持つ:
+  - 既定は **1.45** = Android の日本語 system フォント Noto Sans CJK JP の実測 1.448 の切り上げ
+    （AOSP 版・Google Fonts 版とも同値、2026-08-06 実測）。melta はフォントを同梱しないので、
+    system フォント環境を基準にする。iOS には この clip 機序が無いため基準にしない
+  - フォントを同梱する消費者は theme の `typography.minLineHeightRatio` に実測値を宣言する
+    （例: LINE Seed JP = 1.61。ラテン専用フォントなら下げる宣言も可）
+  - 下限の丸めは**切り上げ**（四捨五入だと 10 × 1.45 = 14.5 → 14 で下限を割る）
+- **既定 theme の lineHeight が 5 段変わる**: xxs 14→15 / xs 18→19 / xl 31→32 /
+  2xl 36→38 / 3xl 45→47（sm / base / lg は宣言比率が下限より広いため据え置き）。
+  web 共有の contracts tokens には手を入れていない（web に clip 機序が無いため、
+  下限は native 正規化のポリシーとして normalize-tokens 側で持つ）
+- **クランプは 3 か所で効く**: ① codegen（native-theme 生成時）② pure resolver
+  （`resolveTextShape` / `resolveMetricStyles` — defineTheme で注入されたカスタム theme の
+  未クランプ値への防波堤）③ `Text` の最終 style 合成後（消費者の `style={{lineHeight}}` は
+  合成順で resolver に勝つため、flatten 後の最終値に掛ける。fontSize の上書きにも追随する）
+
+### 追加
+
+- theme から `DEFAULT_MIN_LINE_HEIGHT_RATIO` / `minLineHeightFor` / `clampLineHeight` を公開
+  （消費者が自前の style 定数を検査する用途にも使える）
+- `defineTheme` の validation に `minLineHeightRatio` の形式検査を追加（1 以上の有限数のみ）
+- クランプの回帰テスト: pure 層（`scripts/lib/line-height.test.ts`）+ RN render 層
+  （`src/__tests__/text-lineheight.test.tsx`、消費者上書きに勝つことの検証）
+
+---
+
 ## 0.5.3 — 2026-08-04
 
 既存 API（コンポーネント・subpath）の変更なし。**lint plugin に推奨 config を追加**。

@@ -20,6 +20,10 @@ import {
 } from "./recipe-conformance.js";
 import { resolveTextShape } from "../../src/primitives/text.styles.js";
 import { nativeTheme } from "../../src/theme/native-theme.js";
+import {
+  DEFAULT_MIN_LINE_HEIGHT_RATIO,
+  clampLineHeight,
+} from "../../src/theme/line-height.js";
 import type { FontSizeKey } from "../../src/theme/types.js";
 
 const contractsRoot = resolveContractsRoot();
@@ -54,13 +58,19 @@ test("text conformance: 全 variant の fontSize / lineHeight / letterSpacing �
     // fontSize: token の px がそのまま実装値
     assert.equal(style.fontSize, impl.fontSize, `${name}: fontSize`);
 
-    // lineHeight: fontSize token は複合値。px × lineHeight 比率（丸め）を期待値側で再現
+    // lineHeight: fontSize token は複合値。px × lineHeight 比率（丸め）を、行間の安全下限
+    // （minLineHeightRatio、切り上げ）でクランプした値を期待値側で再現（normalize-tokens と同式。
+    // 下限の根拠は src/theme/line-height.ts）
     const fsNode = walkTokenPath(tokens, variantRecipe.style.fontSize.token) as {
       px: number;
       lineHeight: string;
     };
     assert.equal(
-      Math.round(fsNode.px * Number.parseFloat(fsNode.lineHeight)),
+      clampLineHeight(
+        fsNode.px,
+        Math.round(fsNode.px * Number.parseFloat(fsNode.lineHeight)),
+        nativeTheme.typography.minLineHeightRatio ?? DEFAULT_MIN_LINE_HEIGHT_RATIO,
+      ),
       impl.lineHeight,
       `${name}: lineHeight`,
     );

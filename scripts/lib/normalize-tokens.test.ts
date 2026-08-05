@@ -80,10 +80,15 @@ test("normalizeTokens: 実 tokens.json を RN theme に変換する", () => {
   assert.equal(theme.color.status.success.subtleLight, "#ecfdf5");
   assert.equal(theme.color.status.danger.textDark, "#fca5a5");
 
-  // typography: px 採用、lineHeight = px × ratio
+  // typography: px 採用、lineHeight = max(px × 宣言比率(四捨五入), px × 1.45(切り上げ))
   assert.equal(theme.typography.fontSize.base.fontSize, 18);
-  assert.equal(theme.typography.fontSize.base.lineHeight, 36); // 18 × 2.0
-  assert.equal(theme.typography.fontSize.xs.lineHeight, Math.round(13 * 1.4)); // 18
+  assert.equal(theme.typography.fontSize.base.lineHeight, 36); // 18 × 2.0（下限 27 より広い → 宣言値のまま）
+  // 13 × 1.4 = 18.2 → round 18 だが、下限 ceil(13 × 1.45) = 19 でクランプされる
+  assert.equal(theme.typography.fontSize.xs.lineHeight, 19);
+  // 下限は**切り上げ**（round だと 10 × 1.45 = 14.5 → 14 で下限割れ）
+  assert.equal(theme.typography.fontSize.xxs.lineHeight, 15);
+  // 既定 theme は前提フォント（system Noto CJK JP）の下限を明示的に持つ
+  assert.equal(theme.typography.minLineHeightRatio, 1.45);
   assert.equal(theme.typography.fontWeight.bold, "700");
   // 初期は system default なので fontFamily は未指定（embed しない）
   assert.equal(theme.typography.fontFamily.sans, undefined);

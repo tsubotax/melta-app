@@ -83,10 +83,13 @@ test("theme エントリの値 export 集合が意図どおり（公開面の無
   // src/index.ts が `export * from "./theme"` するので、ここに足したものは即 npm 公開 API になる。
   // コンポーネント側と違って契約に対応物が無く drift 検査も効かないため、明示的に pin する。
   assert.deepEqual(listRuntimeExports("theme/index.ts"), [
+    "DEFAULT_MIN_LINE_HEIGHT_RATIO",
     "ThemeProvider",
+    "clampLineHeight",
     "declaredModes",
     "defineTheme",
     "deriveColorScheme",
+    "minLineHeightFor",
     "nativeTheme",
     "resolveLetterSpacing",
     "resolveMode",

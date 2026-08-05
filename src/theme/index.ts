@@ -9,6 +9,11 @@ export { nativeTheme } from "./native-theme";
 export { ThemeProvider, useTheme } from "./ThemeProvider";
 export type { ThemeContextValue, ThemeMode } from "./ThemeProvider";
 export { defineTheme } from "./define-theme";
+export {
+  DEFAULT_MIN_LINE_HEIGHT_RATIO,
+  minLineHeightFor,
+  clampLineHeight,
+} from "./line-height";
 /**
  * 以下は theme の解決規則を外から検証・再利用するためのヘルパ。
  * **@experimental — 安定 API ではない。** 挙動・シグネチャ・メッセージは予告なく変わりうる。

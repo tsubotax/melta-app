@@ -7,6 +7,9 @@
  */
 
 import type { NativeTheme, FontSizeKey, FontWeightKey, FontWeightValue } from "../theme";
+// theme index からの runtime import は ThemeProvider → react-native を引くため、
+// pure module（line-height.ts）を直接参照する（letterSpacing の式直書きと同じ理由）。
+import { DEFAULT_MIN_LINE_HEIGHT_RATIO, clampLineHeight } from "../theme/line-height";
 
 /** letterSpacing の切替軸（text.recipe description の role prop に対応）。 */
 export type TextRole = "heading" | "body";
@@ -35,7 +38,13 @@ export function resolveTextShape(
   const fs = theme.typography.fontSize[variant];
   return {
     fontSize: fs.fontSize,
-    lineHeight: fs.lineHeight,
+    // 既定 theme は codegen 時点でクランプ済みだが、defineTheme で注入されたカスタム theme の
+    // 値はここが最初の防波堤（機序と下限の根拠は theme/line-height.ts）。
+    lineHeight: clampLineHeight(
+      fs.fontSize,
+      fs.lineHeight,
+      theme.typography.minLineHeightRatio ?? DEFAULT_MIN_LINE_HEIGHT_RATIO,
+    ),
     letterSpacing: fs.fontSize * theme.typography.letterSpacingRatio[role],
     ...(weight ? { fontWeight: theme.typography.fontWeight[weight] } : null),
   };

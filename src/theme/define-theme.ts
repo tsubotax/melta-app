@@ -373,6 +373,19 @@ export function validateTheme(options: ThemeOptions): string[] {
     }
   }
 
+  // minLineHeightRatio は任意欄だが、書くなら実在しうる比率であること
+  // （0.9 のような「詰め」を宣言されると clamp が下限の意味を失う。上限は設けない——
+  //  行間をいくら広げても字形は欠けないので、広い分には嘘にならない）。
+  const minRatio = options.typography?.minLineHeightRatio;
+  if (
+    minRatio !== undefined &&
+    (typeof minRatio !== "number" || !Number.isFinite(minRatio) || minRatio < 1)
+  ) {
+    problems.push(
+      `${where}: typography.minLineHeightRatio が不正 — ${String(minRatio)}（フォント実測の 1 以上の有限数を宣言する。根拠は theme/line-height.ts）`,
+    );
+  }
+
   const status = options.color?.status;
   if (status !== null && typeof status === "object") {
     for (const kind of STATUS_KINDS) {

@@ -81,11 +81,11 @@ export const nativeTheme: NativeTheme = {
     "fontSize": {
       "xxs": {
         "fontSize": 10,
-        "lineHeight": 14
+        "lineHeight": 15
       },
       "xs": {
         "fontSize": 13,
-        "lineHeight": 18
+        "lineHeight": 19
       },
       "sm": {
         "fontSize": 15,
@@ -101,15 +101,15 @@ export const nativeTheme: NativeTheme = {
       },
       "xl": {
         "fontSize": 22,
-        "lineHeight": 31
+        "lineHeight": 32
       },
       "2xl": {
         "fontSize": 26,
-        "lineHeight": 36
+        "lineHeight": 38
       },
       "3xl": {
         "fontSize": 32,
-        "lineHeight": 45
+        "lineHeight": 47
       }
     },
     "fontWeight": {
@@ -121,7 +121,8 @@ export const nativeTheme: NativeTheme = {
     "letterSpacingRatio": {
       "heading": 0.01,
       "body": 0.02
-    }
+    },
+    "minLineHeightRatio": 1.45
   },
   "spacing": {
     "1": 4,

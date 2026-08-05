@@ -91,6 +91,15 @@ export interface ThemeTypography {
    * （requirements §4 の「px に換算」からの意図的な乖離。理由はこのコメントの通り）
    */
   letterSpacingRatio: { heading: number; body: number };
+  /**
+   * 使用フォントが要求する最小行間比（(ascent + descent) / unitsPerEm）。
+   * これを下回る lineHeight は RN Android で字形の描画領域を削り、濁点などが欠ける
+   * （機序と既定値 1.45 の根拠は theme/line-height.ts のコメント）。
+   * style resolver は `clampLineHeight()` でこの比率を下限として適用する。
+   * 未宣言は DEFAULT_MIN_LINE_HEIGHT_RATIO（1.45 = Android system 日本語フォント基準）へ倒れる。
+   * フォントを同梱する消費者は実測値を宣言する（例: LINE Seed JP = 1.61）。
+   */
+  minLineHeightRatio?: number;
 }
 
 /**

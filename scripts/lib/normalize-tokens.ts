@@ -20,6 +20,7 @@ import type {
   SpacingKey,
   StatusColors,
 } from "../../src/theme/types";
+import { DEFAULT_MIN_LINE_HEIGHT_RATIO, clampLineHeight } from "../../src/theme/line-height";
 
 /**
  * Android elevation は CSS box-shadow の blur/offset とは別概念で、(offsetY+blur) からの自動算出は
@@ -155,9 +156,17 @@ function normalizeStatus(rec: Record<string, ValueEntry>): StatusColors {
 export function normalizeTokens(raw: RawTokens): NativeTheme {
   const fontSize = {} as Record<FontSizeKey, FontSizeEntry>;
   for (const [key, entry] of Object.entries(raw.typography.fontSize)) {
+    // 宣言比率（web 共有の意匠値）は従来どおり四捨五入で px 化し、そのうえで
+    // 安全下限（DEFAULT_MIN_LINE_HEIGHT_RATIO、切り上げ）でクランプする。
+    // web の contracts には手を入れない: この clip は RN Android 固有の機序（line-height.ts 参照）
+    // なので、下限は native 正規化のポリシーとしてここで持つ。
     fontSize[key as FontSizeKey] = {
       fontSize: entry.px,
-      lineHeight: Math.round(entry.px * Number.parseFloat(entry.lineHeight)),
+      lineHeight: clampLineHeight(
+        entry.px,
+        Math.round(entry.px * Number.parseFloat(entry.lineHeight)),
+        DEFAULT_MIN_LINE_HEIGHT_RATIO,
+      ),
     };
   }
 
@@ -200,6 +209,9 @@ export function normalizeTokens(raw: RawTokens): NativeTheme {
         heading: toNumber(raw.typography.letterSpacing.heading.value),
         body: toNumber(raw.typography.letterSpacing.body.value),
       },
+      // 既定 theme が前提にしているフォント環境（= system の Noto CJK JP）の下限を明示的に焼く。
+      // 「なぜこの lineHeight なのか」の根拠を theme 自身が持つため（値の出どころは line-height.ts）。
+      minLineHeightRatio: DEFAULT_MIN_LINE_HEIGHT_RATIO,
     },
     spacing,
     radius,

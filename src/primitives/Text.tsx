@@ -13,8 +13,8 @@
  */
 
 import { useMemo, type ReactNode } from "react";
-import { Text as RNText, type StyleProp, type TextStyle } from "react-native";
-import { useTheme } from "../theme";
+import { StyleSheet, Text as RNText, type StyleProp, type TextStyle } from "react-native";
+import { useTheme, DEFAULT_MIN_LINE_HEIGHT_RATIO, minLineHeightFor } from "../theme";
 import type { FontWeightKey, SemanticColors } from "../theme";
 import { CONTRACTS, type VariantOf } from "../contracts/contract-types";
 import { resolveTextShape, type TextRole } from "./text.styles";
@@ -55,9 +55,21 @@ export function Text({
     [theme, variant, role, weight],
   );
 
+  // 消費者 style は合成順で最後＝上書きが勝つため、resolver 内のクランプだけでは
+  // `style={{lineHeight: 16}}` を止められない。flatten した**最終値**に行間の安全下限を掛ける
+  // （fontSize の上書きにも追随させるため、下限は最終 fontSize から算出。機序は theme/line-height.ts）。
+  const flat: TextStyle = StyleSheet.flatten([shape, { color: colors[color] }, style]);
+  if (flat.lineHeight !== undefined) {
+    const floor = minLineHeightFor(
+      flat.fontSize ?? shape.fontSize ?? 0,
+      theme.typography.minLineHeightRatio ?? DEFAULT_MIN_LINE_HEIGHT_RATIO,
+    );
+    if (flat.lineHeight < floor) flat.lineHeight = floor;
+  }
+
   return (
     <RNText
-      style={[shape, { color: colors[color] }, style]}
+      style={flat}
       numberOfLines={numberOfLines}
       accessibilityRole={role === "heading" ? "header" : undefined}
       testID={testID}
