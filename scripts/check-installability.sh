@@ -80,7 +80,7 @@ npm install --silent --no-audit --no-fund \
   react@19.2.3 react-native@0.85.3 \
   typescript@~6.0.3 @types/react@~19.2.2 >/dev/null
 
-# --- consumer tsconfig の 3 構成（fixture × moduleResolution = 計 9 回の tsc）---
+# --- consumer tsconfig の 3 構成（fixture × moduleResolution = 計 12 回の tsc）---
 # bundler          : Metro / Vite など実アプリの既定。拡張子なし相対 import でも通ってしまう
 # node16 / nodenext: Node の ESM 解決に厳密。.d.ts の相対 import に拡張子が無いと TS2834 で落ちる
 # → bundler だけを見ていると「npm 利用者の半分で型が壊れている」を検出できない（W3 で実際に発生）

@@ -7,6 +7,30 @@
 
 ---
 
+## 0.8.1 — 2026-08-06
+
+Codex スパン監査（W3〜W8 の 5 commit 通し）の反映。44pt 横断保証の残り穴 2 つを閉じる。
+
+### 修正
+
+- **`Toast` の action が短いラベル（"OK" 等）で横の実効タップ標的 44pt を割れた** —
+  従来は「テキスト幅は実運用で 44 を超える」頼みで静的保証が無かった。× と同じ
+  見えない箱の幅下限 32 + 横 hitSlop 6×2 = 44 で静的保証に変更（背景なし = 見た目不変）
+- **`TextField` が 44pt 横断検査の対象から漏れていた** — small 36 / medium 42 の視覚寸法
+  （recipe の minHeight）は契約どおり据え置き、TextInput への縦 hitSlop（4 / 1）で
+  実効 44 を確保。`A11Y_MIN_TAP_TARGET_44` と recipe の自己矛盾を解消
+
+### 内部
+
+- **tap-target conformance に網羅性ガードを追加** — Pressable / TextInput を使う src 全ファイルを
+  走査し、TARGETS（実効寸法の照合）か NON_TARGETS（理由必須の allowlist）への所属を強制。
+  手書きの表 + 件数下限だけでは今回の TextField のような登録漏れを検知できなかった。
+  ActionSheet の action / cancel 行も TARGETS に追加（padding 駆動で 44 超を機械照合）。
+  allowlist の腐り検査つき・登録を消すと実際に赤くなることを確認済み
+- `requiredHitSlop()` を撤去（dead code。実装値は literal 規約で導出禁止、テストも直接検算のため使途なし）
+- README のタップ標的の説明を整理（× / action 系 = 見えない箱 + hitSlop の複合、を例外として明記）/
+  installability の「計 9 回」コメントを実態（12 回）へ
+
 ## 0.8.0 — 2026-08-06
 
 **破壊的変更（0.x 運用なので minor で表現）**: `configs.recommended` にルールが 1 本増える

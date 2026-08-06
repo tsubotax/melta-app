@@ -44,6 +44,27 @@ export const TEXTFIELD_SIZE_SPEC: Record<
   large: { minHeight: 48, px: "3", font: "lg" },
 };
 
+/**
+ * TextInput への縦 hitSlop（片側）。small 36 / medium 42 は視覚寸法（recipe の minHeight）を
+ * 変えずに実効タップ標的 44 を満たすための手当て（A11Y_MIN_TAP_TARGET_44・規約 10。
+ * Codex スパン監査 2026-08-06: TextField が 44pt 横断の対象から漏れていた）。
+ * 横は付けない（input は親幅いっぱいで既に広い）。値は literal（規約 10: 導出しない）。
+ */
+export const TEXTFIELD_VERTICAL_HIT_SLOP: Record<TextFieldSize, number> = {
+  small: 4,
+  medium: 1,
+  large: 0,
+};
+
+/** size → TextInput に渡す hitSlop。0 のときは undefined（prop を付けない）。 */
+export function resolveTextFieldHitSlop(
+  size: TextFieldSize,
+): { top: number; bottom: number } | undefined {
+  const slop = TEXTFIELD_VERTICAL_HIT_SLOP[size];
+  if (slop === 0) return undefined;
+  return { top: slop, bottom: slop };
+}
+
 /** resolver の出力（label → input → helperText / errorText の縦構成の各パート）。 */
 export interface TextFieldResolvedStyle {
   input: {

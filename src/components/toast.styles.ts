@@ -62,7 +62,9 @@ export const TOAST_SPEC = {
  *
  * 横を 6 に削ると × の実効幅が 24 + 6×2 = 36pt と 44pt を割るため、**箱の下限を 32pt に広げて**
  * 32 + 6×2 = 44pt を確保する（× は背景を持たないので幅を広げても見た目は変わらない）。
- * action 側はテキスト幅が可変で静的に決められないため、縦のみ 44pt を保証する。
+ * action 側も同じ手当て: テキスト幅は可変だが「短いラベル（"OK" 等）で 44pt を割る」のは
+ * × と同型の問題なので、見えない箱の幅下限 32 + 横 hitSlop 6×2 = 44 で静的に保証する
+ * （Codex スパン監査 2026-08-06。従来は縦のみ保証で、横は「実運用では超える」頼みだった）。
  */
 export const TOAST_TAP_TARGET = {
   /** action / × 共通の hitSlop（横だけ gap/2 = 6 に絞る）。 */
@@ -71,6 +73,8 @@ export const TOAST_TAP_TARGET = {
   closeMinWidth: 32,
   /** × の箱の高さ下限（正典パターンと同値）。 */
   closeMinHeight: CANONICAL_TAP_TARGET.minHeight,
+  /** action の箱の幅の下限（× と同じ 32 + 6×2 = 44。背景なしなので見た目不変）。 */
+  actionMinWidth: 32,
 } as const;
 
 /**

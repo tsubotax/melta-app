@@ -27,12 +27,6 @@ export const CANONICAL_TAP_TARGET = {
   hitSlop: 10,
 } as const;
 
-/**
- * 視覚寸法 `visual` を実効 44pt に届かせるのに必要な**片側** hitSlop（切り上げ ＝ 安全側）。
- *
- * ⚠️ 実装の hitSlop 値をこの関数で計算しないこと（上のコメント参照）。
- * 使うのは (a) 値を決めるときの検算、(b) conformance テストの期待値算出。
- */
-export function requiredHitSlop(visual: number): number {
-  return Math.max(0, Math.ceil((MIN_TAP_TARGET - visual) / 2));
-}
+// requiredHitSlop（必要 hitSlop の導出関数）は置かない — 実装値は literal 規約で導出禁止、
+// テスト側も「実効 = 視覚 + slop×2 >= 44」を直接検算するため使い道が無い（dead code 化して撤去、
+// Codex スパン監査 2026-08-06）。値を決めるときの検算は手計算 ceil((44 − 視覚) / 2) で足りる。

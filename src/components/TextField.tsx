@@ -36,6 +36,7 @@ import {
 import { useTheme } from "../theme/index.js";
 import { CONTRACTS } from "../contracts/contract-types.js";
 import {
+  resolveTextFieldHitSlop,
   resolveTextFieldStyle,
   resolveTextFieldFocusStyle,
   type TextFieldSize,
@@ -149,6 +150,8 @@ export function TextField({
     <View style={style} testID={testID}>
       <RNText style={resolved.label}>{label}</RNText>
       <TextInput
+        // small 36 / medium 42 の視覚寸法のまま実効タップ標的 44 を満たす（規約 10、値は literal）
+        hitSlop={resolveTextFieldHitSlop(size)}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}

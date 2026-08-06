@@ -53,6 +53,13 @@ import { TOAST_SPEC, TOAST_TAP_TARGET } from "../../src/components/toast.styles.
 import { RADIO_SPEC } from "../../src/components/radio.styles.js";
 import { TOGGLE_SIZE_SPEC, TOGGLE_VERTICAL_HIT_SLOP } from "../../src/components/toggle.styles.js";
 import { CHECKBOX_SPEC } from "../../src/components/checkbox.styles.js";
+import {
+  TEXTFIELD_SIZE_SPEC,
+  TEXTFIELD_VERTICAL_HIT_SLOP,
+  resolveTextFieldHitSlop,
+  type TextFieldSize,
+} from "../../src/components/textfield.styles.js";
+import { resolveActionSheetStyle } from "../../src/components/action-sheet.styles.js";
 
 const here = dirname(fileURLToPath(import.meta.url)); // scripts/lib
 const srcRoot = resolve(here, "../../src");
@@ -92,6 +99,7 @@ const lineHeightOf = (variant: Parameters<typeof resolveTextShape>[1]): number =
   resolveTextShape(theme, variant, "body").lineHeight;
 
 const buttonSizes: ButtonSize[] = ["small", "medium", "large"];
+const actionSheetStyles = resolveActionSheetStyle(theme, "dark");
 
 const TARGETS: TapTarget[] = [
   // --- Button: labeled は minHeight + 縦 hitSlop、iconOnly は正方形 + 四方 hitSlop ---
@@ -190,11 +198,10 @@ const TARGETS: TapTarget[] = [
     source: "components/Toast.tsx",
     usesConstants: ["TOAST_TAP_TARGET"],
     height: lineHeightOf(TOAST_SPEC.messageFont),
-    width: null,
-    widthUnknownReason: "actionLabel のテキスト幅で決まる（実運用では 44pt を大きく超える）",
+    width: TOAST_TAP_TARGET.actionMinWidth,
     hitSlop: TOAST_TAP_TARGET.hitSlop,
     adjacentGap: theme.spacing[TOAST_SPEC.gap],
-    note: "× と隣接するので横 hitSlop は gap/2 まで",
+    note: "× と隣接するので横 hitSlop は gap/2 まで。幅は × と同じ箱下限 32 で静的保証（旧: テキスト幅頼みで短ラベルが 44 を割れた）",
   },
 
   // --- Radio / Toggle / Checkbox ---
@@ -236,6 +243,42 @@ const TARGETS: TapTarget[] = [
     hitSlop: { top: 0, bottom: 0 },
     note: "背景を持たないので hitSlop ではなく minHeight（Radio と同じ手当て。旧 hitSlop 12 は縦積みで隣接行と重なっていた）",
   },
+
+  // --- TextField（スパン監査 2026-08-06 で欠落が発覚 → 追加） ---
+  ...(["small", "medium", "large"] as TextFieldSize[]).map<TapTarget>((size) => ({
+    name: `TextField ${size} の input`,
+    source: "components/TextField.tsx",
+    usesConstants: ["resolveTextFieldHitSlop"],
+    height: TEXTFIELD_SIZE_SPEC[size].minHeight,
+    width: null,
+    widthUnknownReason: "input は親の幅いっぱい（横は常に 44 超）",
+    hitSlop: resolveTextFieldHitSlop(size) ?? { top: 0, bottom: 0 },
+    note: "視覚寸法（recipe の minHeight 36/42/48）は据え置き、縦 hitSlop で実効 44 を確保",
+  })),
+
+  // --- ActionSheet（padding 駆動の行。寸法は resolver の実値から下限見積もり） ---
+  {
+    name: "ActionSheet の action 行",
+    source: "components/ActionSheet.tsx",
+    usesConstants: [],
+    height:
+      actionSheetStyles.actionStyle.paddingVertical * 2 + actionSheetStyles.actionTextStyle.fontSize,
+    width: null,
+    widthUnknownReason: "行は sheet の幅いっぱい",
+    hitSlop: { top: 0, bottom: 0 },
+    note: "paddingVertical 16×2 + テキストで 44 超（fontSize を行高の下限として見積もる）",
+  },
+  {
+    name: "ActionSheet の cancel 行",
+    source: "components/ActionSheet.tsx",
+    usesConstants: [],
+    height:
+      actionSheetStyles.cancelStyle.paddingVertical * 2 + actionSheetStyles.cancelTextStyle.fontSize,
+    width: null,
+    widthUnknownReason: "行は sheet の幅いっぱい",
+    hitSlop: { top: 0, bottom: 0 },
+    note: "paddingVertical 16×2 + テキストで 44 超",
+  },
 ];
 
 /** hitSlop を含めた実効寸法。 */
@@ -251,6 +294,55 @@ test("実効タップ標的の表が空でない（照合が骨抜きになっ�
   assert.ok(TARGETS.length >= 15, `操作要素の登録が少なすぎる: ${TARGETS.length} 件`);
   const names = TARGETS.map((t) => t.name);
   assert.deepEqual([...new Set(names)].length, names.length, "表に重複した name がある");
+});
+
+/**
+ * 操作要素を持つのに TARGETS に載っていないファイルの検出（網羅性ガード）。
+ * 手書きの表 + 件数下限だけでは「新しい Pressable の登録漏れ」を検知できない
+ * （スパン監査 2026-08-06: TextField がまさにこの形で漏れていた）。
+ * Pressable / TextInput を使う src ファイルの全数を、TARGETS の source か
+ * NON_TARGETS（理由必須の allowlist）のどちらかに必ず所属させる。
+ */
+const NON_TARGETS: Record<string, string> = {
+  "components/BottomSheet.tsx":
+    "Pressable は overlay（画面全体を覆う閉じる面）のみ = 寸法検査の対象外",
+  "components/Card.tsx":
+    "Pressable は action/link variant の面全体（カード寸法 = 常に 44 超）。中身の操作要素は各コンポーネント側で検査",
+  "primitives/_internal/focus-ring.tsx":
+    "Pressable を持たない内部 helper（コメント・型参照のみで grep に掛かる）",
+};
+
+test("Pressable / TextInput を使う全ファイルが TARGETS か NON_TARGETS に所属している", async () => {
+  const { readdirSync } = await import("node:fs");
+  const interactive: string[] = [];
+  const walk = (dir: string, prefix: string) => {
+    for (const entry of readdirSync(resolve(srcRoot, dir), { withFileTypes: true })) {
+      const rel = `${dir}/${entry.name}`;
+      if (entry.isDirectory()) {
+        if (entry.name === "__tests__") continue; // テストは対象外（意図的な生値を含む）
+        walk(rel, prefix);
+      } else if (entry.name.endsWith(".tsx")) {
+        const content = readFileSync(resolve(srcRoot, rel), "utf8");
+        if (/\bPressable\b|<TextInput\b/.test(content)) interactive.push(rel);
+      }
+    }
+  };
+  walk("components", "");
+  walk("primitives", "");
+  walk("icons", "");
+
+  const covered = new Set([...TARGETS.map((t) => t.source), ...Object.keys(NON_TARGETS)]);
+  const uncovered = interactive.filter((f) => !covered.has(f));
+  assert.deepEqual(
+    uncovered,
+    [],
+    `操作要素を持つのに 44pt 検査に載っていないファイル: ${uncovered.join(", ")}\n` +
+      "  TARGETS に実効寸法を登録するか、対象外なら NON_TARGETS に理由付きで宣言する",
+  );
+
+  // allowlist の腐り検査: 実在しない・もう interactive でないファイルの登録は削除させる
+  const stale = Object.keys(NON_TARGETS).filter((f) => !interactive.includes(f));
+  assert.deepEqual(stale, [], `NON_TARGETS に不要な登録が残っている: ${stale.join(", ")}`);
 });
 
 for (const target of TARGETS) {

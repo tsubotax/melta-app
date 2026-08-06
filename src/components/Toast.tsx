@@ -88,7 +88,17 @@ export function Toast({
       {actionLabel != null && onAction != null && (
         // 横 hitSlop は gap/2（= 6）まで。10 のままだと隣の × と当たり判定が 8pt 重なり、
         // 手前に描かれる × が勝って「元に戻す」が押せない（toast.styles.ts の TOAST_TAP_TARGET 参照）。
-        <Pressable onPress={onAction} accessibilityRole="button" hitSlop={TOAST_TAP_TARGET.hitSlop}>
+        <Pressable
+          onPress={onAction}
+          accessibilityRole="button"
+          hitSlop={TOAST_TAP_TARGET.hitSlop}
+          // 短いラベル（"OK" 等）でも横の実効 44 を割らないよう × と同じ幅下限（背景なし = 見た目不変）
+          style={{
+            minWidth: TOAST_TAP_TARGET.actionMinWidth,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <Text
             variant={TOAST_SPEC.messageFont}
             weight={TOAST_SPEC.messageWeight}

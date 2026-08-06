@@ -367,7 +367,9 @@ const listRef = useRef<ScrollView>(null);
 | `Toggle` medium / large | track 24 / 28 | 縦 hitSlop 10 / 8 | 44 |
 | `Checkbox` の行 | box 20（行は label 込み） | `minHeight: 44` | 44 |
 
-- **背景を持つ要素は hitSlop、持たない要素は `minHeight`**。背景がある要素を minHeight で伸ばすと見た目が変わるため
+- **背景を持つ要素は hitSlop、持たない行は `minHeight`**。背景がある要素を minHeight で伸ばすと見た目が変わるため。
+  例外は × / action のような**小型の固定標的**で、見えない箱（minWidth/minHeight）+ hitSlop の複合
+  （正典パターン 24+10、Toast のように横 hitSlop を絞る席では箱を 32 に広げて 44 を維持）
 - **横方向の hitSlop は隣接する操作要素との gap の 1/2 まで**。超えると当たり判定が重なって押し違いが起きる
   （`Toast` の action と × はこれで実際に 8pt 重なっていた。0.7.0 で修正）
 - ⚠️ **iconOnly の `Button` だけは横にも hitSlop が付く**（幅 32/40 では 44pt に届かないため）。
