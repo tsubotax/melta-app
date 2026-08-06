@@ -7,7 +7,7 @@
  *   scripts/lib/card-conformance.test.ts が行う。
  * - variant: basic/media は非インタラクティブ、action/link は Pressable。
  *   action/link は pressed 時 elevation.sm→md（§2 hover→pressed mapping）。
- *   focus-within は RN 非サポートとして Phase1 明示 drop（§2）。
+ *   focus-within は RN 非サポートとして明示 drop（§2）。
  * - 型で action/link は onPress 必須を強制（§4 の DU 精神。無言で非対話に落ちる事故を防ぐ）。
  * - **カード面自体は操作要素にしない**（contract 2.1.0 の a11y.required）。面の Pressable は
  *   `accessibilityRole` を名乗らず `accessible={false}`。理由は2つ:
@@ -21,7 +21,7 @@
  *   react-native-web では実際に `<article>` 要素になる）。accessibilityRole 系とは別系統。
  * - **focus ring は Card では描かない**。フォーカスを受けるのは `primaryAction` 側で、
  *   melta の Button は自前の ring を持つ。カードにも出すと1回のフォーカスで ring が二重に描かれる。
- *   contract の focus-within は RN 非サポートとして Phase1 で明示 drop 済み（app recipe に記録あり）で、
+ *   contract の focus-within は RN 非サポートとして明示 drop 済み（app recipe に記録あり）で、
  *   web だけ動く実装を残すとプラットフォーム非対称になるため、実装ごと持たない。
  * - `accessibilityLabel` は 0.5.0 で削除した。面が `accessible={false}` なので native では
  *   原理的に読まれず、web だけ `aria-label` として効く非対称な prop だった。
@@ -144,5 +144,6 @@ export function Card({
   );
 }
 
-// Phase 2 conformance test 用の contract メタ（§2 A-3）。
+// conformance test 用の contract メタ（§2 A-3）。scripts/lib/conformance.test.ts が
+// 「この宣言が正しい contract を指しているか」を静的スキャンで照合する。
 Card.__contract = CONTRACTS.card;

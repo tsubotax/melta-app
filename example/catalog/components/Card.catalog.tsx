@@ -93,7 +93,7 @@ export function CardCatalog() {
 
       {/* レポートカード風（media + Metric 行 + Tag を compose）。
           media variant は非インタラクティブ（見た目デモ）。実際の押下は呼び出し側で Pressable 包む or
-          action/link と組合せる設計議論が必要（contract は variant 排他なので Phase1 は見た目まで）。 */}
+          action/link と組合せる設計議論が必要（contract は variant 排他なので、ここは見た目のデモに留める）。 */}
       <Card
         variant="media"
         media={

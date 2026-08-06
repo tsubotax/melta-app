@@ -1,9 +1,13 @@
 /**
- * button.styles — Button の pure style resolver（P4 conformance 対応で Button.tsx から分離）。
+ * button.styles — Button の pure style resolver（styleRefs conformance 対応で Button.tsx から分離）。
  *
  * react-native を import しない純粋モジュールにすることで node テスト（tsx --test）から
  * 直接実行できる。recipes/app/button.recipe.json（melta-contracts の styleRefs）との
- * 機械照合は scripts/lib/recipe-conformance.test.ts が行う。
+ * 機械照合は scripts/lib/recipe-conformance.test.ts が行う（層B）。
+ *
+ * ⚠️ このファイルは resolver 機構の**最初の実装**で、戻り値が slot 単位に揃っていない
+ * （色だけを返し、寸法は component 側で組む）。現行の書き方は AGENTS.md「style resolver の規約」
+ * を参照すること — 新規 / 改修は alert.styles.ts・textfield.styles.ts の形に寄せる。
  */
 
 import type { NativeTheme, ThemeMode, FontSizeKey, SpacingKey } from "../theme";
@@ -19,7 +23,7 @@ export type ButtonVariant =
 export type ButtonSize = "small" | "medium" | "large";
 
 /** size → height / 横 padding / label fontSize / icon box（contract sizes/iconButton と整合）。 */
-export const SIZE_SPEC: Record<
+export const BUTTON_SIZE_SPEC: Record<
   ButtonSize,
   { height: number; px: SpacingKey; font: FontSizeKey; iconBox: number }
 > = {
@@ -33,7 +37,7 @@ export const SIZE_SPEC: Record<
  * 文字色は variant により semantic 外（primary.500 等）もあるため hex 文字列で返し、
  * Text の style で color 上書きする（Text の color prop は SemanticColors キー限定のため）。
  */
-export function resolveVariant(
+export function resolveButtonColors(
   theme: NativeTheme,
   mode: ThemeMode,
   variant: ButtonVariant,

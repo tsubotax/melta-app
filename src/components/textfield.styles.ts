@@ -22,6 +22,7 @@ import type {
   FontWeightValue,
   SpacingKey,
 } from "../theme";
+import { resolveStatusTokenColors } from "./status-colors";
 
 /** 検証状態（textfield.contract の variant 語彙と 1:1）。 */
 export type TextFieldVariant = "default" | "error" | "success" | "disabled";
@@ -78,6 +79,8 @@ export function resolveTextFieldStyle(
   const c = theme.color;
   const sem = c.semantic[mode];
   const spec = TEXTFIELD_SIZE_SPEC[size];
+  // status 色（error の面と errorText）は Alert / Toast と同じ写像を使う（status-colors.ts）
+  const danger = resolveStatusTokenColors(theme, mode, "danger");
 
   // variant → border / bg（recipe variants.*.inputStyle の写像）
   const colors = (() => {
@@ -85,11 +88,7 @@ export function resolveTextFieldStyle(
       case "default":
         return { borderColor: sem["input-border"], backgroundColor: sem["input-bg"] };
       case "error":
-        return {
-          borderColor: c.status.danger.base,
-          backgroundColor:
-            mode === "light" ? c.status.danger.subtleLight : c.status.danger.subtleDark,
-        };
+        return { borderColor: c.status.danger.base, backgroundColor: danger.bg };
       case "success":
         return { borderColor: c.status.success.base, backgroundColor: sem["input-bg"] };
       case "disabled":
@@ -120,7 +119,7 @@ export function resolveTextFieldStyle(
     },
     errorText: {
       fontSize: theme.typography.fontSize.xs.fontSize,
-      color: mode === "light" ? c.status.danger.textLight : c.status.danger.textDark,
+      color: danger.text,
       marginTop: theme.spacing["1"],
     },
   };

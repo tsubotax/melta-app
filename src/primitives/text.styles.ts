@@ -8,8 +8,9 @@
 
 import type { NativeTheme, FontSizeKey, FontWeightKey, FontWeightValue } from "../theme";
 // theme index からの runtime import は ThemeProvider → react-native を引くため、
-// pure module（line-height.ts）を直接参照する（letterSpacing の式直書きと同じ理由）。
-import { DEFAULT_MIN_LINE_HEIGHT_RATIO, clampLineHeight } from "../theme/line-height";
+// pure module（line-height.ts / letter-spacing.ts）を直接参照する。
+import { clampLineHeight, minRatioOf } from "../theme/line-height";
+import { resolveLetterSpacing } from "../theme/letter-spacing";
 
 /** letterSpacing の切替軸（text.recipe description の role prop に対応）。 */
 export type TextRole = "heading" | "body";
@@ -25,9 +26,7 @@ export interface TextShape {
 /**
  * variant / role / weight → 形状解決（text.recipe styleRefs の 1:1 写像）。
  * - fontSize token は複合値（px + lineHeight 比率）。theme 生成時に lineHeight は px 化済み。
- * - letterSpacing は em 比率 token のため fontSize × ratio で pt 化する。
- *   theme の resolveLetterSpacing と同一式だが、theme index 経由の runtime import は
- *   ThemeProvider → react-native を引くため、pure に保つ目的でここでは式を直書きする。
+ * - letterSpacing は em 比率 token のため fontSize × ratio で pt 化する（resolveLetterSpacing）。
  */
 export function resolveTextShape(
   theme: NativeTheme,
@@ -40,12 +39,8 @@ export function resolveTextShape(
     fontSize: fs.fontSize,
     // 既定 theme は codegen 時点でクランプ済みだが、defineTheme で注入されたカスタム theme の
     // 値はここが最初の防波堤（機序と下限の根拠は theme/line-height.ts）。
-    lineHeight: clampLineHeight(
-      fs.fontSize,
-      fs.lineHeight,
-      theme.typography.minLineHeightRatio ?? DEFAULT_MIN_LINE_HEIGHT_RATIO,
-    ),
-    letterSpacing: fs.fontSize * theme.typography.letterSpacingRatio[role],
+    lineHeight: clampLineHeight(fs.fontSize, fs.lineHeight, minRatioOf(theme)),
+    letterSpacing: resolveLetterSpacing(fs.fontSize, theme.typography.letterSpacingRatio[role]),
     ...(weight ? { fontWeight: theme.typography.fontWeight[weight] } : null),
   };
 }

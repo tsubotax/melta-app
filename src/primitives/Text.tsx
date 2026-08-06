@@ -8,13 +8,14 @@
  * - 色は token キーのみ（生 hex 不可、§5 lint の意味を保つ）。
  * - letterSpacing は role(heading/body) の ratio を fontSize から pt 換算（text.styles.ts）。
  * - 形状（fontSize/lineHeight/letterSpacing/fontWeight）は variant/role/weight 依存なので useMemo で
- *   分離（B-3 の「形状/色 分離 + 参照安定性」を Phase1 は useMemo で満たす。StyleSheet 事前生成の
- *   最適化は Card で実証予定）。色のみ render 時に colors から取る。
+ *   分離（B-3 の「形状/色 分離 + 参照安定性」は useMemo で満たす。StyleSheet 事前生成による
+ *   最適化はどのコンポーネントでも採っていない）。色のみ render 時に colors から取る。
  */
 
 import { useMemo, type ReactNode } from "react";
 import { StyleSheet, Text as RNText, type StyleProp, type TextStyle } from "react-native";
-import { useTheme, DEFAULT_MIN_LINE_HEIGHT_RATIO, minLineHeightFor } from "../theme";
+import { useTheme } from "../theme";
+import { minLineHeightFor, minRatioOf } from "../theme/line-height";
 import type { FontWeightKey, SemanticColors } from "../theme";
 import { CONTRACTS, type VariantOf } from "../contracts/contract-types";
 import { resolveTextShape, type TextRole } from "./text.styles";
@@ -64,10 +65,7 @@ export function Text({
   // 「Text の文字サイズは variant が決める」契約とクランプ基準を一致させる。
   if (typeof flat.fontSize !== "number") flat.fontSize = shape.fontSize;
   if (flat.lineHeight !== undefined) {
-    const floor = minLineHeightFor(
-      flat.fontSize ?? 0,
-      theme.typography.minLineHeightRatio ?? DEFAULT_MIN_LINE_HEIGHT_RATIO,
-    );
+    const floor = minLineHeightFor(flat.fontSize ?? 0, minRatioOf(theme));
     if (flat.lineHeight < floor) flat.lineHeight = floor;
   }
 
@@ -83,5 +81,6 @@ export function Text({
   );
 }
 
-// Phase 2 conformance test 用の contract メタ（§2 A-3）。
+// conformance test 用の contract メタ（§2 A-3）。scripts/lib/conformance.test.ts が
+// 「この宣言が正しい contract を指しているか」を静的スキャンで照合する。
 Text.__contract = CONTRACTS.text;

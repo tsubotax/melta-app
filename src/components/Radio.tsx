@@ -10,7 +10,7 @@
  * - states（contract → prop の写像）: selected/unselected → value との一致、
  *   error → error?: string（circle の borderColor 差分 + errorText 表示。selected と併用時は
  *   error を優先 = 契約 stateSpecs）、disabled → グループ全体 or option 個別（opacity 0.5 + 非活性）。
- *   focus は Phase1 非対応（recipe にも focus 差分なし）。
+ *   focus は非対応（recipe にも focus 差分なし）。
  * - a11y: グループに accessibilityRole="radiogroup"、各 option に "radio" +
  *   accessibilityState={{ checked, disabled }}。
  * - 色・寸法の決定は pure resolver（radio.styles.ts）に分離。
@@ -150,5 +150,6 @@ export function Radio({
   );
 }
 
-// Phase 2 conformance test 用の contract メタ（§2 A-3）。
+// conformance test 用の contract メタ（§2 A-3）。scripts/lib/conformance.test.ts が
+// 「この宣言が正しい contract を指しているか」を静的スキャンで照合する。
 Radio.__contract = CONTRACTS.radio;

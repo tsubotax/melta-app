@@ -77,7 +77,7 @@ export interface ThemeTypography {
   /**
    * 初期は system default（未指定 = OS デフォルトフォント）。RN の fontFamily は string 一本で
    * web の fallback 配列のようには効かず、Inter 等を焼くと expo-font でのロード必須になり実機で崩れる。
-   * Inter / JetBrains Mono の embed は expo-font 導入後に generator へ font マップを渡す Phase 2。
+   * Inter / JetBrains Mono の embed は expo-font を導入し、generator へ font マップを渡す形になる（未着手）。
    * それまでは sans/mono とも未指定（= OS の sans / monospace）にする。
    */
   fontFamily: { sans?: string; mono?: string };

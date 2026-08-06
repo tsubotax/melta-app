@@ -1,7 +1,7 @@
 /**
  * radio-conformance.test — recipes/app/radio.recipe.json（melta-contracts）と実装 resolver の機械照合。
  *
- * recipe-conformance.test.ts の層B（button が模範例）と同型:
+ * recipe-conformance.test.ts の層B と同型の styleRefs conformance:
  *   pure style resolver（src/components/radio.styles.ts）の出力と recipe の styleRefs を
  *   token 解決（tokens.json を正とする）して突き合わせる。
  *
@@ -15,8 +15,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { resolveContractsRoot } from "./contracts-root.js";
 import {
-  resolveContractsRoot,
   loadAppRecipe,
   resolveStyleRefs,
   type AppRecipe,

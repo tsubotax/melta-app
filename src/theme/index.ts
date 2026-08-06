@@ -15,6 +15,12 @@ export {
   clampLineHeight,
 } from "./line-height";
 /**
+ * letterSpacingRatio（em 相当の比率）を適用先の fontSize から letterSpacing(pt) に解決する helper。
+ * 実体は pure module（./letter-spacing）。resolver 側は index を経由せず直接 import する
+ * （index は ThemeProvider = react-native を引くため）。
+ */
+export { resolveLetterSpacing } from "./letter-spacing";
+/**
  * 以下は theme の解決規則を外から検証・再利用するためのヘルパ。
  * **@experimental — 安定 API ではない。** 挙動・シグネチャ・メッセージは予告なく変わりうる。
  * アプリの実行時ロジックが依存する場合は、useTheme().capabilities を使うほうが安全。
@@ -33,12 +39,3 @@ export type {
   ThemeModeViolation,
   ThemeOptions,
 } from "./define-theme";
-
-/**
- * letterSpacingRatio（em 相当の比率）を、適用先の fontSize から RN の letterSpacing(pt) に解決する。
- * 例: resolveLetterSpacing(18, theme.typography.letterSpacingRatio.body)
- * theme.typography.letterSpacingRatio.* をそのまま style.letterSpacing に入れる誤用を避けるための helper。
- */
-export function resolveLetterSpacing(fontSize: number, ratio: number): number {
-  return fontSize * ratio;
-}

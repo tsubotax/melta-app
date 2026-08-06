@@ -11,7 +11,7 @@
  * - states（contract → prop の写像）: checked/unchecked → checked:boolean、
  *   indeterminate → indeterminate:boolean（variant "indeterminate"。a11y は "mixed"）、
  *   error → error:boolean（borderColor 差分、checked より優先）、disabled → prop
- *   （opacity 0.5 + 非活性）。focus は Phase1 非対応（recipe にも focus 差分なし）。
+ *   （opacity 0.5 + 非活性）。focus は非対応（recipe にも focus 差分なし）。
  * - 色・寸法の決定は pure resolver（checkbox.styles.ts）に分離。
  *   recipes/app/checkbox.recipe.json との機械照合は scripts/lib/checkbox-conformance.test.ts が行う。
  */
@@ -103,5 +103,6 @@ export function Checkbox({
   );
 }
 
-// Phase 2 conformance test 用の contract メタ（§2 A-3）。
+// conformance test 用の contract メタ（§2 A-3）。scripts/lib/conformance.test.ts が
+// 「この宣言が正しい contract を指しているか」を静的スキャンで照合する。
 Checkbox.__contract = CONTRACTS.checkbox;

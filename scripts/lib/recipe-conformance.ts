@@ -9,26 +9,8 @@
  * 変わるため。例: color.status.danger."text-light" → theme では textLight）。
  */
 
-import { createRequire } from "node:module";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
-import { dirname, resolve, join } from "node:path";
-import { fileURLToPath } from "node:url";
-
-const require = createRequire(import.meta.url);
-const here = dirname(fileURLToPath(import.meta.url)); // scripts/lib
-
-/** melta-contracts のパッケージルートを解決（npm install → 兄弟ディレクトリ fallback）。 */
-export function resolveContractsRoot(): string {
-  try {
-    const pkgJson = require.resolve("melta-contracts/package.json");
-    return dirname(pkgJson);
-  } catch {
-    // fall through
-  }
-  const local = resolve(here, "../../../melta-ui/design/contracts");
-  if (existsSync(local)) return local;
-  throw new Error("melta-contracts を解決できません（未 install + 兄弟 fallback 不在）。");
-}
+import { join } from "node:path";
 
 export function listAppRecipeFiles(root: string): string[] {
   const dir = join(root, "recipes", "app");

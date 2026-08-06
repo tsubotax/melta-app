@@ -7,10 +7,9 @@
 
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
-import { createRequire } from "node:module";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 import { test } from "node:test";
+import { SIBLING_CONTRACTS_ROOT, resolveTokensPath } from "./contracts-root.js";
 import {
   normalizeTokens,
   parseBoxShadow,
@@ -19,8 +18,6 @@ import {
   type RawTokens,
   toNumber,
 } from "./normalize-tokens";
-
-const here = dirname(fileURLToPath(import.meta.url));
 
 test("toNumber: 単位を落として数値化する", () => {
   assert.equal(toNumber("4px"), 4);
@@ -61,26 +58,6 @@ test("parseCubicBezier: 4 引数の tuple を返す", () => {
   assert.deepEqual(parseCubicBezier("cubic-bezier(0.4, 0, 0.2, 1)"), [0.4, 0, 0.2, 1]);
   assert.throws(() => parseCubicBezier("ease-in-out"));
 });
-
-/**
- * 実 tokens.json の解決（generate-native-theme.ts と同順: npm → 兄弟 fallback）。
- * ⚠️ どちらも無ければ **throw**（skip しない）。旧実装は兄弟パス直書き + 無ければ
- * console.warn で return しており、CI（意図的に兄弟 melta-ui を置かない npm 経路検証）では
- * この検証が**常に silent skip** されていた（fail-open。Phase 0 リサーチ C-1 で検出）。
- */
-function resolveRealTokensPath(): string {
-  const require = createRequire(import.meta.url);
-  try {
-    return require.resolve("melta-contracts/tokens");
-  } catch {
-    const sibling = resolve(here, "../../../melta-ui/design/contracts/tokens.json");
-    if (existsSync(sibling)) return sibling;
-    throw new Error(
-      "実 tokens.json を解決できない（melta-contracts 未 install かつ兄弟 melta-ui なし）。" +
-        "この検証は skip せず失敗させる。`npm install` するか兄弟に melta-ui を置くこと。",
-    );
-  }
-}
 
 /** 実 tokens の正規化検証本体（npm 契約 / 兄弟 dev 版の両テストで共有）。 */
 function assertRealTokensNormalize(tokensPath: string): void {
@@ -131,8 +108,14 @@ function assertRealTokensNormalize(tokensPath: string): void {
   assert.equal(theme.zIndex.modal, 50);
 }
 
+/**
+ * ⚠️ 解決できなければ **throw**（skip しない）。旧実装は兄弟パス直書き + 無ければ
+ * console.warn で return しており、CI（意図的に兄弟 melta-ui を置かない npm 経路検証）では
+ * この検証が**常に silent skip** されていた（fail-open。Phase 0 リサーチ C-1 で検出）。
+ * 解決順（npm → 兄弟 fallback）は scripts/lib/contracts-root.ts が SSOT。
+ */
 test("normalizeTokens: 実 tokens.json（npm 契約、fail-closed）を RN theme に変換する", () => {
-  assertRealTokensNormalize(resolveRealTokensPath());
+  assertRealTokensNormalize(resolveTokensPath());
 });
 
 test("normalizeTokens: 兄弟 melta-ui の dev 版 tokens も同じ検証を通す（存在時のみ）", (t) => {
@@ -140,7 +123,7 @@ test("normalizeTokens: 兄弟 melta-ui の dev 版 tokens も同じ検証を通�
   // 一切検証されなくなる（Codex W1 レビュー指摘）。publish 前の契約変更をローカルで
   // 早期検出するため、兄弟がある環境では dev 版にも同じ assert を通す。
   // CI には兄弟が意図的に無い（npm 経路の証明）ので、ここは skip が正しい。
-  const sibling = resolve(here, "../../../melta-ui/design/contracts/tokens.json");
+  const sibling = join(SIBLING_CONTRACTS_ROOT, "tokens.json");
   if (!existsSync(sibling)) {
     t.skip("兄弟 melta-ui なし（CI では npm 契約テストが本体）");
     return;

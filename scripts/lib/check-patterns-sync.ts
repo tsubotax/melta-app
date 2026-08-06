@@ -20,7 +20,8 @@
  *   docs/*.md のどの fence からも参照されていない（md 側から fence を消しても検出する）
  *
  * 修正の向き: **実装が正**。drift したら docs 側の fence を実コードに合わせて更新する
- * （--write での自動 heal は Phase 1 ではしない）。
+ * （--write での自動 heal は用意していない。実装から docs への一方向 heal は「どの fence が
+ * どの region に対応するか」の判断を含むため、機械化せず人間が直す）。
  *
  * 使い方:
  *   tsx scripts/lib/check-patterns-sync.ts   # 単体実行（drift があれば exit 1）

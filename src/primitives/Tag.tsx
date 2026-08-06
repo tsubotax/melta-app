@@ -9,8 +9,8 @@
  *   色・寸法の決定は pure resolver（tag.styles.ts）に分離、recipe との機械照合は
  *   scripts/lib/tag-conformance.test.ts が行う。
  * - label は Text primitive。filter-chip active の文字色だけ primary.700（SemanticColors 外なので style 上書き）。
- * - focus outline は Button(Step8) で Pressable focus handling を共通化してから Tag にも適用する
- *   （§1 は Phase1 scope だが acceptance 外。今は accessibilityState のみ。Button 実装時に回収）。
+ * - focus outline は Button と共通の Pressable focus handling（_internal/focus-ring）を使う
+ *   （removable / filter-chip の押せる要素に FocusRing を描く）。
  */
 
 import { Pressable, View, type StyleProp, type ViewStyle } from "react-native";
@@ -122,5 +122,6 @@ export function Tag(props: TagProps) {
   );
 }
 
-// Phase 2 conformance test 用の contract メタ（§2 A-3）。
+// conformance test 用の contract メタ（§2 A-3）。scripts/lib/conformance.test.ts が
+// 「この宣言が正しい contract を指しているか」を静的スキャンで照合する。
 Tag.__contract = CONTRACTS.tag;

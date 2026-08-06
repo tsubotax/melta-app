@@ -6,50 +6,24 @@
  *   → 実装宣言（各 component の `X.__contract = CONTRACTS.y`）
  *
  * RN component は node test で実行できないため、実装側はソースを「読むだけ」で静的スキャンする
- * （`X.__contract = CONTRACTS.y` の X↔y 対応を正規表現で確認）。実行時の prop 網羅照合（Button が
- * 本当に6 variant 描画できるか等）は Phase 2（実機 or RN test runner 導入後）。
+ * （`X.__contract = CONTRACTS.y` の X↔y 対応を正規表現で確認）。RN runtime で実際に mount できるかは
+ * jest 側（`npm run test:rn` の mount smoke）の担当で、全 variant を描画して見た目まで見る網羅照合は
+ * どちらにも無い（未着手。値の一致は styleRefs conformance が代替している）。
  *
- * Phase 1 で保証すること:
+ * この層が保証すること:
  *   1. CONTRACTS（生成物）が contract JSON（源）と一致 = codegen が鮮度を保っている（手編集・古い生成物を検知）
  *   2. 各 component の __contract 宣言が正しい contract を指している（型では防げない誤参照を捕捉）
  */
 
-import { createRequire } from "node:module";
-import { existsSync, readFileSync, readdirSync } from "node:fs";
-import { dirname, resolve, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { readFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
 
-const require = createRequire(import.meta.url);
-const here = dirname(fileURLToPath(import.meta.url)); // scripts/lib
-
-/** generate-contract-types.ts と同じ MVP allowlist（contract id）。 */
-export const MVP_CONTRACT_IDS = [
-  "text",
-  "button",
-  "tag",
-  "card",
-  "image",
-  "surface",
-  "skeleton",
-  "empty-state",
-  "metric",
-  "stack",
-  "row",
-  "screen",
-  "header",
-  "icon",
-  "avatar",
-  "textfield",
-  "toggle",
-  "checkbox",
-  "radio",
-  "alert",
-  "toast",
-  "progress",
-  "modal",
-  "action-sheet",
-  "bottom-sheet",
-] as const;
+/**
+ * MVP allowlist（contract id）。SSOT は型生成側の `MVP_COMPONENTS`
+ * （scripts/generate-contract-types.ts）で、ここは照合側の呼び名で再輸出しているだけ。
+ * 「型は生成されたが conformance の対象に入っていない」ズレを構造的に無くすため import で繋ぐ。
+ */
+export { MVP_COMPONENTS as MVP_CONTRACT_IDS } from "../generate-contract-types.js";
 
 export interface ContractMeta {
   id: string;
@@ -87,20 +61,6 @@ export function toContractKey(component: string): string {
     if (name === component) return toKey(id);
   }
   return component.charAt(0).toLowerCase() + component.slice(1);
-}
-
-/** 契約源（melta-contracts の components ディレクトリ）を解決。generate-contract-types と同方針。 */
-export function resolveContractsDir(): string {
-  try {
-    const pkgJson = require.resolve("melta-contracts/package.json");
-    const dir = join(dirname(pkgJson), "components");
-    if (existsSync(dir)) return dir;
-  } catch {
-    // fall through
-  }
-  const local = resolve(here, "../../../melta-ui/design/contracts/components");
-  if (existsSync(local)) return local;
-  throw new Error("contracts components ディレクトリを解決できません（melta-contracts 未 install + fallback 不在）。");
 }
 
 /** 契約源の *.contract.json を読み、ContractMeta 形式（CONTRACTS と同じ shape）に正規化。 */

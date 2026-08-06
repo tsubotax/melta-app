@@ -9,7 +9,7 @@
 import type { FontVariant } from "react-native";
 import type { NativeTheme, ThemeMode, FontSizeKey, FontWeightValue } from "../theme";
 // theme index からの runtime import は ThemeProvider → react-native を引くため pure module を直接参照
-import { DEFAULT_MIN_LINE_HEIGHT_RATIO, clampLineHeight } from "../theme/line-height";
+import { clampLineHeight, minRatioOf } from "../theme/line-height";
 
 export type MetricSize = "sm" | "md" | "lg";
 
@@ -62,7 +62,7 @@ export function resolveMetricStyles(
       lineHeight: clampLineHeight(
         fontSize[font.value].fontSize,
         fontSize[font.value].lineHeight,
-        theme.typography.minLineHeightRatio ?? DEFAULT_MIN_LINE_HEIGHT_RATIO,
+        minRatioOf(theme),
       ),
       fontWeight: theme.typography.fontWeight.bold,
       color: sem["text-heading"],

@@ -7,8 +7,7 @@
  *
  * - RN では border を持たず bg subtle + text 色で表現する（status token に border 用の中間色が
  *   無いため。COLOR_ONLY_FORBIDDEN は title/message のテキストと icon slot で担保、recipe description）。
- * - dark mode は status.*.subtleDark / textDark 側を解決する。info variant のみ primary 固定
- *   （dark token が無い既知の割り切り、web と同じ）。
+ * - status 色（mode ごとの subtle / text、info の primary 固定）の解決は status-colors.ts が SSOT。
  */
 
 import type {
@@ -20,8 +19,10 @@ import type {
   SpacingKey,
   ThemeMode,
 } from "../theme";
+import { resolveStatusVariantColors, type StatusVariant } from "./status-colors";
 
-export type AlertVariant = "info" | "success" | "warning" | "error";
+/** alert.contract の variant 語彙（status 共通語彙と 1:1）。 */
+export type AlertVariant = StatusVariant;
 
 /**
  * 構成キー（token キー）。component は Text にこのキーをそのまま渡し、resolver は同じキーから
@@ -66,33 +67,13 @@ export interface AlertStyles {
   };
 }
 
-/**
- * variant → bg / text 色の解決。
- * - info: primary.50 / primary.800 固定（mode 非依存）。
- * - success / warning / error: status token（error は status キー上は danger）。
- *   light は subtleLight / textLight、dark は subtleDark / textDark（recipe description の写像）。
- */
-export function resolveAlertColors(
-  theme: NativeTheme,
-  mode: ThemeMode,
-  variant: AlertVariant,
-): { bg: string; text: string } {
-  if (variant === "info") {
-    return { bg: theme.color.primary["50"], text: theme.color.primary["800"] };
-  }
-  const status = theme.color.status[variant === "error" ? "danger" : variant];
-  return mode === "dark"
-    ? { bg: status.subtleDark, text: status.textDark }
-    : { bg: status.subtleLight, text: status.textLight };
-}
-
 /** variant → 全 slot の style 解決（alert.recipe styleRefs の 1:1 写像）。 */
 export function resolveAlertStyles(
   theme: NativeTheme,
   mode: ThemeMode,
   variant: AlertVariant,
 ): AlertStyles {
-  const { bg, text } = resolveAlertColors(theme, mode, variant);
+  const { bg, text } = resolveStatusVariantColors(theme, mode, variant);
   return {
     containerStyle: {
       backgroundColor: bg,

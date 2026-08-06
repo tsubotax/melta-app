@@ -31,6 +31,13 @@ melta-app/
     lib/                        token 正規化 + conformance / consumer テスト
 ```
 
+## style resolver
+
+見た目の値の解決は component（`.tsx`）ではなく隣の `<component>.styles.ts`（react-native を値 import しない
+pure module）に置く。node の `tsx --test` から直接実行できることが conformance テストの前提になっている。
+書き方の規約（`<COMPONENT>_SPEC` / slot 単位の戻り値 / 命名 / 共有 module）は [AGENTS.md](../AGENTS.md) が正。
+resolver は3世代が混在しているので、**現行世代を規範とする**（初代の `button.styles.ts` を写さない）。
+
 ## トークン正規化（web → RN）
 
 `scripts/lib/normalize-tokens.ts` が変換する。壊れやすい箇所はテスト必須。

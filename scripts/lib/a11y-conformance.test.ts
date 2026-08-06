@@ -38,7 +38,8 @@ import { readFileSync, existsSync } from "node:fs";
 import { dirname, resolve, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
-import { MVP_CONTRACT_IDS, toComponentName, resolveContractsDir } from "./conformance.js";
+import { resolveContractsComponentsDir } from "./contracts-root.js";
+import { MVP_CONTRACT_IDS, toComponentName } from "./conformance.js";
 
 const here = dirname(fileURLToPath(import.meta.url)); // scripts/lib
 const srcRoot = resolve(here, "../../src");
@@ -330,7 +331,7 @@ test("ROLE_RULES の表が MVP の契約集合を過不足なく覆っている"
 });
 
 test("表が控えている contractRole が契約の実値と一致する", () => {
-  const dir = resolveContractsDir();
+  const dir = resolveContractsComponentsDir();
   const mismatches: string[] = [];
   for (const id of MVP_CONTRACT_IDS) {
     const contract = JSON.parse(readFileSync(join(dir, `${id}.contract.json`), "utf8")) as {
@@ -419,7 +420,7 @@ for (const id of MVP_CONTRACT_IDS) {
 }
 
 test("既知の乖離は実在するものだけ / 契約改訂後は再承認が要る", () => {
-  const dir = resolveContractsDir();
+  const dir = resolveContractsComponentsDir();
   for (const [id, divergence] of Object.entries(KNOWN_DIVERGENCES)) {
     const actual = scanRoles(implementationFile(id)).roles;
     const stale = divergence.roles.filter((role) => !actual.has(role));

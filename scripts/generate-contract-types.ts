@@ -4,32 +4,35 @@
  * codegen する。出力は src/contracts/contract-types.ts。
  *
  * 設計書 design-melta-app.md §2(A-3): 「variant/size/state の型を contract から codegen、
- * 実装は手書き、各 component に __contract メタを持たせ Phase2 conformance test で照合」。
- * Phase 1 は型 + メタの生成のみ。自動 conformance（実装 vs contract の機械照合）は Phase 2（§10 未決4）。
+ * 実装は手書き、各 component に __contract メタを持たせ conformance test で照合」。
+ * ここは型 + メタの生成が責務。生成物と契約源・実装宣言の機械照合は scripts/lib/conformance.test.ts
+ * が担当する（稼働中）。
  *
  * 使い方:
  *   npx tsx scripts/generate-contract-types.ts [contracts/components ディレクトリのパス]
  *
  * 入力の解決順（generate-native-theme.ts と同方針）:
  *   1. 第1引数で明示されたディレクトリ
- *   2. melta-contracts の components/（publish & install 後に有効）
- *   3. 開発 fallback: ../melta-ui/design/contracts/components
+ *   2. melta-contracts の components/ / 兄弟 melta-ui の開発 fallback（scripts/lib/contracts-root.ts）
  */
 
-import { createRequire } from "node:module";
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, resolve, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { resolveContractsComponentsDir } from "./lib/contracts-root";
 
-const require = createRequire(import.meta.url);
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 
 /**
- * MVP スコープ（設計書 §1 の名目9個）。melta-app が実装する component だけを型生成する。
- * 33 contract 全部を引くと未実装 component の型がノイズになるため allowlist 方式。
- * 育成フロー（§7）で component を追加するときはここに足す（= 必要な順に取り込む運用と整合）。
+ * MVP スコープ（設計書 §1 の名目9個から育成した現在の実装集合）。melta-app が実装する
+ * component だけを型生成する。33 contract 全部を引くと未実装 component の型がノイズになるため
+ * allowlist 方式。育成フロー（§7）で component を追加するときはここに足す。
+ *
+ * **この配列が allowlist の SSOT**。conformance / drift 検査 / 公開 API 照合はここを import して
+ * 使う（`MVP_CONTRACT_IDS` として再輸出、scripts/lib/conformance.ts）。かつては両側に同じ
+ * 配列が書かれており、片方だけ足すと型は生成されるのに照合が素通りする形になっていた。
  */
-const MVP_COMPONENTS = [
+export const MVP_COMPONENTS = [
   "text",
   "button",
   "tag",
@@ -65,28 +68,14 @@ interface RawContract {
   states?: string[];
 }
 
-function resolveContractsDir(): string {
+function inputContractsDir(): string {
   const explicit = process.argv[2];
   if (explicit) {
     const p = resolve(explicit);
     if (!existsSync(p)) throw new Error(`指定された contracts ディレクトリが見つからない: ${p}`);
     return p;
   }
-  try {
-    const pkgJson = require.resolve("melta-contracts/package.json");
-    const dir = join(dirname(pkgJson), "components");
-    if (existsSync(dir)) return dir;
-  } catch {
-    // fall through to dev fallback
-  }
-  const local = resolve(scriptDir, "../../melta-ui/design/contracts/components");
-  if (existsSync(local)) {
-    console.warn(`⚠️  melta-contracts 未 install。開発 fallback を使用: ${local}`);
-    return local;
-  }
-  throw new Error(
-    "contracts の components ディレクトリを解決できません。`npm install melta-contracts` するか、第1引数でパスを渡してください。",
-  );
+  return resolveContractsComponentsDir({ warnOnFallback: true });
 }
 
 /** "empty-state" → "emptyState"（型キーを TS identifier 化）。contract の id 文字列自体は保持。 */
@@ -99,7 +88,7 @@ function literalArray(values: string[]): string {
 }
 
 function main(): void {
-  const dir = resolveContractsDir();
+  const dir = inputContractsDir();
 
   const blocks: string[] = [];
   for (const id of MVP_COMPONENTS) {
@@ -154,4 +143,8 @@ function main(): void {
   console.log(`✅ contract 型を生成: ${out}`);
 }
 
-main();
+// --- main guard（allowlist を import するだけの呼び出し元では codegen を走らせない） ---
+const isMain =
+  process.argv[1] != null && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+
+if (isMain) main();

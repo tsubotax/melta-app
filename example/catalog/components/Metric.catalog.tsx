@@ -1,7 +1,7 @@
 /**
  * Metric.catalog — Metric primitive の全 size を実レンダ（設計書 §6）。
  * カード内の主役指標なので、サマリー風に複数 Metric を並べた例も置く（MetricsRow は
- * Phase1 では melta に作らず呼び出し側 compose、§1。ここは catalog 内の手 compose）。
+ * melta に作らず呼び出し側 compose とする方針、§1。ここは catalog 内の手 compose）。
  */
 
 import { View } from "react-native";

@@ -8,8 +8,8 @@ import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { resolveContractsRoot } from "./contracts-root.js";
 import {
-  resolveContractsRoot,
   loadAppRecipe,
   resolveStyleRefs,
   type AppRecipe,

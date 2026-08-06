@@ -26,7 +26,7 @@ import { readFileSync, writeFileSync, readdirSync, existsSync } from "node:fs";
 import { resolve, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { MVP_CONTRACT_IDS, toComponentName } from "./lib/conformance.js";
-import { resolveContractsRoot } from "./lib/recipe-conformance.js";
+import { resolveContractsRoot } from "./lib/contracts-root.js";
 import { renderLlmsTxt } from "./build-llms-txt.js";
 import { checkPatternsSync } from "./lib/check-patterns-sync.js";
 

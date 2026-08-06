@@ -7,8 +7,9 @@
  *   disabled→prop（opacity + 非活性）、loading→Spinner + disabled 相当。
  * - 色は variant ごとに NativeTheme から解決（button.contract tokenRefs を 1:1 で写像）。
  *   contained の pressed は hover-bg=primary.700（contract に native readable token あり、唯一）。
- *   他 variant の pressed 視覚変化は contract が Tailwind のみ＝Phase1 non-conformant（§2 M-1）、
- *   ここでは pressed 時に薄い overlay を敷く近似に留め、Phase2 で contract に pressed-* token 追加。
+ *   他 variant の pressed 視覚変化は contract が Tailwind クラスしか持たず native 解決できない
+ *   （§2 M-1）。ここでは pressed 時に薄い overlay を敷く近似に留めている。contract 側に
+ *   pressed-* token が入ったら実値解決へ置き換える（契約側が未対応のため未着手）。
  * - height は contract sizes（small32/medium40/large48）。
  */
 
@@ -24,7 +25,7 @@ import { Text } from "./Text";
 import { useTheme } from "../theme";
 import { useFocusRing, FocusRing } from "./_internal/focus-ring";
 import { CONTRACTS } from "../contracts/contract-types";
-import { SIZE_SPEC, resolveVariant, type ButtonVariant, type ButtonSize } from "./button.styles";
+import { BUTTON_SIZE_SPEC, resolveButtonColors, type ButtonVariant, type ButtonSize } from "./button.styles";
 
 interface ButtonBase {
   variant?: ButtonVariant;
@@ -60,8 +61,8 @@ export function Button(props: ButtonProps) {
   } = props;
   const { focused, focusHandlers } = useFocusRing();
 
-  const spec = SIZE_SPEC[size];
-  const colors = useMemo(() => resolveVariant(theme, mode, variant), [theme, mode, variant]);
+  const spec = BUTTON_SIZE_SPEC[size];
+  const colors = useMemo(() => resolveButtonColors(theme, mode, variant), [theme, mode, variant]);
   const isDisabled = disabled || loading;
   const iconOnly = props.iconOnly === true;
 
@@ -110,5 +111,6 @@ export function Button(props: ButtonProps) {
   );
 }
 
-// Phase 2 conformance test 用の contract メタ（§2 A-3）。
+// conformance test 用の contract メタ（§2 A-3）。scripts/lib/conformance.test.ts が
+// 「この宣言が正しい contract を指しているか」を静的スキャンで照合する。
 Button.__contract = CONTRACTS.button;

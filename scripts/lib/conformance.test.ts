@@ -1,5 +1,5 @@
 /**
- * conformance.test — 「実装が contract を満たすか」の機械照合（設計書 §2 A-3 の Phase 1 最低ライン）。
+ * conformance.test — 「実装が contract を満たすか」の機械照合（設計書 §2 A-3）。
  *
  * 契約源（*.contract.json）→ 生成メタ（CONTRACTS）→ 実装宣言（__contract）の一直線を検証する。
  */
@@ -9,11 +9,11 @@ import assert from "node:assert/strict";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { CONTRACTS } from "../../src/contracts/contract-types.js";
+import { resolveContractsComponentsDir } from "./contracts-root.js";
 import {
   MVP_CONTRACT_IDS,
   toKey,
   toContractKey,
-  resolveContractsDir,
   loadContractMetaFromSource,
   scanContractDeclarations,
   type ContractMeta,
@@ -21,7 +21,7 @@ import {
 
 const here = dirname(fileURLToPath(import.meta.url));
 const srcDir = resolve(here, "../../src");
-const contractsDir = resolveContractsDir();
+const contractsDir = resolveContractsComponentsDir();
 
 // --- 層1: 生成メタ CONTRACTS が契約源 *.contract.json と一致しているか（codegen の鮮度保証） ---
 

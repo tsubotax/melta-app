@@ -6,18 +6,20 @@
  *   - variants / sizes / states キーが契約の部分集合（語彙の発明を検知）
  *   - 全 token 参照が tokens.json に実在（web 側が token を消したらここが赤くなる）
  *
- * 層B（styleRefs conformance、button が機構実証の模範例）:
+ * 層B（styleRefs conformance、button の分）:
  *   pure style resolver（src/primitives/button.styles.ts）の出力と recipe の styleRefs を
  *   token 解決して突き合わせる。「実装と recipe が同じ色・寸法を指しているか」の機械照合。
- *   他 8 コンポーネントへの展開は resolver 分離（RN import 排除）を済ませてから同型で足す。
+ *   同型の検査は全実装コンポーネントに展開済みで、button 以外は `<id>-conformance.test.ts` に
+ *   1 ファイルずつ置いてある（button だけ層A と同居しているのは、機構をここで最初に作った経緯）。
+ *   ⚠️ button は resolver の初代実装で、書き方の規範ではない（AGENTS.md「style resolver の規約」）。
  */
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import { resolveContractsRoot } from "./contracts-root.js";
 import {
-  resolveContractsRoot,
   listAppRecipeFiles,
   loadAppRecipe,
   walkTokenPath,
@@ -28,8 +30,8 @@ import {
 } from "./recipe-conformance.js";
 import { MVP_CONTRACT_IDS } from "./conformance.js";
 import {
-  SIZE_SPEC,
-  resolveVariant,
+  BUTTON_SIZE_SPEC,
+  resolveButtonColors,
   type ButtonVariant,
   type ButtonSize,
 } from "../../src/primitives/button.styles.js";
@@ -140,7 +142,7 @@ const buttonRecipe = loadAppRecipe(contractsRoot, "button.recipe.json") as AppRe
 
 test("button conformance: 全 variant の色が実装 resolver と recipe で一致", () => {
   for (const [name, variantRecipe] of Object.entries(buttonRecipe.variants)) {
-    const impl = resolveVariant(nativeTheme, "light", name as ButtonVariant);
+    const impl = resolveButtonColors(nativeTheme, "light", name as ButtonVariant);
     const style = resolveStyleRefs(tokens, variantRecipe.style);
     const pressed = resolveStyleRefs(tokens, variantRecipe.pressedStyle);
     const text = resolveStyleRefs(tokens, variantRecipe.textStyle);
@@ -154,7 +156,7 @@ test("button conformance: 全 variant の色が実装 resolver と recipe で一
 
 test("button conformance: sizes（height / padding / fontSize / iconOnly 幅）が実装と一致", () => {
   for (const [name, sizeRecipe] of Object.entries(buttonRecipe.sizes)) {
-    const spec = SIZE_SPEC[name as ButtonSize];
+    const spec = BUTTON_SIZE_SPEC[name as ButtonSize];
     assert.ok(spec, `実装に無い size: ${name}`);
     assert.equal(sizeRecipe.height, spec.height, `${name}: height`);
     if (sizeRecipe.paddingHorizontal) {

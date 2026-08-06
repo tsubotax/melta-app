@@ -24,6 +24,15 @@
 export const DEFAULT_MIN_LINE_HEIGHT_RATIO = 1.45;
 
 /**
+ * theme が宣言する最小行間比を取り出す（未宣言なら既定へ倒す）。
+ * `theme.typography.minLineHeightRatio ?? DEFAULT_MIN_LINE_HEIGHT_RATIO` を各 resolver が
+ * 写経すると、既定へ倒す規則が一箇所ずつ腐る（片方だけ ?? を落とす等）ためここに集約する。
+ */
+export function minRatioOf(theme: { typography: { minLineHeightRatio?: number } }): number {
+  return theme.typography.minLineHeightRatio ?? DEFAULT_MIN_LINE_HEIGHT_RATIO;
+}
+
+/**
  * fontSize に対する安全な最小 lineHeight（px）。
  * **切り上げ**であることが要点: 四捨五入だと 32 × 1.45 = 46.4 → 46 で下限を割る。
  */

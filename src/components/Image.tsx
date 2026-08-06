@@ -1,8 +1,9 @@
 /**
  * Image — 画像表示 component（設計書 §1）。contract: image（app 先行定義）。
  *
- * - Phase 1 は RN コア Image。expo-image は Phase 2（blurhash / 高度 cache 要件化時）。
- *   差し替えコスト最小化のためここで包む（呼び出し側は melta-app の Image だけ見る）。
+ * - 実装は RN コア Image（依存ゼロ維持）。expo-image への差し替えは blurhash / 高度 cache が
+ *   要件化してから（未着手）。差し替えコスト最小化のためここで包む（呼び出し側は melta-app の
+ *   Image だけ見る）。
  * - contentFit("cover"|"contain") → RN の resizeMode に変換。
  * - onError 時に fallback（ReactNode）を表示。fallback 未指定なら何も出さない。
  * - radius は token キーのみ（生数値不可、§5）。shape の解決は pure resolver
@@ -85,5 +86,6 @@ export function Image({
   );
 }
 
-// Phase 2 conformance test 用の contract メタ（§2 A-3）。
+// conformance test 用の contract メタ（§2 A-3）。scripts/lib/conformance.test.ts が
+// 「この宣言が正しい contract を指しているか」を静的スキャンで照合する。
 Image.__contract = CONTRACTS.image;

@@ -17,7 +17,7 @@ import { readFileSync, writeFileSync, readdirSync } from "node:fs";
 import { resolve, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { toComponentName } from "./lib/conformance.js";
-import { resolveContractsRoot } from "./lib/recipe-conformance.js";
+import { resolveContractsRoot } from "./lib/contracts-root.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, "..");

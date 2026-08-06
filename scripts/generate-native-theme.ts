@@ -7,43 +7,29 @@
  *
  * 入力の解決順:
  *   1. 第1引数で明示されたパス
- *   2. melta-contracts/tokens（publish & install 後に有効）
- *   3. 開発 fallback: 兄弟ディレクトリ ../melta-ui/design/contracts/tokens.json
+ *   2. melta-contracts の tokens.json / 兄弟 melta-ui の開発 fallback（scripts/lib/contracts-root.ts）
  */
 
-import { createRequire } from "node:module";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { resolveTokensPath } from "./lib/contracts-root";
 import { normalizeTokens, type RawTokens } from "./lib/normalize-tokens";
 
-const require = createRequire(import.meta.url);
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 
-function resolveTokensPath(): string {
+function inputTokensPath(): string {
   const explicit = process.argv[2];
   if (explicit) {
     const p = resolve(explicit);
     if (!existsSync(p)) throw new Error(`指定された tokens.json が見つからない: ${p}`);
     return p;
   }
-  try {
-    return require.resolve("melta-contracts/tokens");
-  } catch {
-    // publish 前の開発 fallback（melta-app と melta-ui が兄弟ディレクトリ前提）
-    const local = resolve(scriptDir, "../../melta-ui/design/contracts/tokens.json");
-    if (existsSync(local)) {
-      console.warn(`⚠️  melta-contracts 未 install。開発 fallback を使用: ${local}`);
-      return local;
-    }
-    throw new Error(
-      "tokens.json を解決できません。`npm install melta-contracts` するか、第1引数でパスを渡してください。",
-    );
-  }
+  return resolveTokensPath({ warnOnFallback: true });
 }
 
 function main(): void {
-  const tokensPath = resolveTokensPath();
+  const tokensPath = inputTokensPath();
   const raw = JSON.parse(readFileSync(tokensPath, "utf8")) as RawTokens;
   const theme = normalizeTokens(raw);
 
