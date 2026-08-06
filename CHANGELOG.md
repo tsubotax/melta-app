@@ -7,7 +7,11 @@
 
 ---
 
-## Unreleased
+## 0.8.0 — 2026-08-06
+
+**破壊的変更（0.x 運用なので minor で表現）**: `configs.recommended` にルールが 1 本増える
+（`melta/no-raw-lineheight`、warn）。`--max-warnings 0` で回している消費者は、生 lineHeight の
+箇所で lint が新たに赤くなりうる（意図的な生値には理由付き `eslint-disable` を）。
 
 ### 追加
 

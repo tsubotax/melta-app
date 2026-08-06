@@ -74,14 +74,14 @@ npm run ios   # または android / web
 - ✅ ライブラリ化（root=ライブラリ / example=カタログアプリ、peerDeps react + react-native、runtime deps ゼロ）
 - ✅ `melta-contracts` を npm 依存として購読（recipes/app の styleRefs 同梱）
 - ✅ conformance: 契約源 ↔ 生成メタ ↔ `__contract` 宣言の照合 + consumer テスト（契約 subset / token 実在 / contractVersion 同期）+ styleRefs conformance（全実装コンポーネント展開済み）+ RN mount smoke（light/dark × 全公開コンポーネント）
-- ✅ ハーネス: design lint（CI `--max-warnings 0` + PostToolUse hook）/ drift 検査（README・docs・catalog・allowlist 突合）/ installability ゲート（pack → tarball 実体検査 → attw で exports の型解決を resolution mode ごとに検査 → fixture へ install → 本体 / icons / safe-area / eslint-plugin の import + typecheck を moduleResolution 3 種（bundler / node16 / nodenext）で実行 → eslint plugin を実 import してルール 4 本の実在を照合 → exports の解決先確認。`npm run release` チェーンの必須ステップ）
+- ✅ ハーネス: design lint（CI `--max-warnings 0` + PostToolUse hook）/ drift 検査（README・docs・catalog・allowlist 突合）/ installability ゲート（pack → tarball 実体検査 → attw で exports の型解決を resolution mode ごとに検査 → fixture へ install → 本体 / icons / safe-area / eslint-plugin の import + typecheck を moduleResolution 3 種（bundler / node16 / nodenext）で実行 → eslint plugin を実 import してルール 5 本の実在を照合 → exports の解決先確認。`npm run release` チェーンの必須ステップ）
 - ✅ layout 6 個（Stack / Row / Screen / Header / Icon / Avatar）— dogfood 不足 1〜4 を解消、ProjectFeedScreen は公開 primitive だけで構成
   - Screen の SafeArea は adapter registry 化済み: default は RN core SafeAreaView（依存ゼロ維持）、`melta-app/safe-area` の `enableSafeAreaContext()` で react-native-safe-area-context に差し替え可（optional peer）
 - ✅ form / feedback 10 個（TextField / Toggle / Checkbox / Radio / Alert / Toast / Progress / Modal / ActionSheet / BottomSheet）— checkbox / radio は Pressable + 描画（svg 非依存）、ActionSheet / BottomSheet は select / dropdown の adapted 変換先の受け皿
 - ✅ showcase（https://app.melta.tsubotax.com — melta-ui 様式シェル + 実 RN カタログの Live 埋め込み。表・統計は契約からビルド時生成）
 - ✅ AI 入口: [llms.txt](https://app.melta.tsubotax.com/llms.txt)（契約から生成・drift 検査対象）+ [patterns.md](./patterns.md)（フォームの組み方規範。スニペットは実コードと機械同期）
 - ✅ lint 強制層の npm 配布（0.5.2）: `melta-app/eslint-plugin` を公開 subpath 化。消費者プロジェクトの flat config に組めば、生値の直書きが消費者側でも lint で止まる。推奨 severity は `configs.recommended` で配布（0.5.3。消費者が手書きで写さない）
-- ✅ 消費者プロジェクトでの実導入検証（2026-08-04）: 別リポジトリの自プロジェクト（非公開 RN アプリ）に npm 経由で導入し、AI が違反コードを書いた直後に検出 → 修正フィードバック → 自己修正、のループを実測で確認。導入時に見つかった hook の欠陥（実行失敗時に無言で素通りする）は同日中に本体へ還元し、故障系を含む E2E 14 ケースで固定（0.5.3）
+- ✅ 消費者プロジェクトでの実導入検証（2026-08-04）: 別リポジトリの自プロジェクト（非公開 RN アプリ）に npm 経由で導入し、AI が違反コードを書いた直後に検出 → 修正フィードバック → 自己修正、のループを実測で確認。導入時に見つかった hook の欠陥（実行失敗時に無言で素通りする）は同日中に本体へ還元し、故障系を含む E2E 15 ケースで固定（0.5.3 で 14、0.8.0 の no-raw-lineheight 追加で 15）
 - ✅ [npm publish（0.5.3）](https://www.npmjs.com/package/melta-app)
 - ⬜ React Native Directory 登録（[PR #2606](https://github.com/react-native-community/directory/pull/2606) レビュー待ち）
 

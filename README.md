@@ -23,8 +23,8 @@
 同じ欠陥を固定した E2E テストまで。
 
 - **ドキュメントは契約からの生成物** — 下の[コンポーネント表](#コンポーネント)・[llms.txt](https://app.melta.tsubotax.com/llms.txt)・showcase の統計は `melta-contracts` から生成し、手書きの表はこのリポに存在しない。腐りは drift 検査が落とす（[scripts/check-drift.ts](./scripts/check-drift.ts) / [CI](./.github/workflows/check.yml)）
-- **消費者プロジェクトでの実導入検証（2026-08-04）** — 別リポジトリの自プロジェクト（非公開 RN アプリ）に npm 経由で導入し、AI が違反コードを書いた直後に検出 → 修正フィードバック → 自己修正、のループを実測で確認。導入時に見つかった hook の欠陥（実行失敗時に無言で素通りする）は同日中に本体へ還元し、故障系を含む E2E 14 ケースで固定（[scripts/lib/hook-lint.test.ts](./scripts/lib/hook-lint.test.ts) / [CHANGELOG 0.5.3](./CHANGELOG.md#053--2026-08-04)）
-- **「npm install すれば動く」の機械証明** — pack → tarball 実体検査 → [attw](https://github.com/arethetypeswrong/arethetypeswrong.github.io) で exports の型解決を resolution mode ごとに検査 → fixture へ install → 本体 / icons / safe-area / eslint-plugin の import + typecheck を **`moduleResolution` 3 種（bundler / node16 / nodenext）すべてで**実行 → lint plugin を実 import してルール 4 本と推奨 severity を照合、までを公開ゲートにしている（[scripts/check-installability.sh](./scripts/check-installability.sh)。`npm run release` の必須ステップ）
+- **消費者プロジェクトでの実導入検証（2026-08-04）** — 別リポジトリの自プロジェクト（非公開 RN アプリ）に npm 経由で導入し、AI が違反コードを書いた直後に検出 → 修正フィードバック → 自己修正、のループを実測で確認。導入時に見つかった hook の欠陥（実行失敗時に無言で素通りする）は同日中に本体へ還元し、故障系を含む E2E 15 ケースで固定 — 0.5.3 で 14、0.8.0 の no-raw-lineheight 追加で 15（[scripts/lib/hook-lint.test.ts](./scripts/lib/hook-lint.test.ts) / [CHANGELOG 0.5.3](./CHANGELOG.md#053--2026-08-04)）
+- **「npm install すれば動く」の機械証明** — pack → tarball 実体検査 → [attw](https://github.com/arethetypeswrong/arethetypeswrong.github.io) で exports の型解決を resolution mode ごとに検査 → fixture へ install → 本体 / icons / safe-area / eslint-plugin の import + typecheck を **`moduleResolution` 3 種（bundler / node16 / nodenext）すべてで**実行 → lint plugin を実 import してルール 5 本と推奨 severity を照合、までを公開ゲートにしている（[scripts/check-installability.sh](./scripts/check-installability.sh)。`npm run release` の必須ステップ）
 
 ## Quickstart
 
@@ -118,7 +118,7 @@ production ビルドでは `__DEV__` を偽（または未定義）のままに�
 
 ## 利用側コードの lint 強制層（`melta-app/eslint-plugin`）
 
-melta 契約からの逸脱を機械検知する eslint カスタムルール 4 本を同梱している。
+melta 契約からの逸脱を機械検知する eslint カスタムルール 5 本を同梱している。
 消費者プロジェクトの flat config に組み込むと、生値の直書きが**使う側のコードで**止まる。
 
 ### 動く完全例
@@ -147,7 +147,7 @@ export default [
 ];
 ```
 
-**成功判定**: 生値を書いたファイルで `npx eslint .` を実行すると、4 ルールが名前付きで出る。
+**成功判定**: 生値を書いたファイルで `npx eslint .` を実行すると、違反したルールが名前付きで出る（この fixture は 5 本中 4 本を踏む）。
 
 ```
 src/Bad.tsx
@@ -162,7 +162,7 @@ src/Bad.tsx
 `theme.*` 経由で書き直すと 0 件になる。ここまでが「利用側に強制層が入った」状態。
 
 > この例は eslint 9.39 / `@react-native/eslint-config` 0.85.3 / melta-app 0.5.3 の
-> 使い捨て fixture（tarball install）で実行して確認したもの。ルール 4 本の実在と severity は
+> 使い捨て fixture（tarball install）で実行して確認したもの（no-raw-lineheight 追加前の 0.5.3 時点）。ルール 5 本の実在と severity は
 > `check:installability` が毎リリース照合する。
 
 ### `configs.recommended` の中身
