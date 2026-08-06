@@ -1,0 +1,45 @@
+name: 機能提案
+description: コンポーネント・props・lint ルールの提案
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        新しいコンポーネントの提案は、先に [melta-ui](https://github.com/tsubotax/melta-ui) 側に契約
+        （`appStatus`）があるか確認してください。契約が無いものは melta-ui 側の議論が先になります。
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 解きたい問題
+      description: 「アプリを作るときに何ができないか」から書いてください
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 提案
+      description: 想定する API（props / 使用例）があれば
+    validations:
+      required: true
+
+  - type: dropdown
+    id: layer
+    attributes:
+      label: 影響する層
+      options:
+        - 既存コンポーネントの props / 挙動
+        - 新しいコンポーネント（契約が必要）
+        - eslint plugin のルール
+        - theme / トークン正規化
+        - ドキュメント
+    validations:
+      required: true
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: 現状の回避策
+    validations:
+      required: false

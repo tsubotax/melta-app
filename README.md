@@ -453,9 +453,16 @@ enableSafeAreaContext({ edges: ["top"] });
 ## 成熟度・メンテナンス
 
 - **0.x**。API は安定に向かっているが、破壊的変更は minor で入る（[CHANGELOG](./CHANGELOG.md) が変更の正本。npm に公開した版だけを記録する）
+- **バグ・要望は [GitHub Issues](https://github.com/tsubotax/melta-app/issues)**、コントリビュートの手引きは [CONTRIBUTING.md](./CONTRIBUTING.md)、脆弱性は [SECURITY.md](./SECURITY.md) の非公開経路へ
 - **個人メンテナンスのプロジェクト**（tsubotax）。SLA・サポート窓口は無い。issue / PR は歓迎するが応答は best effort
 - **現在の adopter は 1 つ**（非公開プロジェクトのモバイルアプリ）。dogfood はそこで回している。D2I は当初想定していた最初の adopter だが、mobile 側はまだ melta-app を導入していない（D2I の web 側が使っているのは melta-ui）
 - React Native Directory 登録は [PR #2606](https://github.com/react-native-community/directory/pull/2606) がレビュー待ち
+
+### 安定性の読み方
+
+- **何も書いていない公開 API は安定**として扱ってよい。変更は semver に従う（0.x なので破壊的変更は minor bump で入り、移行手順を CHANGELOG に書く）
+- **`@experimental` 注記が付いたものは予告なく変わる**（挙動・シグネチャ・メッセージとも）。現在は theme の解決規則ヘルパ（`validateTheme` / `resolveMode` / `supportedModes` / `deriveColorScheme` / `declaredModes`）が該当し、JSDoc と型定義に注記が出る
+- **公開面の増減は機械強制**。export の増減は snapshot テスト（[scripts/lib/export-surface.test.ts](./scripts/lib/export-surface.test.ts)）が、契約の破壊的変更は melta-ui 側の `npm run design:compat` が semver bump を要求する。「気づいたら消えていた」は CI で止まる
 
 ## セキュリティ・データ境界
 

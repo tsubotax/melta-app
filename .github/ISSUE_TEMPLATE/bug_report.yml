@@ -1,0 +1,72 @@
+name: バグ報告
+description: 動かない・仕様と違う挙動を報告する
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        脆弱性の報告はここではなく [SECURITY.md](https://github.com/tsubotax/melta-app/blob/main/SECURITY.md) の非公開経路を使ってください。
+        トークンの**値**に関する指摘は、契約の SSOT である [melta-ui](https://github.com/tsubotax/melta-ui/issues) 側へお願いします。
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: 対象
+      options:
+        - RN コンポーネント（melta-app 本体）
+        - eslint plugin（melta-app/eslint-plugin）
+        - subpath（melta-app/icons / melta-app/safe-area）
+        - theme / ThemeProvider
+        - ドキュメント
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: melta-app のバージョン
+      placeholder: "0.6.0"
+    validations:
+      required: true
+
+  - type: input
+    id: rn-version
+    attributes:
+      label: React Native / Expo のバージョン
+      description: Expo を使っていない場合は RN だけで構いません
+      placeholder: "Expo 56 / RN 0.85.3 / React 19.2.3"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: プラットフォーム
+      multiple: true
+      options:
+        - iOS
+        - Android
+        - Web（RN Web export）
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: 再現手順
+      description: 最小の再現コード（JSX）があると助かります
+      placeholder: |
+        1. `<Screen>` の中に `<Card>` を置く
+        2. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-actual
+    attributes:
+      label: 期待した結果 / 実際の結果
+      placeholder: |
+        期待: ...
+        実際: ...（スクリーンショット / エラーログがあれば添付）
+    validations:
+      required: true
