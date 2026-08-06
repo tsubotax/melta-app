@@ -50,10 +50,12 @@ interface ScreenProps {
   /**
    * 内部 ScrollView への passthrough（variant="scroll" のみ）。children は Screen が持つ。
    *
-   * - `contentContainerStyle` は DS の padding と**配列合成**される（渡した側が後勝ち）。
-   * - `contentInsetAdjustmentBehavior` は渡さないこと（safe-area は Screen 側が持つので二重 inset になる）。
+   * - `contentContainerStyle` は DS の padding と**配列合成**される（渡した側が後勝ち。
+   *   意図的な非常口 — DS の padding を残したい場合は padding 系を書かないこと）。
+   * - `contentInsetAdjustmentBehavior` は**型で遮断**（safe-area は Screen 側が持つので
+   *   iOS の自動 inset と必ず二重になる。正当な用途が無いため Omit）。
    */
-  scrollViewProps?: Omit<ScrollViewProps, "children">;
+  scrollViewProps?: Omit<ScrollViewProps, "children" | "contentInsetAdjustmentBehavior">;
   /**
    * 内部 ScrollView の ref（scrollTo / scrollToEnd 用、variant="scroll" のみ）。
    * Screen 自体は `__contract` 静的プロパティを持つため forwardRef 化せず別 prop にしている。

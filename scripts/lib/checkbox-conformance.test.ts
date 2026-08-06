@@ -27,6 +27,7 @@ const contractsRoot = resolveContractsRoot();
 const tokens = JSON.parse(readFileSync(join(contractsRoot, "tokens.json"), "utf8")) as unknown;
 
 const checkboxRecipe = loadAppRecipe(contractsRoot, "checkbox.recipe.json") as AppRecipe & {
+  description: string;
   variants: {
     default: {
       boxStyle: Record<string, unknown>;
@@ -122,12 +123,14 @@ test("checkbox conformance: states.error の borderColor 差分が実装と一�
   );
 });
 
-test("checkbox conformance: disabled variant の opacity と hitSlop 44 確保が literal（CHECKBOX_SPEC）と一致", () => {
+test("checkbox conformance: disabled variant の opacity と 44pt 標的が literal（CHECKBOX_SPEC）と一致", () => {
   assert.deepEqual(Object.keys(checkboxRecipe.variants.disabled.style).sort(), ["opacity"]);
   const style = resolveStyleRefs(tokens, checkboxRecipe.variants.disabled.style);
   assert.equal(style.opacity, CHECKBOX_SPEC.disabledOpacity, "disabled: opacity");
-  // recipe description の「実タッチ領域は hitSlop で 44 を確保」: box 20 + hitSlop 12×2 = 44
-  assert.equal(CHECKBOX_SPEC.boxSize + CHECKBOX_SPEC.hitSlop * 2, 44, "hitSlop: タッチ領域 44pt");
+  // recipe description の「実タッチ標的は行の minHeight で 44 を確保」（規約 10-(b)）
+  assert.equal(CHECKBOX_SPEC.rowMinHeight, 44, "rowMinHeight: タップ標的 44pt");
+  // recipe description が hitSlop 方式に戻ったら実装との齟齬なので落とす
+  assert.match(checkboxRecipe.description, /minHeight で 44/);
 });
 
 test("checkbox conformance: dark mode では semantic 色が dark 側から解決される", () => {

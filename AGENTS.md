@@ -49,6 +49,9 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
     - (c) **横方向の hitSlop は隣接する操作要素との gap の 1/2 を超えない** — hitSlop は視覚境界の外へ
       広がるので、超えると当たり判定が重なり手前に描画された側が押し勝つ（Toast の action と × で実際に起きた）。
       横が足りなくなる場合は hitSlop ではなく箱の幅下限（minWidth）で埋める。
+      例外は iconOnly の Button（幅 32/40 は minWidth で埋めると正方形が崩れるため横 hitSlop で埋める。
+      代わりに「横並びは gap ≥ hitSlop×2」を消費者責務として README に明記。DS 内部で
+      iconOnly を密に並べるコンポーネントを作る場合はこの前提が崩れるので設計を見直すこと）。
     - **`height` 固定は使わない**（fontScale で中身がクリップする）。寸法は `minHeight` で持つ。
     - hitSlop の値は `*.styles.ts` に **literal** で置き、導出関数（`requiredHitSlop`）から自動計算しない。
       導出にすると視覚寸法の変更に hitSlop が黙って追随し、conformance が fail-open になる。

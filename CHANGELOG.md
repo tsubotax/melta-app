@@ -74,6 +74,13 @@
   Tag removable × / Toast × / Alert × / Checkbox は不変。破壊的変更ではない
   （props / 型の削除なし。`Button` labeled の `height` → `minHeight` 化により、消費者が
   `style={{ height }}` で上書きしていた場合のみ合成挙動が変わり得る）
+- **`Checkbox` のタップ標的を hitSlop 12 から行の `minHeight: 44` へ変更**（Codex レビュー反映）。
+  旧実装は行全体の Pressable に四方 hitSlop が付いており、縦積みの隣接 Checkbox と当たり判定が
+  最大 24pt 重なっていた。Radio の option 行と同じ手当て（規約 10-(b)）に統一。
+  行の高さが最大 8pt 高くなる（背景を持たないため塗りは変わらない）
+- **`Screen` の `scrollViewProps` から `contentInsetAdjustmentBehavior` を型で遮断**
+  （Codex レビュー反映）。safe-area は Screen 側が持つため iOS の自動 inset と必ず二重になり、
+  正当な用途が無い。`contentContainerStyle` の後勝ち合成は意図的な非常口として維持
 - **`enableSafeAreaContext({ edges })` の `edges` の意味が変わった**（シグネチャは互換）。
   「アプリ全体で 1 個のグローバル」から「**`Screen` の既定値**」へ。シート系はこの指定に
   関わらず自前の edge を使う。タブバー対応の推奨も「アプリ全体を `edges: ["top"]`」から

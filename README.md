@@ -363,11 +363,14 @@ const listRef = useRef<ScrollView>(null);
 | `Tag variant="removable"` の × / `Toast` の × / `Alert` の × / `Modal` の × | 24 の箱 | hitSlop 10 | 44 |
 | `Radio` の option 行 | 行の高さ 36 | `minHeight: 44` | 44 |
 | `Toggle` medium / large | track 24 / 28 | 縦 hitSlop 10 / 8 | 44 |
-| `Checkbox` の行 | box 20 | hitSlop 12 | 44 |
+| `Checkbox` の行 | box 20（行は label 込み） | `minHeight: 44` | 44 |
 
 - **背景を持つ要素は hitSlop、持たない要素は `minHeight`**。背景がある要素を minHeight で伸ばすと見た目が変わるため
 - **横方向の hitSlop は隣接する操作要素との gap の 1/2 まで**。超えると当たり判定が重なって押し違いが起きる
   （`Toast` の action と × はこれで実際に 8pt 重なっていた。0.7.0 で修正）
+- ⚠️ **iconOnly の `Button` だけは横にも hitSlop が付く**（幅 32/40 では 44pt に届かないため）。
+  iconOnly を横に並べるときは **gap を hitSlop の 2 倍以上**（small: 12 / medium: 4）取ること。
+  gap 0 で密着させると当たり判定が重なる
 
 ### OS の文字サイズ拡大（fontScale）
 

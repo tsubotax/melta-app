@@ -230,15 +230,11 @@ const TARGETS: TapTarget[] = [
     name: "Checkbox の行",
     source: "components/Checkbox.tsx",
     usesConstants: ["CHECKBOX_SPEC"],
-    height: CHECKBOX_SPEC.boxSize,
-    width: CHECKBOX_SPEC.boxSize,
-    hitSlop: {
-      top: CHECKBOX_SPEC.hitSlop,
-      bottom: CHECKBOX_SPEC.hitSlop,
-      left: CHECKBOX_SPEC.hitSlop,
-      right: CHECKBOX_SPEC.hitSlop,
-    },
-    note: "行全体が Pressable。最小ケース（label が極小）でも box 20 + 12×2 = 44",
+    height: CHECKBOX_SPEC.rowMinHeight,
+    width: null,
+    widthUnknownReason: "box + gap + label の横幅（親の幅いっぱいまで伸びる）",
+    hitSlop: { top: 0, bottom: 0 },
+    note: "背景を持たないので hitSlop ではなく minHeight（Radio と同じ手当て。旧 hitSlop 12 は縦積みで隣接行と重なっていた）",
   },
 ];
 

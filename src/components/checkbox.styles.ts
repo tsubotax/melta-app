@@ -11,14 +11,16 @@ import type { NativeTheme, ThemeMode } from "../theme/index.js";
 /**
  * recipe 由来の literal 値テーブル（token 化されていない数値。conformance が recipe と照合する）。
  * - box は 20px（web の 16px より大きいのはタッチ前提、recipe description）
- * - hitSlop は (44 - box 20) / 2 = 12。行全体 Pressable に足して実効タップ標的 44pt を確保
- *   （A11Y_MIN_TAP_TARGET_44。横断方針と正典パターンは src/a11y/tap-target.ts）
+ * - 実効タップ標的 44pt は行の minHeight で確保（A11Y_MIN_TAP_TARGET_44。規約 10-(b):
+ *   背景を持たない行は hitSlop でなく寸法で満たす — 旧実装の四方 hitSlop 12 は行全体
+ *   Pressable に効くため、縦積みの隣接 Checkbox と当たり判定が最大 24pt 重なっていた
+ *   （Codex レビュー指摘）。Radio の option 行と同じ手当てに統一）
  */
 export const CHECKBOX_SPEC = {
   boxSize: 20,
   boxBorderWidth: 2,
   disabledOpacity: 0.5,
-  hitSlop: 12,
+  rowMinHeight: 44,
 } as const;
 
 /** 見た目（色）に効く状態入力。disabled は opacity のみで色を変えないため含めない。 */

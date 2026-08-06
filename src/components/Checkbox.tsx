@@ -4,8 +4,8 @@
  * - RN にネイティブ checkbox が無いため Pressable（行全体タップ）+ 描画で実装する。
  *   checkmark は rotate した View の L 字 border、indeterminate は横棒
  *   （react-native-svg 非依存 = 本体エントリの依存ゼロ維持。recipe description 参照）。
- * - box は 20px（web の 16px より大きいのはタッチ前提）。実タッチ領域は hitSlop 12 で
- *   44pt（20 + 12×2）を確保する。
+ * - box は 20px（web の 16px より大きいのはタッチ前提）。実効タップ標的は行の
+ *   minHeight 44 で確保する（規約 10-(b): 背景を持たない行は hitSlop でなく寸法）。
  * - label 必須（FORM_NO_LABEL_OMIT を props 型で強制）。label は Text primitive
  *   （base/text-default = recipe labelStyle と同値）。
  * - states（contract → prop の写像）: checked/unchecked → checked:boolean、
@@ -59,7 +59,6 @@ export function Checkbox({
     <Pressable
       onPress={() => onChange(!checked)}
       disabled={disabled}
-      hitSlop={CHECKBOX_SPEC.hitSlop}
       accessibilityRole="checkbox"
       accessibilityState={{ checked: indeterminate ? "mixed" : checked, disabled }}
       accessibilityLabel={label}
@@ -68,6 +67,9 @@ export function Checkbox({
         flexDirection: "row",
         alignItems: "center",
         gap: resolved.gap,
+        // 実効タップ標的 44pt。背景を持たない行なので hitSlop でなく minHeight（規約 10-(b)、
+        // 縦積みの隣接行と当たり判定が重ならない）
+        minHeight: CHECKBOX_SPEC.rowMinHeight,
         opacity: disabled ? CHECKBOX_SPEC.disabledOpacity : 1,
       }}
     >
