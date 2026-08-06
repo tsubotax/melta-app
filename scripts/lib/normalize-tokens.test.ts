@@ -7,6 +7,7 @@
 
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
@@ -61,15 +62,28 @@ test("parseCubicBezier: 4 引数の tuple を返す", () => {
   assert.throws(() => parseCubicBezier("ease-in-out"));
 });
 
-test("normalizeTokens: 実 tokens.json を RN theme に変換する", () => {
-  // 開発 fallback の melta-ui contracts を入力にする
-  const tokensPath = resolve(here, "../../../melta-ui/design/contracts/tokens.json");
-  if (!existsSync(tokensPath)) {
-    // 兄弟ディレクトリに melta-ui が無い環境ではスキップ（CI で contracts を install した後に検証）
-    console.warn(`⚠️  tokens.json 未検出のためスキップ: ${tokensPath}`);
-    return;
+/**
+ * 実 tokens.json の解決（generate-native-theme.ts と同順: npm → 兄弟 fallback）。
+ * ⚠️ どちらも無ければ **throw**（skip しない）。旧実装は兄弟パス直書き + 無ければ
+ * console.warn で return しており、CI（意図的に兄弟 melta-ui を置かない npm 経路検証）では
+ * この検証が**常に silent skip** されていた（fail-open。Phase 0 リサーチ C-1 で検出）。
+ */
+function resolveRealTokensPath(): string {
+  const require = createRequire(import.meta.url);
+  try {
+    return require.resolve("melta-contracts/tokens");
+  } catch {
+    const sibling = resolve(here, "../../../melta-ui/design/contracts/tokens.json");
+    if (existsSync(sibling)) return sibling;
+    throw new Error(
+      "実 tokens.json を解決できない（melta-contracts 未 install かつ兄弟 melta-ui なし）。" +
+        "この検証は skip せず失敗させる。`npm install` するか兄弟に melta-ui を置くこと。",
+    );
   }
-  const raw = JSON.parse(readFileSync(tokensPath, "utf8")) as RawTokens;
+}
+
+test("normalizeTokens: 実 tokens.json を RN theme に変換する", () => {
+  const raw = JSON.parse(readFileSync(resolveRealTokensPath(), "utf8")) as RawTokens;
   const theme = normalizeTokens(raw);
 
   // color

@@ -7,6 +7,25 @@
 
 ---
 
+## Unreleased
+
+### 変更
+
+- **peerDependencies を実態に合わせて宣言**: `react >=18.2.0` / `react-native >=0.71.0`
+  （`gap` レイアウトと `role` prop が RN 0.71 導入のため。従来の `"*"` は 0.70 以下でも
+  install できてしまい、無言でレイアウトが崩れる状態だった）。README に RN 版対応表を追加
+- `engines.node >=22` を宣言（README の要件を package.json でも機械宣言）
+- 配布物が **ESM のみ**であることを README に明記（CJS dual 出力はしない方針を確定）
+
+### 内部
+
+- normalize-tokens.test の実 tokens 検証を fail-closed 化（npm → 兄弟の順で解決し、
+  どちらも無ければ throw。旧実装は兄弟パス直書きのみで、兄弟 melta-ui を意図的に置かない
+  CI では **silent skip** されていた）
+- README に CI / npm バッジを追加
+
+---
+
 ## 0.6.0 — 2026-08-06
 
 **破壊的変更（0.x 運用なので minor で表現）: 8 段中 5 段の lineHeight が +1〜2px 広がる。**

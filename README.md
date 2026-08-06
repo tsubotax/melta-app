@@ -1,5 +1,8 @@
 # melta for APP（melta-app）
 
+[![Check](https://github.com/tsubotax/melta-app/actions/workflows/check.yml/badge.svg)](https://github.com/tsubotax/melta-app/actions/workflows/check.yml)
+[![npm](https://img.shields.io/npm/v/melta-app)](https://www.npmjs.com/package/melta-app)
+
 **web と同じデザイン契約を React Native に降ろす UI kit。使う側のコードにも lint 強制層を npm で配る。**
 アプリ本体ではなく `npm install melta-app` で使うライブラリ。
 
@@ -29,7 +32,16 @@
 npm install melta-app
 ```
 
-必須の peerDependencies は `react` / `react-native` の 2 つ（runtime 依存ゼロ）。機能別の optional peer が 2 つ — `react-native-svg`（`melta-app/icons` を使う場合のみ）と `react-native-safe-area-context`（`melta-app/safe-area` を使う場合のみ）。検証済み構成は Expo 56 / RN 0.85 / React 19.2。
+必須の peerDependencies は `react` / `react-native` の 2 つ（runtime 依存ゼロ）。機能別の optional peer が 2 つ — `react-native-svg`（`melta-app/icons` を使う場合のみ）と `react-native-safe-area-context`（`melta-app/safe-area` を使う場合のみ）。配布物は **ESM のみ**（`require()` では読めない。Metro / 主要バンドラは対応済み）。
+
+**React Native バージョン対応**（下限 0.71 は `gap` / `role` 使用のため。型・Jest で検証済みなのは Expo 56 / RN 0.85 / React 19.2 の組のみ）:
+
+| RN | melta-app | optional peer の目安 |
+|---|---|---|
+| 0.85（検証済み） | ✅ | safe-area-context 5.x / svg 15.13+ |
+| 0.74〜0.84 | 型上は互換（未検証） | safe-area-context 5.x / svg 15.8+ |
+| 0.71〜0.73 | 型上は互換（未検証） | safe-area-context 4.x / svg 15.0〜15.7 |
+| 〜0.70 | ❌（`gap` レイアウトが崩れる） | — |
 
 > ⚠️ **0.x 系につき破壊的変更は minor で入る**（CHANGELOG 方針）。`^` 範囲でなく**バージョン固定か `~` 範囲**を推奨。
 
