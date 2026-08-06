@@ -11,7 +11,7 @@
 import { describe, test, expect } from "@jest/globals";
 import { StyleSheet } from "react-native";
 import { render } from "@testing-library/react-native";
-import { ThemeProvider, Text, defineTheme, nativeTheme } from "../index";
+import { ThemeProvider, Text, defineTheme, nativeTheme } from "../index.js";
 
 /** render().toJSON() の最小 shape（react-test-renderer 型に依存しない）。 */
 interface Node {

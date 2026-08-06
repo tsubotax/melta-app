@@ -32,7 +32,7 @@ import type {
   StatusColors,
   ThemeColor,
   ThemeMode,
-} from "./types";
+} from "./types.js";
 
 // ---------------------------------------------------------------------------
 // dev 判定
@@ -514,6 +514,9 @@ function deepFreeze(value: unknown): void {
  *
  * dev では validateTheme を1回通し、問題があれば throw する（構造が壊れた theme は
  * 後段で必ず事故になるので早く落とす）。production では検査ごと省く。
+ *
+ * dev では**戻り値だけ**が入れ子まで再帰 freeze される。入力オブジェクトと公開 export の
+ * `nativeTheme` は `cloneTokenTree` で参照を切ってあるので凍らない（0.4.3 で意図的にこうした）。
  */
 export function defineTheme(options: ThemeOptions): ResolvedNativeTheme {
   if (isDev) {

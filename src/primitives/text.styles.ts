@@ -6,11 +6,11 @@
  * 機械照合は scripts/lib/text-conformance.test.ts が行う。
  */
 
-import type { NativeTheme, FontSizeKey, FontWeightKey, FontWeightValue } from "../theme";
+import type { NativeTheme, FontSizeKey, FontWeightKey, FontWeightValue } from "../theme/index.js";
 // theme index からの runtime import は ThemeProvider → react-native を引くため、
 // pure module（line-height.ts / letter-spacing.ts）を直接参照する。
-import { clampLineHeight, minRatioOf } from "../theme/line-height";
-import { resolveLetterSpacing } from "../theme/letter-spacing";
+import { clampLineHeight, minRatioOf } from "../theme/line-height.js";
+import { resolveLetterSpacing } from "../theme/letter-spacing.js";
 
 /** letterSpacing の切替軸（text.recipe description の role prop に対応）。 */
 export type TextRole = "heading" | "body";

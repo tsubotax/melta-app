@@ -37,10 +37,10 @@ import {
   Modal,
   ActionSheet,
   BottomSheet,
-} from "../index";
+} from "../index.js";
 // Icon は subpath エントリ（react-native-svg 隔離、src/icons/index.ts 参照）。
 // 利用者と同じ「melta-app/icons」相当の経路 = icons barrel 経由で import する。
-import { Icon } from "../icons";
+import { Icon } from "../icons/index.js";
 
 /** implemented 全コンポーネントの代表 render（DU の全分岐は conformance / catalog の担当、ここは 1 mount）。 */
 const SMOKE_CASES: Array<[name: string, element: ReactElement]> = [

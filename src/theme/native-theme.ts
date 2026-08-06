@@ -2,7 +2,7 @@
 // 生成元: scripts/generate-native-theme.ts（入力 melta-contracts tokens.json）
 // tokens version: 1.0.0
 
-import type { NativeTheme } from "./types";
+import type { NativeTheme } from "./types.js";
 
 export const nativeTheme: NativeTheme = {
   "color": {
@@ -38,7 +38,7 @@ export const nativeTheme: NativeTheme = {
       },
       "dark": {
         "bg-page": "#0f172a",
-        "bg-page-alt": "#1e293b",
+        "bg-page-alt": "#334155",
         "bg-surface": "#1e293b",
         "bg-surface-alt": "#0f172a",
         "text-heading": "#f1f5f9",

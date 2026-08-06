@@ -18,16 +18,17 @@ import {
   type StyleProp,
   type ViewStyle,
 } from "react-native";
-import { useTheme } from "../theme";
-import { CONTRACTS } from "../contracts/contract-types";
+import { useTheme } from "../theme/index.js";
+import { CONTRACTS } from "../contracts/contract-types.js";
 import {
+  AVATAR_INITIALS_MAX_FONT_SCALE,
   resolveAvatarGroupStyle,
   resolveAvatarStatusColor,
   resolveAvatarStyle,
   type AvatarSize,
   type AvatarStatus,
   type AvatarStyleResult,
-} from "./avatar.styles";
+} from "./avatar.styles.js";
 
 interface AvatarProps {
   /** 表示名（initials の生成元 + accessibilityLabel。contract a11y required）。 */
@@ -73,7 +74,14 @@ export function Avatar({ name, source, size = "medium", status, style, testID }:
         {source ? (
           <RNImage source={source} style={{ width: "100%", height: "100%" }} />
         ) : (
-          <RNText style={resolved.text}>{toInitials(name)}</RNText>
+          // 器（円）は fontScale で伸びないので、文字側に size 別の上限を掛けて溢れを防ぐ
+          // （根拠と導出は avatar.styles.ts の AVATAR_INITIALS_MAX_FONT_SCALE）。
+          <RNText
+            style={resolved.text}
+            maxFontSizeMultiplier={AVATAR_INITIALS_MAX_FONT_SCALE[size]}
+          >
+            {toInitials(name)}
+          </RNText>
         )}
       </View>
       {status ? (

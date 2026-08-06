@@ -16,9 +16,9 @@
 import { describe, test, expect, jest, beforeEach, afterEach } from "@jest/globals";
 import { render } from "@testing-library/react-native";
 import { Text as RNText, useColorScheme } from "react-native";
-import { ThemeProvider, useTheme, defineTheme, nativeTheme } from "../index";
-import type { ResolvedNativeTheme } from "../index";
-import { singleDarkThemeOptions } from "../../scripts/lib/fixtures/single-dark.theme";
+import { ThemeProvider, useTheme, defineTheme, nativeTheme } from "../index.js";
+import type { ResolvedNativeTheme } from "../index.js";
+import { singleDarkThemeOptions } from "../../scripts/lib/fixtures/single-dark.theme.js";
 
 jest.mock("react-native/Libraries/Utilities/useColorScheme");
 

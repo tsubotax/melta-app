@@ -81,7 +81,8 @@ test("textfield conformance: recipe のキー集合が想定どおり（増え�
     assert.deepEqual(Object.keys(s).sort(), ["inputStyle"], `size ${name}: キー集合が変わった`);
     assert.deepEqual(
       Object.keys(s.inputStyle).sort(),
-      ["fontSize", "height", "paddingHorizontal"],
+      // 0.7.0 で height → minHeight（fontScale で入力文字がクリップするため）
+      ["fontSize", "minHeight", "paddingHorizontal"],
       `size ${name}: inputStyle キー集合が変わった`,
     );
   }
@@ -122,13 +123,13 @@ test("textfield conformance: 共通部（label / helperText / errorText）が実
   assert.equal(error.marginTop, impl.errorText.marginTop, "errorText: marginTop");
 });
 
-test("textfield conformance: sizes（height / paddingHorizontal / fontSize）が実装と一致", () => {
+test("textfield conformance: sizes（minHeight / paddingHorizontal / fontSize）が実装と一致", () => {
   for (const [name, sizeRecipe] of Object.entries(recipe.sizes)) {
     const spec = TEXTFIELD_SIZE_SPEC[name as TextFieldSize];
     assert.ok(spec, `実装に無い size: ${name}`);
     const impl = resolveTextFieldStyle(nativeTheme, "light", { size: name as TextFieldSize });
     const style = resolveStyleRefs(tokens, sizeRecipe.inputStyle);
-    assert.equal(style.height, impl.input.height, `${name}: height`);
+    assert.equal(style.minHeight, impl.input.minHeight, `${name}: minHeight`);
     assert.equal(style.paddingHorizontal, impl.input.paddingHorizontal, `${name}: paddingHorizontal`);
     assert.equal(style.fontSize, impl.input.fontSize, `${name}: fontSize`);
   }

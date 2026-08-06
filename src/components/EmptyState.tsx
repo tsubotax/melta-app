@@ -12,11 +12,11 @@
 
 import { useMemo, type ReactNode } from "react";
 import { View, type StyleProp, type ViewStyle } from "react-native";
-import { Text } from "../primitives/Text";
-import { Button } from "../primitives/Button";
-import { useTheme } from "../theme";
-import { CONTRACTS } from "../contracts/contract-types";
-import { EMPTY_STATE_SPEC, resolveEmptyStateStyles } from "./empty-state.styles";
+import { Text } from "../primitives/Text.js";
+import { Button } from "../primitives/Button.js";
+import { useTheme } from "../theme/index.js";
+import { CONTRACTS } from "../contracts/contract-types.js";
+import { EMPTY_STATE_SPEC, resolveEmptyStateStyles } from "./empty-state.styles.js";
 
 interface EmptyStateProps {
   icon?: ReactNode;

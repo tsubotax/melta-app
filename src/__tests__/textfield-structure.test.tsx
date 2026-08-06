@@ -9,8 +9,8 @@
 
 import { describe, test, expect, jest } from "@jest/globals";
 import { fireEvent, render } from "@testing-library/react-native";
-import { ThemeProvider, TextField } from "../index";
-import { resolveInputVerticalFix } from "../components/TextField";
+import { ThemeProvider, TextField } from "../index.js";
+import { resolveInputVerticalFix } from "../components/TextField.js";
 
 interface Node {
   type: string;
@@ -48,8 +48,10 @@ describe("TextField 構造", () => {
     const style = flatStyle(inputs[0]);
     expect(style.paddingVertical).toBe(0);
     expect(style.textAlignVertical).toBe("center");
-    // 固定 height（size spec）と共存していること（height が消えると補正の前提が変わる）
-    expect(typeof style.height).toBe("number");
+    // 高さ下限（size spec の minHeight）と共存していること。
+    // ⚠️ `height` ではない — 固定 height は fontScale で入力文字がクリップするため W5 で minHeight にした。
+    expect(typeof style.minHeight).toBe("number");
+    expect(style.height).toBeUndefined();
   });
 
   test("Android では CJK 光学ナッジ paddingBottom: 2 が入り、iOS では入らない", () => {

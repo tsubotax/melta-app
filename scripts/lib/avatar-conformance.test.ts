@@ -15,6 +15,8 @@ import {
 } from "./recipe-conformance.js";
 import {
   AVATAR_GROUP_OVERLAP,
+  AVATAR_INITIALS_MAX_FONT_SCALE,
+  AVATAR_SIZE_SPEC,
   resolveAvatarGroupStyle,
   resolveAvatarStatusColor,
   resolveAvatarStyle,
@@ -100,6 +102,27 @@ test("avatar conformance: states（statusDot の色 + bg-surface ring）が実�
     const impl = resolveAvatarStyle(nativeTheme, "light", "image", "medium");
     assert.equal(impl.dot.borderColor, dotStyle.borderColor, `${status}: ring = bg-surface`);
     assert.equal(impl.dot.borderWidth, dotStyle.borderWidth, `${status}: ring 幅`);
+  }
+});
+
+test("avatar conformance: initials の maxFontSizeMultiplier が円からの溢れを防ぐ（fontScale 対策）", () => {
+  for (const size of ["small", "medium", "large"] as const) {
+    const box = resolveAvatarStyle(nativeTheme, "light", "initials", size).container.height;
+    const { lineHeight } = nativeTheme.typography.fontSize[AVATAR_SIZE_SPEC[size].fontSize];
+    const clamp = AVATAR_INITIALS_MAX_FONT_SCALE[size];
+
+    // (1) 上限まで拡大しても行ボックスが円に収まる（＝ 円が楕円化しない / 文字が切れない）
+    assert.ok(
+      lineHeight * clamp <= box,
+      `${size}: lineHeight ${lineHeight} × ${clamp} = ${(lineHeight * clamp).toFixed(2)} が box ${box} を超える`,
+    );
+    // (2) 締めすぎていない（切り捨て粒度 0.1 の1段上は必ず溢れる ＝ 一番緩い安全値になっている）
+    assert.ok(
+      lineHeight * (clamp + 0.1) > box,
+      `${size}: 上限 ${clamp} は必要以上に厳しい（${(clamp + 0.1).toFixed(1)} でも収まる）`,
+    );
+    // (3) 拡大を禁止していない（1 未満 / 1 ちょうどは OS の文字サイズ設定を殺すので不可）
+    assert.ok(clamp > 1, `${size}: 上限が 1 以下（拡大を完全に禁止している）`);
   }
 });
 

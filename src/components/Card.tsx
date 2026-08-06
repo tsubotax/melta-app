@@ -33,11 +33,11 @@
 
 import { useEffect, type ReactElement, type ReactNode } from "react";
 import { Pressable, View, type StyleProp, type ViewStyle } from "react-native";
-import { useTheme } from "../theme";
-import { CONTRACTS } from "../contracts/contract-types";
-import { isDev } from "../theme/define-theme";
-import { CARD_INTERACTIVE, resolveCardShape, resolveCardBodyStyle } from "./card.styles";
-import { validateCardProps } from "./card.validate";
+import { useTheme } from "../theme/index.js";
+import { CONTRACTS } from "../contracts/contract-types.js";
+import { isDev } from "../theme/define-theme.js";
+import { CARD_INTERACTIVE, resolveCardShape, resolveCardBodyStyle } from "./card.styles.js";
+import { validateCardProps } from "./card.validate.js";
 
 /**
  * 同じ問題を毎レンダー報告しないためのラッチ。

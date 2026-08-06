@@ -13,7 +13,7 @@
  *   conformance が recipe states.disabled と照合する。
  */
 
-import type { NativeTheme, ThemeMode } from "../theme";
+import type { NativeTheme, ThemeMode } from "../theme/index.js";
 
 /** ON/OFF（toggle.contract の variantModeledStates と 1:1）。 */
 export type ToggleVariant = "off" | "on";
@@ -33,6 +33,26 @@ export const TOGGLE_SIZE_SPEC: Record<
 
 /** disabled state の opacity（recipe states.disabled.style.opacity と照合）。 */
 export const TOGGLE_DISABLED_OPACITY = 0.5;
+
+/**
+ * size → 縦方向の片側 hitSlop（実効タップ標的 44pt。A11Y_MIN_TAP_TARGET_44）。
+ *
+ * Pressable の高さは **label 無しなら track の高さそのもの**（medium 24 / large 28）で、
+ * どちらも 44pt に届かない。track は背景（色付きの丸）を持つので minHeight で伸ばすと
+ * スイッチが縦長に見える → 当たり判定だけ広げる:
+ *   medium 24 + 10×2 = 44 / large 28 + 8×2 = 44
+ *
+ * label 付きの行でも高さは label（base）の lineHeight 36pt にしかならず 44pt に届かないため、
+ * **label の有無に関わらず同じ値を適用する**（label 付きは 36 + 20 = 56pt と余裕が出るが、
+ * Toggle は alignSelf: flex-start の独立行なので横に重なる相手がいない）。
+ *
+ * ⚠️ literal で持つ（TOGGLE_SIZE_SPEC から自動導出しない）。導出にすると track 寸法を変えたときに
+ * hitSlop が黙って追随し、conformance が fail-open になる。
+ */
+export const TOGGLE_VERTICAL_HIT_SLOP: Record<ToggleSize, number> = {
+  medium: 10,
+  large: 8,
+};
 
 /**
  * variant / size → track + thumb の最終 style 値の解決（toggle.recipe styleRefs の 1:1 写像）。

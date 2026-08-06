@@ -22,8 +22,9 @@ import type {
   RadiusKey,
   SpacingKey,
   ThemeMode,
-} from "../theme";
-import { resolveStatusVariantColors, type StatusVariant } from "./status-colors";
+} from "../theme/index.js";
+import { resolveStatusVariantColors, type StatusVariant } from "./status-colors.js";
+import { CANONICAL_TAP_TARGET } from "../a11y/tap-target.js";
 
 /** toast.contract の variant 語彙（status 共通語彙と 1:1）。 */
 export type ToastVariant = StatusVariant;
@@ -47,6 +48,30 @@ export const TOAST_SPEC = {
   messageFont: FontSizeKey;
   messageWeight: FontWeightKey;
 };
+
+/**
+ * 右端に並ぶ 2 つの操作要素（action テキストと × ボタン）の当たり判定。
+ *
+ * **既存バグの修正**: 以前は両方とも hitSlop 10（全方向）で、両者の間隔は gap = spacing.3 = 12pt
+ * しかなかった。左右 10 + 10 = 20pt の当たり判定が 12pt の隙間に食い込み、**20 − 12 = 8pt ぶん
+ * 重なって**いた（重なった帯では手前に描画された × が勝つ ＝ action を押したつもりが閉じる）。
+ *
+ * 規約（AGENTS.md）: **横方向の hitSlop は隣接要素との gap の 1/2 を超えない**。
+ * gap 12 → 片側 6pt。これで両者の当たり判定はちょうど接し、重ならない。
+ * 縦は隣接する操作要素が無いので 10pt を維持する（正典パターンと同じ）。
+ *
+ * 横を 6 に削ると × の実効幅が 24 + 6×2 = 36pt と 44pt を割るため、**箱の下限を 32pt に広げて**
+ * 32 + 6×2 = 44pt を確保する（× は背景を持たないので幅を広げても見た目は変わらない）。
+ * action 側はテキスト幅が可変で静的に決められないため、縦のみ 44pt を保証する。
+ */
+export const TOAST_TAP_TARGET = {
+  /** action / × 共通の hitSlop（横だけ gap/2 = 6 に絞る）。 */
+  hitSlop: { top: 10, bottom: 10, left: 6, right: 6 },
+  /** × の箱の幅の下限（横 hitSlop を削ったぶん canonical の 24 から広げる。32 + 6×2 = 44）。 */
+  closeMinWidth: 32,
+  /** × の箱の高さ下限（正典パターンと同値）。 */
+  closeMinHeight: CANONICAL_TAP_TARGET.minHeight,
+} as const;
 
 /**
  * slot 構成（toast.recipe 各 variant の containerStyle / messageStyle と 1:1。

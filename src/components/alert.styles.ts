@@ -18,8 +18,9 @@ import type {
   RadiusKey,
   SpacingKey,
   ThemeMode,
-} from "../theme";
-import { resolveStatusVariantColors, type StatusVariant } from "./status-colors";
+} from "../theme/index.js";
+import { resolveStatusVariantColors, type StatusVariant } from "./status-colors.js";
+import { CANONICAL_TAP_TARGET } from "../a11y/tap-target.js";
 
 /** alert.contract の variant 語彙（status 共通語彙と 1:1）。 */
 export type AlertVariant = StatusVariant;
@@ -28,6 +29,12 @@ export type AlertVariant = StatusVariant;
  * 構成キー（token キー）。component は Text にこのキーをそのまま渡し、resolver は同じキーから
  * style 値を解決する（component と resolver が別々のキーを持って drift する事故を防ぐ SSOT）。
  */
+/**
+ * × の当たり判定（正典パターン: 視覚 24pt + hitSlop 10 = 実効 44pt）。
+ * Alert の × は右端に単独で立つ（Toast と違い隣接する操作要素が無い）ので横も 10 のままでよい。
+ */
+export const ALERT_CLOSE_TAP_TARGET = CANONICAL_TAP_TARGET;
+
 export const ALERT_SPEC = {
   padding: "4",
   gap: "3",

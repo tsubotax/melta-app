@@ -12,7 +12,7 @@
  *   fill は primary.500 / status.success.base（mode 非依存）。
  */
 
-import type { NativeTheme, RadiusKey, ThemeMode } from "../theme";
+import type { NativeTheme, RadiusKey, ThemeMode } from "../theme/index.js";
 
 export type ProgressVariant = "primary" | "success" | "indeterminate";
 

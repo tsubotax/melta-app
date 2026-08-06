@@ -6,7 +6,8 @@
  *   editable=false + accessibilityState.disabled を併せて適用する（recipe description の規約）。
  * - error 時は errorText を必ずテキストで表示する（FORM_NO_COLOR_ONLY_ERROR = 色だけで伝えない）。
  *   RN には aria-describedby 相当が無いため、(a) errorText を input の accessibilityLabel に合成
- *   （再フォーカス時に読み上げ）、(b) errorText 側に accessibilityLiveRegion="polite"（Android は
+ *   （再フォーカス時に読み上げ。合成文は formatErrorAccessibilityLabel で差し替え可能 = i18n フック。
+ *   既定は日本語）、(b) errorText 側に accessibilityLiveRegion="polite"（Android は
  *   出現時に通知。iOS の即時通知が要る画面は submit 時に announceForAccessibility を併用する —
  *   docs/patterns.md 参照）。
  * - focus は内部 state（onFocus/onBlur）で recipe states.focus の inputStyle 差分
@@ -32,16 +33,16 @@ import {
   type TextStyle,
   type ViewStyle,
 } from "react-native";
-import { useTheme } from "../theme";
-import { CONTRACTS } from "../contracts/contract-types";
+import { useTheme } from "../theme/index.js";
+import { CONTRACTS } from "../contracts/contract-types.js";
 import {
   resolveTextFieldStyle,
   resolveTextFieldFocusStyle,
   type TextFieldSize,
-} from "./textfield.styles";
+} from "./textfield.styles.js";
 
 /**
- * Android の EditText は固定 height と組み合わさると既定の縦 padding で文字が
+ * Android の EditText は高さ下限（minHeight）と組み合わさると既定の縦 padding で文字が
  * 上寄り・下端切れになるため、縦 padding を殺して縦センターに揃える。
  * textAlignVertical は Android 専用、paddingVertical: 0 は iOS の見た目を変えない
  * （iOS の単一行入力は元々縦センター）。
@@ -65,6 +66,15 @@ export function resolveInputVerticalFix(os: typeof Platform.OS): TextStyle {
 
 const INPUT_VERTICAL_FIX = resolveInputVerticalFix(Platform.OS);
 
+/**
+ * error 時の accessibilityLabel 合成の既定（日本語）。
+ * props で差し替え可能（formatErrorAccessibilityLabel）。既定値を変えると
+ * 既存アプリの VoiceOver 読み上げが変わるので、既定は日本語のまま据え置く。
+ */
+function defaultErrorAccessibilityLabel(label: string, errorText: string): string {
+  return `${label}。エラー: ${errorText}`;
+}
+
 interface TextFieldProps {
   /** ラベル（必須。placeholder だけの入力欄を作らせない = FORM_NO_LABEL_OMIT）。 */
   label: string;
@@ -80,6 +90,12 @@ interface TextFieldProps {
   helperText?: string;
   /** variant="error" 時に表示するエラーメッセージ（色だけでなくテキストで伝える）。 */
   errorText?: string;
+  /**
+   * error 時に input の accessibilityLabel へ合成する文字列の組み立て（i18n フック）。
+   * 既定は日本語の `${label}。エラー: ${errorText}`（既存アプリの読み上げを変えないため据え置き）。
+   * 英語アプリなどでは `(label, error) => \`${label}. Error: ${error}\`` を渡す。
+   */
+  formatErrorAccessibilityLabel?: (label: string, errorText: string) => string;
   /** キーボード種別（RN TextInput へ透過）。 */
   keyboardType?: KeyboardTypeOptions;
   autoCapitalize?: "none" | "sentences" | "words" | "characters";
@@ -104,6 +120,7 @@ export function TextField({
   size = "medium",
   helperText,
   errorText,
+  formatErrorAccessibilityLabel = defaultErrorAccessibilityLabel,
   keyboardType,
   autoCapitalize,
   autoCorrect,
@@ -143,7 +160,7 @@ export function TextField({
         maxLength={maxLength}
         returnKeyType={returnKeyType}
         onSubmitEditing={onSubmitEditing}
-        accessibilityLabel={showError ? `${label}。エラー: ${errorText}` : label}
+        accessibilityLabel={showError ? formatErrorAccessibilityLabel(label, errorText) : label}
         accessibilityState={{ disabled }}
         onFocus={(e) => {
           if (!disabled) setFocused(true);

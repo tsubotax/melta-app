@@ -6,12 +6,13 @@
  * 機械照合は scripts/lib/checkbox-conformance.test.ts が行う。
  */
 
-import type { NativeTheme, ThemeMode } from "../theme";
+import type { NativeTheme, ThemeMode } from "../theme/index.js";
 
 /**
  * recipe 由来の literal 値テーブル（token 化されていない数値。conformance が recipe と照合する）。
  * - box は 20px（web の 16px より大きいのはタッチ前提、recipe description）
- * - hitSlop は (44 - box 20) / 2 = 12。行全体 Pressable に足して実タッチ領域 44pt を確保
+ * - hitSlop は (44 - box 20) / 2 = 12。行全体 Pressable に足して実効タップ標的 44pt を確保
+ *   （A11Y_MIN_TAP_TARGET_44。横断方針と正典パターンは src/a11y/tap-target.ts）
  */
 export const CHECKBOX_SPEC = {
   boxSize: 20,

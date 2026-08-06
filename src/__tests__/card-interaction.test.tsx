@@ -24,7 +24,7 @@
 
 import { describe, test, expect, jest, afterEach } from "@jest/globals";
 import { render, fireEvent } from "@testing-library/react-native";
-import { ThemeProvider, Card, Button, Text } from "../index";
+import { ThemeProvider, Card, Button, Text } from "../index.js";
 
 function renderCard(onCardPress: () => void, onActionPress: () => void) {
   return render(

@@ -6,7 +6,7 @@
  * 機械照合は scripts/lib/stack-conformance.test.ts が行う。
  */
 
-import type { NativeTheme, SpacingKey } from "../theme";
+import type { NativeTheme, SpacingKey } from "../theme/index.js";
 
 /** 交差軸の配置（RN alignItems への写像。default stretch = RN デフォルトなので出力しない）。 */
 export type StackAlign = "start" | "center" | "end" | "stretch";

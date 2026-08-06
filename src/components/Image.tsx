@@ -20,10 +20,10 @@ import {
   type StyleProp,
   type ViewStyle,
 } from "react-native";
-import { useTheme } from "../theme";
-import type { RadiusKey } from "../theme";
-import { CONTRACTS } from "../contracts/contract-types";
-import { resolveImageShape } from "./image.styles";
+import { useTheme } from "../theme/index.js";
+import type { RadiusKey } from "../theme/index.js";
+import { CONTRACTS } from "../contracts/contract-types.js";
+import { resolveImageShape } from "./image.styles.js";
 
 type ContentFit = "cover" | "contain";
 

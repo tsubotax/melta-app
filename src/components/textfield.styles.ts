@@ -21,30 +21,34 @@ import type {
   FontSizeKey,
   FontWeightValue,
   SpacingKey,
-} from "../theme";
-import { resolveStatusTokenColors } from "./status-colors";
+} from "../theme/index.js";
+import { resolveStatusTokenColors } from "./status-colors.js";
 
 /** 検証状態（textfield.contract の variant 語彙と 1:1）。 */
 export type TextFieldVariant = "default" | "error" | "success" | "disabled";
 export type TextFieldSize = "small" | "medium" | "large";
 
 /**
- * size → height / 横 padding / 入力文字 fontSize（textfield.recipe sizes と整合）。
- * height の literal は recipe の値を直書きし、conformance で recipe と照合する。
+ * size → 最小高さ / 横 padding / 入力文字 fontSize（textfield.recipe sizes と整合）。
+ * literal は recipe の値を直書きし、conformance で recipe と照合する。
+ *
+ * `minHeight`（`height` ではない）なのは fontScale 対策。height 固定だと OS の文字サイズ拡大で
+ * 入力文字が縦にクリップする（recipe 側も 0.7.0 で `minHeight` に変わっている）。
  */
 export const TEXTFIELD_SIZE_SPEC: Record<
   TextFieldSize,
-  { height: number; px: SpacingKey; font: FontSizeKey }
+  { minHeight: number; px: SpacingKey; font: FontSizeKey }
 > = {
-  small: { height: 36, px: "3", font: "sm" },
-  medium: { height: 42, px: "3", font: "base" },
-  large: { height: 48, px: "3", font: "lg" },
+  small: { minHeight: 36, px: "3", font: "sm" },
+  medium: { minHeight: 42, px: "3", font: "base" },
+  large: { minHeight: 48, px: "3", font: "lg" },
 };
 
 /** resolver の出力（label → input → helperText / errorText の縦構成の各パート）。 */
 export interface TextFieldResolvedStyle {
   input: {
-    height: number;
+    /** 下限（fontScale で伸びる余地を残す。height 固定は文字がクリップする）。 */
+    minHeight: number;
     paddingHorizontal: number;
     fontSize: number;
     borderWidth: number;
@@ -98,7 +102,7 @@ export function resolveTextFieldStyle(
 
   return {
     input: {
-      height: spec.height,
+      minHeight: spec.minHeight,
       paddingHorizontal: theme.spacing[spec.px],
       fontSize: theme.typography.fontSize[spec.font].fontSize,
       borderWidth: 1,

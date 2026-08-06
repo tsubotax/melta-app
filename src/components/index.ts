@@ -3,21 +3,21 @@
  * Surface はライブラリ公開（P1）で正式 export（契約 surface.contract.json + recipe を持つ implemented）。
  */
 
-export { Surface } from "./Surface";
-export { Image } from "./Image";
-export { Card } from "./Card";
-export { Skeleton } from "./Skeleton";
-export { EmptyState } from "./EmptyState";
-export { Screen } from "./Screen";
-export { Header } from "./Header";
-export { Avatar } from "./Avatar";
-export { TextField } from "./TextField";
-export { Toggle } from "./Toggle";
-export { Checkbox } from "./Checkbox";
-export { Radio } from "./Radio";
-export { Alert } from "./Alert";
-export { Toast } from "./Toast";
-export { Progress } from "./Progress";
-export { Modal } from "./Modal";
-export { ActionSheet } from "./ActionSheet";
-export { BottomSheet } from "./BottomSheet";
+export { Surface } from "./Surface.js";
+export { Image } from "./Image.js";
+export { Card } from "./Card.js";
+export { Skeleton } from "./Skeleton.js";
+export { EmptyState } from "./EmptyState.js";
+export { Screen } from "./Screen.js";
+export { Header } from "./Header.js";
+export { Avatar } from "./Avatar.js";
+export { TextField } from "./TextField.js";
+export { Toggle } from "./Toggle.js";
+export { Checkbox } from "./Checkbox.js";
+export { Radio } from "./Radio.js";
+export { Alert } from "./Alert.js";
+export { Toast } from "./Toast.js";
+export { Progress } from "./Progress.js";
+export { Modal } from "./Modal.js";
+export { ActionSheet } from "./ActionSheet.js";
+export { BottomSheet } from "./BottomSheet.js";

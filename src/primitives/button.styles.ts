@@ -10,7 +10,7 @@
  * を参照すること — 新規 / 改修は alert.styles.ts・textfield.styles.ts の形に寄せる。
  */
 
-import type { NativeTheme, ThemeMode, FontSizeKey, SpacingKey } from "../theme";
+import type { NativeTheme, ThemeMode, FontSizeKey, SpacingKey } from "../theme/index.js";
 
 export type ButtonVariant =
   | "contained"
@@ -22,15 +22,64 @@ export type ButtonVariant =
   | "subtle";
 export type ButtonSize = "small" | "medium" | "large";
 
-/** size → height / 横 padding / label fontSize / icon box（contract sizes/iconButton と整合）。 */
+/**
+ * size → 最小高さ / 横 padding / label fontSize / icon box（contract sizes/iconButton と整合）。
+ *
+ * `minHeight`（`height` ではない）なのは fontScale 対策。label は Text primitive の
+ * lineHeight（base = 36pt）で伸びるため、height 固定だと fontScale 1.12x あたりから
+ * medium（40pt）で文字がクリップする。recipe 側も 0.7.0 で `minHeight` に変わっている。
+ * iconOnly だけは正方形を保つため width/height 固定のまま（recipe の iconOnlyWidth/iconOnlyHeight）。
+ */
 export const BUTTON_SIZE_SPEC: Record<
   ButtonSize,
-  { height: number; px: SpacingKey; font: FontSizeKey; iconBox: number }
+  { minHeight: number; px: SpacingKey; font: FontSizeKey; iconBox: number }
 > = {
-  small: { height: 32, px: "3", font: "sm", iconBox: 32 },
-  medium: { height: 40, px: "4", font: "base", iconBox: 40 },
-  large: { height: 48, px: "6", font: "base", iconBox: 48 },
+  small: { minHeight: 32, px: "3", font: "sm", iconBox: 32 },
+  medium: { minHeight: 40, px: "4", font: "base", iconBox: 40 },
+  large: { minHeight: 48, px: "6", font: "base", iconBox: 48 },
 };
+
+/**
+ * size → 縦方向の片側 hitSlop（実効タップ標的 44pt 確保。A11Y_MIN_TAP_TARGET_44）。
+ *
+ * 視覚寸法は据え置き、当たり判定だけを広げる:
+ *   small  32 + 6*2 = 44 / medium 40 + 2*2 = 44 / large 48（既に 44 以上なので 0）
+ *
+ * ⚠️ literal で持つ（BUTTON_SIZE_SPEC から自動導出しない）。導出にすると視覚寸法を変えたときに
+ * hitSlop が黙って追随してしまい、conformance が構造的に fail-open になる。
+ */
+export const BUTTON_VERTICAL_HIT_SLOP: Record<ButtonSize, number> = {
+  small: 6,
+  medium: 2,
+  large: 0,
+};
+
+/** Pressable の hitSlop（RN の Insets）。 */
+export interface ButtonHitSlop {
+  top: number;
+  bottom: number;
+  left?: number;
+  right?: number;
+}
+
+/**
+ * size / iconOnly → Pressable に渡す hitSlop。0 のときは undefined（prop を付けない）。
+ *
+ * - labeled: **縦だけ**。横は付けない — Row の gap 0 で隣接した Button 同士の当たり判定が
+ *   重なって押し違いが起きるため（横方向は padding で既に広い）。
+ * - iconOnly: 幅も 32/40 と狭い正方形なので**横にも同値**を付ける（左右の隣接は
+ *   iconOnly ボタンを gap 0 で並べない前提。並べる場合は消費者側で gap を取る）。
+ */
+export function resolveButtonHitSlop(
+  size: ButtonSize,
+  iconOnly: boolean,
+): ButtonHitSlop | undefined {
+  const slop = BUTTON_VERTICAL_HIT_SLOP[size];
+  if (slop === 0) return undefined;
+  return iconOnly
+    ? { top: slop, bottom: slop, left: slop, right: slop }
+    : { top: slop, bottom: slop };
+}
 
 /**
  * variant → 色解決（button.contract tokenRefs の 1:1 写像）。

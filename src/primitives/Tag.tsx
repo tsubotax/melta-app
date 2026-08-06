@@ -14,11 +14,16 @@
  */
 
 import { Pressable, View, type StyleProp, type ViewStyle } from "react-native";
-import { Text } from "./Text";
-import { useTheme } from "../theme";
-import { useFocusRing, FocusRing } from "./_internal/focus-ring";
-import { CONTRACTS } from "../contracts/contract-types";
-import { resolveTagBase, resolveTagVariant } from "./tag.styles";
+import { Text } from "./Text.js";
+import { useTheme } from "../theme/index.js";
+import { useFocusRing, FocusRing } from "./_internal/focus-ring.js";
+import { CONTRACTS } from "../contracts/contract-types.js";
+import {
+  resolveTagBase,
+  resolveTagVariant,
+  TAG_FILTER_CHIP_VERTICAL_HIT_SLOP,
+  TAG_REMOVE_TAP_TARGET,
+} from "./tag.styles.js";
 
 interface TagBase {
   label: string;
@@ -53,6 +58,12 @@ function FilterChipTag(props: TagBase & { selected: boolean; onToggle: () => voi
       onPress={onToggle}
       accessibilityRole="button"
       accessibilityState={{ selected }}
+      // 視覚高さ 34pt（padding 駆動）に縦 hitSlop を足して実効 44pt（A11Y_MIN_TAP_TARGET_44）。
+      // 背景と枠を持つので minHeight で伸ばすと見た目が変わる → 当たり判定だけ広げる。
+      hitSlop={{
+        top: TAG_FILTER_CHIP_VERTICAL_HIT_SLOP,
+        bottom: TAG_FILTER_CHIP_VERTICAL_HIT_SLOP,
+      }}
       testID={testID}
       style={[
         base,
@@ -86,14 +97,20 @@ function RemovableTag(
       <Text variant={v.font} color="text-default">
         {label}
       </Text>
-      {/* 最小タップターゲット確保: 親 Tag の高さを超えられないので remove 自身に min 24 + hitSlop（Codex M-2）。 */}
+      {/* 最小タップターゲット確保: 親 Tag の高さを超えられないので remove 自身に正典パターン
+          （視覚 24 + hitSlop 10 = 実効 44）を持たせる（Codex M-2 / A11Y_MIN_TAP_TARGET_44）。 */}
       <Pressable
         {...focusHandlers}
         onPress={onRemove}
         accessibilityRole="button"
         accessibilityLabel={removeAccessibilityLabel}
-        hitSlop={10}
-        style={{ minWidth: 24, minHeight: 24, alignItems: "center", justifyContent: "center" }}
+        hitSlop={TAG_REMOVE_TAP_TARGET.hitSlop}
+        style={{
+          minWidth: TAG_REMOVE_TAP_TARGET.minWidth,
+          minHeight: TAG_REMOVE_TAP_TARGET.minHeight,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
       >
         <Text variant="xs" color="text-muted">
           ×

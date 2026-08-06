@@ -7,7 +7,7 @@
  */
 
 import type { ViewStyle } from "react-native";
-import type { NativeTheme, ThemeMode, ElevationKey } from "../theme";
+import type { NativeTheme, ThemeMode, ElevationKey } from "../theme/index.js";
 
 export type CardVariant = "basic" | "media" | "action" | "link";
 

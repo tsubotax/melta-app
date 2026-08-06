@@ -22,9 +22,9 @@ import {
   type StyleProp,
   type ViewStyle,
 } from "react-native";
-import { Surface } from "./Surface";
-import { useTheme } from "../theme";
-import { CONTRACTS } from "../contracts/contract-types";
+import { Surface } from "./Surface.js";
+import { useTheme } from "../theme/index.js";
+import { CONTRACTS } from "../contracts/contract-types.js";
 import {
   CARD_SURFACE_SPEC,
   PULSE_OPACITY,
@@ -32,7 +32,7 @@ import {
   resolveSkeletonStates,
   resolveSkeletonVariants,
   type SkeletonVariant,
-} from "./skeleton.styles";
+} from "./skeleton.styles.js";
 
 interface SkeletonProps {
   variant?: SkeletonVariant;

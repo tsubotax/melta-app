@@ -59,7 +59,7 @@ npm run check:drift
 # 6. RN mount smoke（jest + Testing Library。light/dark × 全公開コンポーネント）
 npm run test:rn
 
-# 7. installability ゲート（pack → fixture へ install → import → typecheck）
+# 7. installability ゲート（pack → attw → fixture へ install → import → typecheck ×3 解決）
 npm run check:installability
 ```
 
@@ -78,7 +78,14 @@ npm run generate && git diff --exit-code src/theme/native-theme.ts src/contracts
   CI にはそのディレクトリが無いので、**fallback に依存した変更は CI で必ず落ちます**
 - drift が出たら **`npm run check:drift -- --write`**（= `tsx scripts/check-drift.ts --write`）で
   README の生成ブロックと `llms.txt` を heal できます
-- `check:installability` は `npm pack` を伴うため数十秒かかります。ネットワークも使います
+- `check:installability` は `npm pack` を伴うため数十秒かかります。ネットワークも使います。
+  型解決は **fixture 4 種 × `moduleResolution` 3 種（bundler / node16 / nodenext）** と
+  `attw`（`@arethetypeswrong/cli`）の二重で見ます。`bundler` だけ通って node16/nodenext が
+  落ちる＝ `.d.ts` の相対 import に `.js` 拡張子が足りていない、が典型です
+- **`src/` の相対 import には `.js` 拡張子を付けます**（`./card.styles.js` / ディレクトリは
+  `./theme/index.js`）。TS の ESM 規約どおり `./x.js` はソースの `./x.ts` を指し、
+  bob が生成する `.d.ts` にそのまま出ることで node16/nodenext の消費者が型を引けます。
+  拡張子を落とすと `check:installability` が落ちます
 - リリース時は `npm run release` が上記＋`build` / `check:build-fresh` / `npm publish` を
   一本のチェーンで回します（publish は human gate）
 

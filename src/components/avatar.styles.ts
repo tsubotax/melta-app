@@ -6,13 +6,13 @@
  * 機械照合は scripts/lib/avatar-conformance.test.ts が行う。
  */
 
-import type { FontWeightValue, NativeTheme, ThemeMode } from "../theme";
+import type { FontWeightValue, NativeTheme, ThemeMode } from "../theme/index.js";
 
 export type AvatarSize = "small" | "medium" | "large";
 export type AvatarStatus = "online" | "away" | "offline";
 
 /** サイズ軸（contract sizes の height と 1:1。recipe sizes の width/height/dotSize/fontSize に対応）。 */
-const SIZE_TABLE = {
+export const AVATAR_SIZE_SPEC = {
   small: { box: 32, dot: 8, fontSize: "xs" },
   medium: { box: 40, dot: 10, fontSize: "sm" },
   large: { box: 48, dot: 12, fontSize: "base" },
@@ -20,6 +20,28 @@ const SIZE_TABLE = {
 
 /** group の重なり（-spacing.2 相当。負値 token が無いため recipe と同じ literal）。 */
 export const AVATAR_GROUP_OVERLAP = -8;
+
+/**
+ * initials の文字サイズ倍率の上限（size 別）。
+ *
+ * Avatar の器は **width = height の円**（recipe sizes の box）で、fontScale で伸びるのは
+ * 中身の文字だけ。器は伸びないので、上限を掛けないと OS の文字サイズ拡大で文字が円から
+ * はみ出す（円が楕円に見える / 文字が切れる）。
+ *
+ * 導出は「box ÷ その size が使う fontSize token の lineHeight」を**小数第1位で切り捨て**（安全側）:
+ *   small  32 ÷ 19（xs   の lineHeight） = 1.68… → 1.6
+ *   medium 40 ÷ 26（sm   の lineHeight） = 1.53… → 1.5
+ *   large  48 ÷ 36（base の lineHeight） = 1.33… → 1.3
+ *
+ * lineHeight（fontSize ではなく）を分母に採るのは、RN が確保する行ボックスの高さが
+ * 溢れの実体だから。theme を差し替えても壊れないよう、この導出そのものは
+ * avatar-conformance.test.ts が実 theme の値で再検算する。
+ */
+export const AVATAR_INITIALS_MAX_FONT_SCALE: Record<AvatarSize, number> = {
+  small: 1.6,
+  medium: 1.5,
+  large: 1.3,
+};
 
 /**
  * group variant（avatar.recipe の group.style / group.overlapStyle の 1:1 写像）。
@@ -61,7 +83,7 @@ export function resolveAvatarStyle(
   variant: "image" | "initials",
   size: AvatarSize,
 ): AvatarStyleResult {
-  const s = SIZE_TABLE[size];
+  const s = AVATAR_SIZE_SPEC[size];
   return {
     container: {
       width: s.box,

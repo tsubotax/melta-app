@@ -14,7 +14,7 @@ import type {
   SemanticColors,
   SpacingKey,
   ThemeMode,
-} from "../theme";
+} from "../theme/index.js";
 
 /** Surface の見た目 props（すべて token キー限定。デフォルトは recipe default variant と 1:1）。 */
 export interface SurfaceStyleProps {

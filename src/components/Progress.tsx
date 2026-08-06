@@ -23,14 +23,14 @@ import {
   type StyleProp,
   type ViewStyle,
 } from "react-native";
-import { useTheme } from "../theme";
-import { CONTRACTS } from "../contracts/contract-types";
+import { useTheme } from "../theme/index.js";
+import { CONTRACTS } from "../contracts/contract-types.js";
 import {
   PROGRESS_INDETERMINATE_FILL_RATIO,
   clampProgressValue,
   resolveProgressStyles,
   type ProgressVariant,
-} from "./progress.styles";
+} from "./progress.styles.js";
 
 interface ProgressProps {
   /** 進捗タイプ（contract variant）。default "primary"。 */

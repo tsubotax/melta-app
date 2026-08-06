@@ -13,9 +13,9 @@
 
 import type { ReactNode } from "react";
 import { View, type StyleProp, type ViewStyle } from "react-native";
-import { useTheme } from "../theme";
-import { CONTRACTS } from "../contracts/contract-types";
-import { resolveSurfaceStyle, type SurfaceStyleProps } from "./surface.styles";
+import { useTheme } from "../theme/index.js";
+import { CONTRACTS } from "../contracts/contract-types.js";
+import { resolveSurfaceStyle, type SurfaceStyleProps } from "./surface.styles.js";
 
 export interface SurfaceProps extends SurfaceStyleProps {
   style?: StyleProp<ViewStyle>;

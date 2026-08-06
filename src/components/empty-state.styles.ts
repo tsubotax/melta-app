@@ -15,7 +15,7 @@ import type {
   SemanticColors,
   SpacingKey,
   ThemeMode,
-} from "../theme";
+} from "../theme/index.js";
 
 /**
  * default variant の構成キー（token キー）。

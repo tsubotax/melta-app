@@ -11,17 +11,26 @@
  * 実装ではこの共通部を variant に関わらず同値で返す（conformance が variant 間一致を照合）。
  */
 
-import type { FontWeightValue, NativeTheme, ThemeMode } from "../theme";
+import type { FontWeightValue, NativeTheme, ThemeMode } from "../theme/index.js";
+import { MIN_TAP_TARGET } from "../a11y/tap-target.js";
 
 export type RadioVariant = "vertical" | "horizontal" | "card-style";
 
-/** recipe 由来の literal 値テーブル（token 化されていない数値。conformance が recipe と照合する）。 */
+/**
+ * recipe 由来の literal 値テーブル（token 化されていない数値。conformance が recipe と照合する）。
+ *
+ * `optionMinHeight` だけは recipe 外の a11y 手当て（A11Y_MIN_TAP_TARGET_44）。
+ * option 行の視覚高さは label（base）の lineHeight 36pt しかなく 44pt に届かないが、
+ * option 行は**背景を持たない**（card-style を除く。card は padding 16×2 で既に 68pt）ので
+ * hitSlop ではなく minHeight で下げ止める — 見た目は変わらず、hitSlop の重なりも原理的に起きない。
+ */
 export const RADIO_SPEC = {
   circleSize: 20,
   circleBorderWidth: 2,
   dotSize: 10,
   cardBorderWidth: 1,
   disabledOpacity: 0.5,
+  optionMinHeight: MIN_TAP_TARGET,
 } as const;
 
 export interface RadioGroupResolved {

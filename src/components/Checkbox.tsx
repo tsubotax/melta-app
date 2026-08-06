@@ -18,10 +18,10 @@
 
 import { useMemo } from "react";
 import { Pressable, View } from "react-native";
-import { Text } from "../primitives/Text";
-import { useTheme } from "../theme";
-import { CONTRACTS } from "../contracts/contract-types";
-import { CHECKBOX_SPEC, resolveCheckboxStyle } from "./checkbox.styles";
+import { Text } from "../primitives/Text.js";
+import { useTheme } from "../theme/index.js";
+import { CONTRACTS } from "../contracts/contract-types.js";
+import { CHECKBOX_SPEC, resolveCheckboxStyle } from "./checkbox.styles.js";
 
 /** checkmark / 横棒の幾何値（recipe に token 化されていない描画トリック側の定数）。 */
 const CHECKMARK = { width: 10, height: 6, borderWidth: 2, offsetY: -1 } as const;

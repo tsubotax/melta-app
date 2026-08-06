@@ -6,6 +6,8 @@
  *   構造一致している前提で theme.typography.fontSize[variant] を引く。乖離したら型エラーで検知
  *   される（= A-3 conformance の型レベル最低ライン、§2）。
  * - 色は token キーのみ（生 hex 不可、§5 lint の意味を保つ）。
+ * - fontScale 制御（allowFontScaling / maxFontSizeMultiplier）は RN Text へ素通しする。
+ *   既定は未指定 ＝ RN 既定（OS の文字サイズ設定に追随）。器が固定寸法の箇所だけ opt-in で絞る。
  * - letterSpacing は role(heading/body) の ratio を fontSize から pt 換算（text.styles.ts）。
  * - 形状（fontSize/lineHeight/letterSpacing/fontWeight）は variant/role/weight 依存なので useMemo で
  *   分離（B-3 の「形状/色 分離 + 参照安定性」は useMemo で満たす。StyleSheet 事前生成による
@@ -14,11 +16,11 @@
 
 import { useMemo, type ReactNode } from "react";
 import { StyleSheet, Text as RNText, type StyleProp, type TextStyle } from "react-native";
-import { useTheme } from "../theme";
-import { minLineHeightFor, minRatioOf } from "../theme/line-height";
-import type { FontWeightKey, SemanticColors } from "../theme";
-import { CONTRACTS, type VariantOf } from "../contracts/contract-types";
-import { resolveTextShape, type TextRole } from "./text.styles";
+import { useTheme } from "../theme/index.js";
+import { minLineHeightFor, minRatioOf } from "../theme/line-height.js";
+import type { FontWeightKey, SemanticColors } from "../theme/index.js";
+import { CONTRACTS, type VariantOf } from "../contracts/contract-types.js";
+import { resolveTextShape, type TextRole } from "./text.styles.js";
 
 type TextVariant = VariantOf<"text">;
 
@@ -32,6 +34,18 @@ interface TextProps {
   /** letterSpacing の切替軸。default "body"。 */
   role?: TextRole;
   numberOfLines?: number;
+  /**
+   * OS の文字サイズ設定に追随するか（RN Text へそのまま透過）。既定は未指定 = RN 既定（true）。
+   * **原則は既定のまま**（false にすると視覚障害者の拡大設定を無視することになる）。
+   * 固定寸法の図版・チャートのラベルなど、拡大するとレイアウトが壊れる箇所だけ false にする。
+   */
+  allowFontScaling?: boolean;
+  /**
+   * 文字サイズ倍率の上限（RN Text へそのまま透過）。既定は未指定 = RN 既定（上限なし）。
+   * 拡大は許しつつ器からの溢れだけ抑えたいとき（円形の Avatar initials 等）に使う。
+   * `0` は「上限なし」、`1` は「拡大しない」という RN の規約に従う。
+   */
+  maxFontSizeMultiplier?: number;
   style?: StyleProp<TextStyle>;
   testID?: string;
   children: ReactNode;
@@ -43,6 +57,8 @@ export function Text({
   color = "text-default",
   role = "body",
   numberOfLines,
+  allowFontScaling,
+  maxFontSizeMultiplier,
   style,
   testID,
   children,
@@ -73,6 +89,8 @@ export function Text({
     <RNText
       style={flat}
       numberOfLines={numberOfLines}
+      allowFontScaling={allowFontScaling}
+      maxFontSizeMultiplier={maxFontSizeMultiplier}
       accessibilityRole={role === "heading" ? "header" : undefined}
       testID={testID}
     >

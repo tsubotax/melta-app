@@ -7,6 +7,7 @@
  * - variant はレイアウト: vertical（標準）/ horizontal（wrap する横並び）/ card-style
  *   （各 option を枠付きカードにする。web の grid 2col は RN では縦積みに読み替え）。
  * - RN にネイティブ radio が無いため各 option は Pressable + 描画（circle + 内側 dot）。
+ *   option 行は minHeight 44pt（RADIO_SPEC.optionMinHeight）で実効タップ標的を確保する。
  * - states（contract → prop の写像）: selected/unselected → value との一致、
  *   error → error?: string（circle の borderColor 差分 + errorText 表示。selected と併用時は
  *   error を優先 = 契約 stateSpecs）、disabled → グループ全体 or option 個別（opacity 0.5 + 非活性）。
@@ -19,15 +20,15 @@
 
 import { useMemo } from "react";
 import { Pressable, View } from "react-native";
-import { Text } from "../primitives/Text";
-import { useTheme } from "../theme";
-import { CONTRACTS } from "../contracts/contract-types";
+import { Text } from "../primitives/Text.js";
+import { useTheme } from "../theme/index.js";
+import { CONTRACTS } from "../contracts/contract-types.js";
 import {
   RADIO_SPEC,
   resolveRadioCircleStyle,
   resolveRadioGroupStyle,
   type RadioVariant,
-} from "./radio.styles";
+} from "./radio.styles.js";
 
 export interface RadioOption {
   label: string;
@@ -99,6 +100,9 @@ export function Radio({
               accessibilityState={{ checked: selected, disabled: optionDisabled }}
               accessibilityLabel={option.label}
               style={[
+                // 実効タップ標的 44pt（A11Y_MIN_TAP_TARGET_44）。option 行は背景を持たないので
+                // minHeight で下げ止める（視覚不変・隣接 option と当たり判定が重ならない）。
+                { minHeight: RADIO_SPEC.optionMinHeight, justifyContent: "center" },
                 variant === "card-style"
                   ? [group.cardStyle, selected ? group.cardSelectedStyle : null]
                   : null,

@@ -37,8 +37,16 @@
       "import": "./lib/module/safe-area/index.js",
       "default": "./lib/module/safe-area/index.js"
     },
-    "./eslint-plugin": "./eslint-rules/melta.mjs",
-    "./eslint-rules/melta.mjs": "./eslint-rules/melta.mjs",
+    "./eslint-plugin": {
+      "types": "./eslint-rules/melta.d.mts",
+      "import": "./eslint-rules/melta.mjs",
+      "default": "./eslint-rules/melta.mjs"
+    },
+    "./eslint-rules/melta.mjs": {
+      "types": "./eslint-rules/melta.d.mts",
+      "import": "./eslint-rules/melta.mjs",
+      "default": "./eslint-rules/melta.mjs"
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -69,6 +77,7 @@
     }
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "0.18.5",
     "@jest/globals": "^29.7.0",
     "@react-native/babel-preset": "^0.85.3",
     "@react-native/jest-preset": "^0.85.3",
@@ -117,7 +126,10 @@
     ],
     "testMatch": [
       "<rootDir>/src/**/__tests__/**/*.test.tsx"
-    ]
+    ],
+    "moduleNameMapper": {
+      "^(\\.{1,2}/.*)\\.js$": "$1"
+    }
   },
   "react-native-builder-bob": {
     "source": "src",

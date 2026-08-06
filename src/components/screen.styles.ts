@@ -6,7 +6,7 @@
  * 機械照合は scripts/lib/screen-conformance.test.ts が行う。
  */
 
-import type { NativeTheme, SpacingKey, ThemeMode } from "../theme";
+import type { NativeTheme, SpacingKey, ThemeMode } from "../theme/index.js";
 
 /** content の padding（spacing token キー限定 | "none"）。default "4"（recipe に焼いてある）。 */
 export type ScreenPadding = SpacingKey | "none";

@@ -11,10 +11,10 @@
 
 import { useMemo, type ReactNode } from "react";
 import { View, type StyleProp, type ViewStyle } from "react-native";
-import { useTheme } from "../theme";
-import { CONTRACTS } from "../contracts/contract-types";
-import { Text } from "../primitives/Text";
-import { resolveHeaderStyle, type HeaderStyle } from "./header.styles";
+import { useTheme } from "../theme/index.js";
+import { CONTRACTS } from "../contracts/contract-types.js";
+import { Text } from "../primitives/Text.js";
+import { resolveHeaderStyle, type HeaderStyle } from "./header.styles.js";
 
 interface HeaderProps {
   /** 画面タイトル（heading として読み上げ）。 */

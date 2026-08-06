@@ -8,22 +8,24 @@
  *   flex-start / flex-end を切り替える（アニメは Phase 外）。
  * - disabled: recipe states.disabled の opacity + accessibilityState.disabled + onPress 無効。
  * - a11y: accessibilityRole="switch" + accessibilityState.checked。label があれば右に表示し、
- *   Pressable 全体がタップ領域 + accessibilityLabel になる。
+ *   Pressable 全体がタップ領域 + accessibilityLabel になる。実効タップ標的 44pt は
+ *   縦 hitSlop で確保する（TOGGLE_VERTICAL_HIT_SLOP、A11Y_MIN_TAP_TARGET_44）。
  * - 色・寸法の決定は pure resolver（toggle.styles.ts）に分離。
  *   recipes/app/toggle.recipe.json との機械照合は scripts/lib/toggle-conformance.test.ts が行う。
  */
 
 import { useMemo } from "react";
 import { Pressable, View, type StyleProp, type ViewStyle } from "react-native";
-import { Text } from "../primitives/Text";
-import { useTheme } from "../theme";
-import { CONTRACTS } from "../contracts/contract-types";
+import { Text } from "../primitives/Text.js";
+import { useTheme } from "../theme/index.js";
+import { CONTRACTS } from "../contracts/contract-types.js";
 import {
   resolveToggleStyle,
   TOGGLE_DISABLED_OPACITY,
+  TOGGLE_VERTICAL_HIT_SLOP,
   type ToggleSize,
   type ToggleVariant,
-} from "./toggle.styles";
+} from "./toggle.styles.js";
 
 interface ToggleProps {
   /** 現在値（true=on / false=off。variant はここから暗黙決定）。 */
@@ -61,6 +63,12 @@ export function Toggle({
       accessibilityRole="switch"
       accessibilityState={{ checked: value, disabled }}
       accessibilityLabel={label}
+      // track（24/28pt）も label 付きの行（36pt）も 44pt に届かないので縦 hitSlop で補う。
+      // 値の根拠は toggle.styles.ts の TOGGLE_VERTICAL_HIT_SLOP。
+      hitSlop={{
+        top: TOGGLE_VERTICAL_HIT_SLOP[size],
+        bottom: TOGGLE_VERTICAL_HIT_SLOP[size],
+      }}
       testID={testID}
       style={[
         {

@@ -7,9 +7,9 @@
  */
 
 import type { FontVariant } from "react-native";
-import type { NativeTheme, ThemeMode, FontSizeKey, FontWeightValue } from "../theme";
+import type { NativeTheme, ThemeMode, FontSizeKey, FontWeightValue } from "../theme/index.js";
 // theme index からの runtime import は ThemeProvider → react-native を引くため pure module を直接参照
-import { clampLineHeight, minRatioOf } from "../theme/line-height";
+import { clampLineHeight, minRatioOf } from "../theme/line-height.js";
 
 export type MetricSize = "sm" | "md" | "lg";
 

@@ -14,9 +14,9 @@
 
 import { createContext, useContext, useMemo, type ReactNode } from "react";
 import { useColorScheme } from "react-native";
-import { nativeTheme } from "./native-theme";
-import { defineTheme, isDev, resolveMode, type ResolvedCapabilities, type ResolvedNativeTheme, type ThemeModeViolation } from "./define-theme";
-import type { NativeTheme, SemanticColors, ThemeMode } from "./types";
+import { nativeTheme } from "./native-theme.js";
+import { defineTheme, isDev, resolveMode, type ResolvedCapabilities, type ResolvedNativeTheme, type ThemeModeViolation } from "./define-theme.js";
+import type { NativeTheme, SemanticColors, ThemeMode } from "./types.js";
 
 export type { ThemeMode };
 
@@ -41,8 +41,11 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 /**
  * 既定 theme。melta-contracts 由来の codegen 結果を注入経路と同じ形に通す（自分でも dogfood する）。
- * 副作用として dev では `nativeTheme` の入れ子オブジェクト（トークン群）も freeze される
- * — 生成物のトークンを実行時に書き換える経路は元々無いので、意図した副作用として許容する。
+ *
+ * dev で freeze されるのは **`defineTheme()` の戻り値**（= `useTheme().theme` として配られる
+ * 解決済み theme）で、入れ子のトークン群まで再帰的に凍る。公開 export の `nativeTheme` 自体は
+ * `defineTheme` 内の `cloneTokenTree` で参照が切り離されているので**凍らない**
+ * （0.4.3 で意図的にこう変えた: 凍らせると `{ ...nativeTheme }` からの正当な派生が dev で壊れるため）。
  */
 const DEFAULT_THEME: ResolvedNativeTheme = defineTheme({ ...nativeTheme, id: "melta" });
 

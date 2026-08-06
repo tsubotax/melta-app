@@ -6,7 +6,7 @@
  * 機械照合は scripts/lib/header-conformance.test.ts が行う。
  */
 
-import type { NativeTheme, ThemeMode } from "../theme";
+import type { NativeTheme, ThemeMode } from "../theme/index.js";
 
 export interface HeaderStyle {
   containerStyle: {

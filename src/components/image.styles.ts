@@ -11,7 +11,7 @@
  * （token キー限定）指定時のみ borderRadius + overflow:hidden を付ける。
  */
 
-import type { NativeTheme, RadiusKey } from "../theme";
+import type { NativeTheme, RadiusKey } from "../theme/index.js";
 
 /**
  * ImageStyle / ViewStyle 双方に有効な共通サブセット。

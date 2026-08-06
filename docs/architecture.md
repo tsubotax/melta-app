@@ -27,7 +27,7 @@ melta-app/
     generate-native-theme.ts    melta-contracts/tokens.json → src/theme/native-theme.ts
     generate-contract-types.ts  契約 JSON → src/contracts/contract-types.ts
     check-drift.ts              README / docs / catalog / allowlist の drift 検査（--write で heal）
-    check-installability.sh     pack → install → import → typecheck の公開ゲート
+    check-installability.sh     pack → attw → install → import → typecheck の公開ゲート
     lib/                        token 正規化 + conformance / consumer テスト
 ```
 
@@ -74,7 +74,7 @@ npm run ios   # または android / web
 - ✅ ライブラリ化（root=ライブラリ / example=カタログアプリ、peerDeps react + react-native、runtime deps ゼロ）
 - ✅ `melta-contracts` を npm 依存として購読（recipes/app の styleRefs 同梱）
 - ✅ conformance: 契約源 ↔ 生成メタ ↔ `__contract` 宣言の照合 + consumer テスト（契約 subset / token 実在 / contractVersion 同期）+ styleRefs conformance（全実装コンポーネント展開済み）+ RN mount smoke（light/dark × 全公開コンポーネント）
-- ✅ ハーネス: design lint（CI `--max-warnings 0` + PostToolUse hook）/ drift 検査（README・docs・catalog・allowlist 突合）/ installability ゲート（pack → tarball 実体検査 → fixture へ install → 本体 / icons / safe-area の import + typecheck → eslint plugin を実 import してルール 4 本の実在を照合 → exports の解決先確認。`npm run release` チェーンの必須ステップ）
+- ✅ ハーネス: design lint（CI `--max-warnings 0` + PostToolUse hook）/ drift 検査（README・docs・catalog・allowlist 突合）/ installability ゲート（pack → tarball 実体検査 → attw で exports の型解決を resolution mode ごとに検査 → fixture へ install → 本体 / icons / safe-area / eslint-plugin の import + typecheck を moduleResolution 3 種（bundler / node16 / nodenext）で実行 → eslint plugin を実 import してルール 4 本の実在を照合 → exports の解決先確認。`npm run release` チェーンの必須ステップ）
 - ✅ layout 6 個（Stack / Row / Screen / Header / Icon / Avatar）— dogfood 不足 1〜4 を解消、ProjectFeedScreen は公開 primitive だけで構成
   - Screen の SafeArea は adapter registry 化済み: default は RN core SafeAreaView（依存ゼロ維持）、`melta-app/safe-area` の `enableSafeAreaContext()` で react-native-safe-area-context に差し替え可（optional peer）
 - ✅ form / feedback 10 個（TextField / Toggle / Checkbox / Radio / Alert / Toast / Progress / Modal / ActionSheet / BottomSheet）— checkbox / radio は Pressable + 描画（svg 非依存）、ActionSheet / BottomSheet は select / dropdown の adapted 変換先の受け皿
@@ -96,4 +96,4 @@ push / PR で以下を順に回す。CI には兄弟ディレクトリ（melta-u
 4. `npm test`（consumer + conformance）
 5. `npm run check:drift`（README / docs / catalog / allowlist）
 6. `npm run test:rn`（RN mount smoke）
-7. `npm run check:installability`（pack → install → import → typecheck）
+7. `npm run check:installability`（pack → attw → install → import → typecheck ×3 解決）

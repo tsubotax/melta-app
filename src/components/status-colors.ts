@@ -8,7 +8,7 @@
  * react-native を import しない純粋モジュール（各 *.styles.ts と同じ規約）。
  */
 
-import type { NativeTheme, ThemeMode } from "../theme";
+import type { NativeTheme, ThemeMode } from "../theme/index.js";
 
 /** 契約側の status 語彙。token 側のキーとは error / danger だけ表記が違う。 */
 export type StatusVariant = "info" | "success" | "warning" | "error";

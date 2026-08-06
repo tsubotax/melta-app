@@ -52,10 +52,16 @@ function stripComments(source: string): string {
   return source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
 }
 
-/** 相対 specifier を実ファイルへ解決する（.ts / .tsx / index）。解決できなければ null。 */
+/**
+ * 相対 specifier を実ファイルへ解決する（.ts / .tsx / index）。解決できなければ null。
+ *
+ * src の相対 import は node16/nodenext の consumer 向けに `.js` 拡張子を明示している（W3）。
+ * TypeScript の ESM 規約どおり `./x.js` は `./x.ts` を指すので、末尾の `.js` を落として探す。
+ * 拡張子なしの旧形式も引き続き解決できるようにしておく（他スクリプト由来の呼び出し互換）。
+ */
 function resolveModule(fromFile: string, specifier: string): string | null {
   if (!specifier.startsWith(".")) return null; // 外部パッケージは公開面の走査対象外
-  const base = resolve(dirname(fromFile), specifier);
+  const base = resolve(dirname(fromFile), specifier.replace(/\.js$/, ""));
   for (const candidate of [`${base}.ts`, `${base}.tsx`, `${base}/index.ts`, `${base}/index.tsx`]) {
     if (existsSync(candidate)) return candidate;
   }

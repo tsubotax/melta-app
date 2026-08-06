@@ -41,7 +41,8 @@ function main(): void {
     "// 生成元: scripts/generate-native-theme.ts（入力 melta-contracts tokens.json）\n" +
     `// tokens version: ${raw.version ?? "unknown"}\n\n`;
   const body =
-    'import type { NativeTheme } from "./types";\n\n' +
+    // 相対 import は .js 拡張子を明示する（node16/nodenext の consumer で .d.ts が解決できるように）
+    'import type { NativeTheme } from "./types.js";\n\n' +
     `export const nativeTheme: NativeTheme = ${JSON.stringify(theme, null, 2)};\n`;
 
   writeFileSync(out, banner + body, "utf8");

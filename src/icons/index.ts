@@ -7,6 +7,6 @@
  * この subpath を import する利用者だけが react-native-svg を要求される。
  */
 
-export { Icon } from "./Icon";
-export { GLYPHS, ICON_NAMES } from "./glyphs";
-export type { IconName, Glyph } from "./glyphs";
+export { Icon } from "./Icon.js";
+export { GLYPHS, ICON_NAMES } from "./glyphs.js";
+export type { IconName, Glyph } from "./glyphs.js";

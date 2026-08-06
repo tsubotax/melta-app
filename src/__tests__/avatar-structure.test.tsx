@@ -9,8 +9,8 @@
 
 import { describe, test, expect } from "@jest/globals";
 import { render } from "@testing-library/react-native";
-import { ThemeProvider, Avatar } from "../index";
-import { AVATAR_GROUP_OVERLAP } from "../components/avatar.styles";
+import { ThemeProvider, Avatar } from "../index.js";
+import { AVATAR_GROUP_OVERLAP } from "../components/avatar.styles.js";
 
 /** render().toJSON() の最小 shape（react-test-renderer 型に依存しない）。 */
 interface Node {

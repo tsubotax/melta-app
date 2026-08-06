@@ -7,11 +7,11 @@
  */
 
 // theme: トークン（melta-contracts/tokens.json 由来、codegen 済み）+ Provider + helpers
-export * from "./theme";
+export * from "./theme/index.js";
 
 // primitives / components（契約 appStatus=implemented の集合と一致。conformance が担保）
-export * from "./primitives";
-export * from "./components";
+export * from "./primitives/index.js";
+export * from "./components/index.js";
 
 // 契約メタ（variant/size/state の実行時参照 + 型。__contract 照合にも使う）
 export {
@@ -21,4 +21,4 @@ export {
   type VariantOf,
   type SizeOf,
   type StateOf,
-} from "./contracts/contract-types";
+} from "./contracts/contract-types.js";

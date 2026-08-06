@@ -5,6 +5,8 @@
  * - RN では border を持たず bg subtle + text 色で表現（status token に border 用の中間色が無い、
  *   recipe description）。COLOR_ONLY_FORBIDDEN は title/message のテキストと icon slot で担保する設計。
  * - icon は ReactNode slot（EmptyState 前例。Icon を差すなら melta-app/icons を利用者が opt-in）。
+ * - × の accessibilityLabel は既定 "閉じる"（closeAccessibilityLabel で差し替え可能）。
+ *   当たり判定は正典パターン（24 + hitSlop 10 = 44pt）。
  * - a11y（§2 web→RN mapping）: web の role=alert(error/warning) / status(info/success) を、
  *   error/warning → accessibilityRole="alert"、info/success → accessibilityLiveRegion="polite"
  *   （Android のみ有効。RN に status role が無いための写像）に落とす。
@@ -15,10 +17,15 @@
 
 import { useMemo, type ReactNode } from "react";
 import { Pressable, View, type StyleProp, type ViewStyle } from "react-native";
-import { Text } from "../primitives/Text";
-import { useTheme } from "../theme";
-import { CONTRACTS } from "../contracts/contract-types";
-import { ALERT_SPEC, resolveAlertStyles, type AlertVariant } from "./alert.styles";
+import { Text } from "../primitives/Text.js";
+import { useTheme } from "../theme/index.js";
+import { CONTRACTS } from "../contracts/contract-types.js";
+import {
+  ALERT_CLOSE_TAP_TARGET,
+  ALERT_SPEC,
+  resolveAlertStyles,
+  type AlertVariant,
+} from "./alert.styles.js";
 
 interface AlertProps {
   /** 通知タイプ（contract variant）。 */
@@ -31,11 +38,25 @@ interface AlertProps {
   icon?: ReactNode;
   /** あれば右端に閉じるボタン（Pressable の ×）を出す。 */
   onClose?: () => void;
+  /**
+   * × ボタンの accessibilityLabel（i18n フック）。既定は日本語 "閉じる"
+   * （既存アプリの読み上げを変えないため据え置き）。
+   */
+  closeAccessibilityLabel?: string;
   style?: StyleProp<ViewStyle>;
   testID?: string;
 }
 
-export function Alert({ variant, title, message, icon, onClose, style, testID }: AlertProps) {
+export function Alert({
+  variant,
+  title,
+  message,
+  icon,
+  onClose,
+  closeAccessibilityLabel = "閉じる",
+  style,
+  testID,
+}: AlertProps) {
   const { theme, mode } = useTheme();
   const styles = useMemo(() => resolveAlertStyles(theme, mode, variant), [theme, mode, variant]);
   const urgent = variant === "error" || variant === "warning";
@@ -63,13 +84,18 @@ export function Alert({ variant, title, message, icon, onClose, style, testID }:
         </Text>
       </View>
       {onClose != null && (
-        // 最小タップターゲット確保: min 24 + hitSlop（Tag removable と同じ手当て）。
+        // 最小タップターゲット確保: 正典パターン 24 + hitSlop 10 = 実効 44pt（Tag removable と同型）。
         <Pressable
           onPress={onClose}
           accessibilityRole="button"
-          accessibilityLabel="閉じる"
-          hitSlop={10}
-          style={{ minWidth: 24, minHeight: 24, alignItems: "center", justifyContent: "center" }}
+          accessibilityLabel={closeAccessibilityLabel}
+          hitSlop={ALERT_CLOSE_TAP_TARGET.hitSlop}
+          style={{
+            minWidth: ALERT_CLOSE_TAP_TARGET.minWidth,
+            minHeight: ALERT_CLOSE_TAP_TARGET.minHeight,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
         >
           <Text variant="xs" style={{ color: styles.messageStyle.color }}>
             ×

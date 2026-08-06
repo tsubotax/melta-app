@@ -14,7 +14,7 @@ import type {
   SemanticColors,
   SpacingKey,
   ThemeMode,
-} from "../theme";
+} from "../theme/index.js";
 
 export type SkeletonVariant = "text" | "circle" | "card";
 /** contract states（loading = pulse、loaded = Skeleton 自体をアンマウント）。 */

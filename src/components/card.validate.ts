@@ -10,8 +10,8 @@
  */
 
 import { isValidElement } from "react";
-import type { CardVariant } from "./card.styles";
-import { CARD_INTERACTIVE } from "./card.styles";
+import type { CardVariant } from "./card.styles.js";
+import { CARD_INTERACTIVE } from "./card.styles.js";
 
 export interface CardPropsForValidation {
   variant: CardVariant;

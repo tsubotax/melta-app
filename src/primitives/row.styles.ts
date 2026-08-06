@@ -6,7 +6,7 @@
  * 機械照合は scripts/lib/row-conformance.test.ts が行う。
  */
 
-import type { NativeTheme, SpacingKey } from "../theme";
+import type { NativeTheme, SpacingKey } from "../theme/index.js";
 
 /** 交差軸の配置（RN alignItems への写像）。default "center"（recipe default に焼いてある）。 */
 export type RowAlign = "start" | "center" | "end" | "baseline" | "stretch";

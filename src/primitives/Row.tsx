@@ -9,10 +9,10 @@
 
 import { useMemo, type ReactNode } from "react";
 import { View, type StyleProp, type ViewStyle } from "react-native";
-import { useTheme } from "../theme";
-import type { SpacingKey } from "../theme";
-import { CONTRACTS } from "../contracts/contract-types";
-import { resolveRowStyle, type RowAlign, type RowJustify, type RowStyle } from "./row.styles";
+import { useTheme } from "../theme/index.js";
+import type { SpacingKey } from "../theme/index.js";
+import { CONTRACTS } from "../contracts/contract-types.js";
+import { resolveRowStyle, type RowAlign, type RowJustify, type RowStyle } from "./row.styles.js";
 
 interface RowProps {
   /** 子要素間の gap（spacing token キー限定）。省略時 gap なし。 */

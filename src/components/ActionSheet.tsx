@@ -9,22 +9,27 @@
  *   色だけでなくラベル文言でも破壊的操作と分かる文言にするのは呼び出し側の責務（contract a11y）。
  * - 先頭 action の borderTop は title が無い場合は消す（title がある時だけ区切りとして意味を持つ）。
  * - action の onPress 後は onClose も呼ぶ（選択 = シートを閉じる）。
- * - sheet 群は SafeAreaView で包み下余白（ホームインジケータ）を確保（recipe description 参照）。
+ * - 下余白（ホームインジケータ）は SafeArea で確保する（recipe description 参照）。位置は
+ *   **最下部の面である cancel ブロックの内側**（BottomSheet と同じ「内側」方針に統一）。
+ *   0.5.x までは sheet 群の外側に置いていたため、iOS では inset 帯に overlay の黒が見えていた。
+ *   内側に移したことで inset 帯まで bg-surface で塗られる代わり、cancel ブロックは
+ *   inset のぶん背が高くなる（ラベルは上寄りに見える）＝意図した見た目の変更。
+ *   edge は bottom + 左右のみ（top は overlay 側で、シートは上端に接しない）。
+ *   SafeArea 実装は registry 経由（safe-area-registry.ts）— "melta-app/safe-area" を
+ *   有効化したアプリでは Android でも inset が入る（RN core の SafeAreaView は Android で no-op）。
  * - sheet 側は onStartShouldSetResponder で touch を claim し、overlay tap でだけ閉じる。
  * - style の決定は pure resolver（action-sheet.styles.ts）に分離 — recipe との機械照合対象。
  */
 
 import { useMemo } from "react";
-import {
-  Modal as RNModal,
-  Pressable,
-  SafeAreaView,
-  Text as RNText,
-  View,
-} from "react-native";
-import { useTheme } from "../theme";
-import { CONTRACTS } from "../contracts/contract-types";
-import { resolveActionSheetStyle, type ActionSheetStyle } from "./action-sheet.styles";
+import { Modal as RNModal, Pressable, Text as RNText, View } from "react-native";
+import { useTheme } from "../theme/index.js";
+import { CONTRACTS } from "../contracts/contract-types.js";
+import { resolveActionSheetStyle, type ActionSheetStyle } from "./action-sheet.styles.js";
+import { resolveSafeAreaView, type SafeAreaEdge } from "./safe-area-registry.js";
+
+/** シートは画面下端に密着するので top inset は不要。 */
+const SHEET_EDGES: readonly SafeAreaEdge[] = ["bottom", "left", "right"];
 
 export interface ActionSheetAction {
   label: string;
@@ -61,6 +66,8 @@ export function ActionSheet({
     [theme, mode],
   );
 
+  const SafeArea = resolveSafeAreaView(SHEET_EDGES);
+
   return (
     <RNModal
       visible={visible}
@@ -70,8 +77,8 @@ export function ActionSheet({
       statusBarTranslucent
     >
       <Pressable style={styles.overlayStyle} onPress={onClose} accessible={false}>
-        {/* sheet 群（sheet + cancel）: SafeArea で下余白を確保し、touch を claim して overlay へ流さない */}
-        <SafeAreaView
+        {/* sheet 群（sheet + cancel）: touch を claim して overlay へ流さない */}
+        <View
           accessibilityViewIsModal
           onStartShouldSetResponder={() => true}
           testID={testID}
@@ -101,9 +108,12 @@ export function ActionSheet({
             ))}
           </View>
           <Pressable accessibilityRole="button" onPress={onClose} style={styles.cancelStyle}>
-            <RNText style={styles.cancelTextStyle}>{cancelLabel}</RNText>
+            {/* SafeArea は最下部の面（cancel）の内側 = inset 帯を overlay の黒でなく bg-surface で塗る */}
+            <SafeArea>
+              <RNText style={styles.cancelTextStyle}>{cancelLabel}</RNText>
+            </SafeArea>
           </Pressable>
-        </SafeAreaView>
+        </View>
       </Pressable>
     </RNModal>
   );

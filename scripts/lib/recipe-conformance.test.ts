@@ -136,7 +136,13 @@ const buttonRecipe = loadAppRecipe(contractsRoot, "button.recipe.json") as AppRe
   variants: Record<string, ButtonVariantRecipe>;
   sizes: Record<
     string,
-    { height: number; paddingHorizontal?: { token: string }; fontSize?: { token: string }; iconOnlyWidth?: number }
+    {
+      minHeight: number;
+      paddingHorizontal?: { token: string };
+      fontSize?: { token: string };
+      iconOnlyWidth?: number;
+      iconOnlyHeight?: number;
+    }
   >;
 };
 
@@ -154,11 +160,17 @@ test("button conformance: 全 variant の色が実装 resolver と recipe で一
   }
 });
 
-test("button conformance: sizes（height / padding / fontSize / iconOnly 幅）が実装と一致", () => {
+test("button conformance: sizes（minHeight / padding / fontSize / iconOnly 箱）が実装と一致", () => {
   for (const [name, sizeRecipe] of Object.entries(buttonRecipe.sizes)) {
     const spec = BUTTON_SIZE_SPEC[name as ButtonSize];
     assert.ok(spec, `実装に無い size: ${name}`);
-    assert.equal(sizeRecipe.height, spec.height, `${name}: height`);
+    // recipe は 0.7.0 で height → minHeight（fontScale でクリップさせないため）。
+    // 実装も height 固定をやめているので、キー名ごと一致していることを見る。
+    assert.ok(
+      !("height" in sizeRecipe),
+      `${name}: recipe に height が復活している（fontScale でクリップするので minHeight のはず）`,
+    );
+    assert.equal(sizeRecipe.minHeight, spec.minHeight, `${name}: minHeight`);
     if (sizeRecipe.paddingHorizontal) {
       const px = resolveStyleRefs(tokens, { v: sizeRecipe.paddingHorizontal }).v;
       assert.equal(px, nativeTheme.spacing[spec.px], `${name}: paddingHorizontal`);
@@ -169,6 +181,10 @@ test("button conformance: sizes（height / padding / fontSize / iconOnly 幅）�
     }
     if (sizeRecipe.iconOnlyWidth !== undefined) {
       assert.equal(sizeRecipe.iconOnlyWidth, spec.iconBox, `${name}: iconOnly 幅`);
+    }
+    // iconOnly は正方形固定（labeled と違い中身が伸びないので height 固定でよい）
+    if (sizeRecipe.iconOnlyHeight !== undefined) {
+      assert.equal(sizeRecipe.iconOnlyHeight, spec.iconBox, `${name}: iconOnly 高さ`);
     }
   }
 });

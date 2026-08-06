@@ -53,8 +53,14 @@ test("本体エントリ（primitives / components barrel）に Icon が混入�
 
 test("src/index.ts が theme / primitives / components / CONTRACTS を公開している", () => {
   const entry = readFileSync(resolve(srcRoot, "index.ts"), "utf8");
-  for (const barrel of ['"./theme"', '"./primitives"', '"./components"']) {
-    assert.match(entry, new RegExp(`export \\* from ${barrel}`), `${barrel} の re-export が無い`);
+  // barrel は `./theme/index.js` 形式（W3 で node16/nodenext 向けに拡張子を明示した）。
+  // ここで見たいのは「barrel の re-export が消えていないか」なので、拡張子の有無は問わない。
+  for (const barrel of ["theme", "primitives", "components"]) {
+    assert.match(
+      entry,
+      new RegExp(`export \\* from "\\./${barrel}(?:/index\\.js)?"`),
+      `"./${barrel}" の re-export が無い`
+    );
   }
   assert.match(entry, /\bCONTRACTS\b/, "契約メタ CONTRACTS が公開されていない");
 });

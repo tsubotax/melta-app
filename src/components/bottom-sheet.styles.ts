@@ -13,7 +13,7 @@
  * - sheet の下余白（SafeArea）は実装（BottomSheet.tsx）が SafeAreaView で加算する。
  */
 
-import type { FontWeightValue, NativeTheme, ThemeMode } from "../theme";
+import type { FontWeightValue, NativeTheme, ThemeMode } from "../theme/index.js";
 
 /** overlay の黒 50%（token 外 literal。modal と同値）。 */
 // eslint-disable-next-line melta/no-raw-color -- overlay の黒 50% は契約上 token 外の literal（recipe description / web の bg-black/50 と同値）

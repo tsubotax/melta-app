@@ -13,8 +13,17 @@
  * - sizes はタブレット以上で効く maxWidth（モバイルは width 100% - overlay padding が先に効く）。
  */
 
-import type { ElevationStyle, FontWeightValue, NativeTheme, ThemeMode } from "../theme";
-import type { SizeOf, VariantOf } from "../contracts/contract-types";
+import type { ElevationStyle, FontWeightValue, NativeTheme, ThemeMode } from "../theme/index.js";
+import type { SizeOf, VariantOf } from "../contracts/contract-types.js";
+import { CANONICAL_TAP_TARGET } from "../a11y/tap-target.js";
+
+/**
+ * title 行の × の当たり判定（正典パターン: 視覚 24pt + hitSlop 10 = 実効 44pt）。
+ *
+ * 以前は hitSlop=spacing.2（8）だけで、× のグリフ幅（fontSize.xl の "×" ≈ 13pt）＋ 8×2 =
+ * 実効 29pt しか無かった（Toast / Alert の × は正典パターン済みだったので Modal だけ取り残されていた）。
+ */
+export const MODAL_CLOSE_TAP_TARGET = CANONICAL_TAP_TARGET;
 
 export type ModalVariant = VariantOf<"modal">;
 export type ModalSize = SizeOf<"modal">;

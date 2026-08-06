@@ -12,9 +12,9 @@
 
 import { useMemo } from "react";
 import { Text as RNText, View, type StyleProp, type ViewStyle } from "react-native";
-import { useTheme } from "../theme";
-import { CONTRACTS, type SizeOf } from "../contracts/contract-types";
-import { resolveMetricStyles } from "./metric.styles";
+import { useTheme } from "../theme/index.js";
+import { CONTRACTS, type SizeOf } from "../contracts/contract-types.js";
+import { resolveMetricStyles } from "./metric.styles.js";
 
 type MetricSize = SizeOf<"metric">; // "sm" | "md" | "lg"
 

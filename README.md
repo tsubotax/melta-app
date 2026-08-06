@@ -24,7 +24,7 @@
 
 - **ドキュメントは契約からの生成物** — 下の[コンポーネント表](#コンポーネント)・[llms.txt](https://app.melta.tsubotax.com/llms.txt)・showcase の統計は `melta-contracts` から生成し、手書きの表はこのリポに存在しない。腐りは drift 検査が落とす（[scripts/check-drift.ts](./scripts/check-drift.ts) / [CI](./.github/workflows/check.yml)）
 - **消費者プロジェクトでの実導入検証（2026-08-04）** — 別リポジトリの自プロジェクト（非公開 RN アプリ）に npm 経由で導入し、AI が違反コードを書いた直後に検出 → 修正フィードバック → 自己修正、のループを実測で確認。導入時に見つかった hook の欠陥（実行失敗時に無言で素通りする）は同日中に本体へ還元し、故障系を含む E2E 14 ケースで固定（[scripts/lib/hook-lint.test.ts](./scripts/lib/hook-lint.test.ts) / [CHANGELOG 0.5.3](./CHANGELOG.md#053--2026-08-04)）
-- **「npm install すれば動く」の機械証明** — pack → tarball 実体検査 → fixture へ install → 本体 / icons / safe-area の import + typecheck → lint plugin を実 import してルール 4 本と推奨 severity を照合、までを公開ゲートにしている（[scripts/check-installability.sh](./scripts/check-installability.sh)。`npm run release` の必須ステップ）
+- **「npm install すれば動く」の機械証明** — pack → tarball 実体検査 → [attw](https://github.com/arethetypeswrong/arethetypeswrong.github.io) で exports の型解決を resolution mode ごとに検査 → fixture へ install → 本体 / icons / safe-area / eslint-plugin の import + typecheck を **`moduleResolution` 3 種（bundler / node16 / nodenext）すべてで**実行 → lint plugin を実 import してルール 4 本と推奨 severity を照合、までを公開ゲートにしている（[scripts/check-installability.sh](./scripts/check-installability.sh)。`npm run release` の必須ステップ）
 
 ## Quickstart
 
@@ -32,7 +32,7 @@
 npm install melta-app
 ```
 
-必須の peerDependencies は `react` / `react-native` の 2 つ（runtime 依存ゼロ）。機能別の optional peer が 2 つ — `react-native-svg`（`melta-app/icons` を使う場合のみ）と `react-native-safe-area-context`（`melta-app/safe-area` を使う場合のみ）。配布物は **ESM のみ**（`require()` では読めない。検証済みは Expo 56 / Metro — 他バンドラは ESM 対応が前提）。eslint plugin / hook などの Node ツール面は Node.js 22 で検証している（`engines` 宣言）。
+必須の peerDependencies は `react` / `react-native` の 2 つ（runtime 依存ゼロ）。機能別の optional peer が 2 つ — `react-native-svg`（`melta-app/icons` を使う場合のみ）と `react-native-safe-area-context`（`melta-app/safe-area` を使う場合のみ）。配布物は **ESM のみ**（`require()` では読めない。検証済みは Expo 56 / Metro — 他バンドラは ESM 対応が前提）。型は `moduleResolution` が `bundler` / `node16` / `nodenext` のいずれでも解決できることを CI で検査している（`skipLibCheck: true` の消費者でも型が欠落しない）。eslint plugin / hook などの Node ツール面は Node.js 22 で検証している（`engines` 宣言）。
 
 **React Native バージョン対応**（下限 0.71 は `gap` / `role` 使用のため。型・Jest で検証済みなのは Expo 56 / RN 0.85 / React 19.2 の組のみ）:
 
@@ -64,6 +64,57 @@ export default function App() {
 ```
 
 テーマは `ThemeProvider` が OS の light / dark に自動追従（`forcedMode` で固定も可）。トークンは `useTheme()` / `nativeTheme` から取れる。自分のブランドで塗り替えるなら[テーマを注入する](#テーマを注入するブランドトークン)。本体エントリ以外は subpath 3 つ（[Icon](#iconmelta-appicons) / [SafeArea 差替](#safearea-の差し替えmelta-appsafe-area) / [lint plugin](#利用側コードの-lint-強制層melta-appeslint-plugin)）。
+
+### bare React Native（Expo を使わない場合）
+
+melta-app 本体は JS のみで、ネイティブモジュールを含まない。ただし**optional peer の 2 つ
+（`react-native-safe-area-context` / `react-native-svg`）は本物のネイティブモジュール**なので、
+bare RN では npm install だけでは動かない。iOS は Pods の再インストールと、両 OS ともネイティブの
+再ビルドが要る（JS の reload では反映されない）:
+
+```bash
+# bare RN — 使う subpath に対応する peer だけ入れる
+npm install react-native-svg react-native-safe-area-context
+npx pod-install            # iOS（= cd ios && pod install）
+# その後 Xcode / Gradle でネイティブを**再ビルド**する（Metro の reload では足りない）
+```
+
+Expo（managed / prebuild）なら従来どおり `npx expo install` が RN 版に合う版を選び、
+config plugin と prebuild が iOS/Android 側を面倒見る:
+
+```bash
+npx expo install react-native-svg react-native-safe-area-context
+```
+
+どちらの peer も使わない（`melta-app` 本体エントリだけ import する）なら、
+melta-app の導入にネイティブ作業は発生しない。
+
+> 検証済みの構成は **Expo 56 / RN 0.85 / React 19.2** の組だけ（[制約と正直な範囲](#制約と正直な範囲)）。
+> bare RN 構成は型・依存関係の上では成立するが、実機での検証は行っていない。
+
+### dev 検証と `__DEV__`
+
+melta の dev 専用チェックは `__DEV__`（Metro のグローバル）が真のときだけ動く:
+
+- `defineTheme()` の `validateTheme` — 壊れた theme をその場で throw
+- 解決済み theme の `deepFreeze` — 後からの書き換えを凍結して検出
+- `ThemeProvider` の mode 違反レポート / `Card` の不正 prop 組み合わせの `console.error`
+
+**Metro 以外のバンドラ（Vite / webpack での react-native-web など）は `__DEV__` を定義しない。**
+その環境では `process.env.NODE_ENV === "development"` にフォールバックし、
+どちらも判定できなければ dev 検証は**自動で無効**になる（本番に dev コストを漏らさない側に倒す設計）。
+つまり「警告が一度も出ない ＝ 違反が無い」ではない。有効にしたい場合はどちらかを与える:
+
+```js
+// Vite
+export default { define: { __DEV__: JSON.stringify(true) } };
+// webpack
+new webpack.DefinePlugin({ __DEV__: JSON.stringify(true) });
+// もしくは NODE_ENV=development でビルド / 起動する
+```
+
+production ビルドでは `__DEV__` を偽（または未定義）のままにする — dev 検証は本番で不要な
+コストであり、Metro は偽に畳み込まれた分岐ごとバンドルから落とす。
 
 ## 利用側コードの lint 強制層（`melta-app/eslint-plugin`）
 
@@ -253,6 +304,107 @@ export default [
 
 0.4.x からの移行は [CHANGELOG](./CHANGELOG.md#050--2026-07-29) を参照。
 
+### 画面骨格（`Screen`）
+
+`Screen` は safe-area + `bg-page` + content padding + ScrollView を 1 つにまとめた画面の器。
+
+| prop | 型 | default | 意味 |
+|---|---|---|---|
+| `variant` | `"scroll"` \| `"fixed"` | `"scroll"` | content を ScrollView に載せるか、`flex: 1` の View に載せるか |
+| `padding` | spacing token キー \| `"none"` | `"4"` | content の padding |
+| `edges` | `readonly ("top" \| "right" \| "bottom" \| "left")[]` | [`enableSafeAreaContext`](#safearea-の差し替えmelta-appsafe-area) の既定 | safe-area を適用する辺 |
+| `header` | `ReactNode` | — | scroll の外（safe-area 直下）に固定されるヘッダー slot |
+| `scrollViewProps` | `Omit<ScrollViewProps, "children">` | — | 内部 ScrollView への passthrough（`variant="scroll"` のみ） |
+| `scrollViewRef` | `Ref<ScrollView>` | — | 内部 ScrollView の ref（`scrollTo` / `scrollToEnd` 用） |
+| `style` | `StyleProp<ViewStyle>` | — | safe-area の器に重ねる style |
+| `testID` | `string` | — | — |
+
+```tsx
+const listRef = useRef<ScrollView>(null);
+
+<Screen
+  header={<Header title="フィード" />}
+  scrollViewProps={{ onScroll: handleScroll, keyboardShouldPersistTaps: "handled" }}
+  scrollViewRef={listRef}
+>
+  <Text>本文</Text>
+</Screen>
+```
+
+契約（passthrough は「素通し」ではない）:
+
+- **`contentInsetAdjustmentBehavior` は渡さないこと。** safe-area は Screen が持つので二重 inset になる
+- `contentContainerStyle` は DS の padding と**配列合成**される（渡した側が後勝ち）。padding を**消す**目的では使えない（消したいときは `padding="none"`）
+- `scrollEventThrottle` は Screen 側の既定が `16`（iOS の既定 0 では `onScroll` が 1 ドラッグ 1 発しか来ずスクロール連動ヘッダが動かない）。消費者の指定で上書きできる
+- `variant="fixed"` に `scrollViewProps` / `scrollViewRef` を渡すと dev ビルドで警告する（内部 ScrollView が無いので黙って捨てられる）
+
+タブバーと併用する画面は、bottom をタブバー側に任せる:
+
+```tsx
+// タブ配下の画面だけ edge を絞る（アプリ全体を top-only にしない。下記 SafeArea 節を参照）
+<Screen edges={["top"]}>…</Screen>
+```
+
+## アクセシビリティの既定
+
+3 点（タップ標的 / OS の文字サイズ拡大 / 読み上げラベル）は**利用側で何もしなくても既定で満たす**ように組んである。
+
+### タップ標的 44pt
+
+すべての操作要素は**視覚寸法を変えないまま**実効タップ標的 44pt を満たす。
+契約側の正本は melta-contracts の `A11Y_MIN_TAP_TARGET_44`、実装との照合は
+[scripts/lib/tap-target-conformance.test.ts](./scripts/lib/tap-target-conformance.test.ts)（CI で毎回検査）。
+
+| 要素 | 視覚寸法 | 手当て | 実効 |
+|---|---|---|---|
+| `Button` small / medium / large（labeled） | minHeight 32 / 40 / 48 | 縦 hitSlop 6 / 2 / 0 | 44 / 44 / 48 |
+| `Button`（iconOnly） | 32 / 40 / 48 の正方形 | 四方 hitSlop 6 / 2 / 0 | 同上（縦横とも） |
+| `Tag variant="filter-chip"` | 高さ 34（padding 駆動） | 縦 hitSlop 5 | 44 |
+| `Tag variant="removable"` の × / `Toast` の × / `Alert` の × / `Modal` の × | 24 の箱 | hitSlop 10 | 44 |
+| `Radio` の option 行 | 行の高さ 36 | `minHeight: 44` | 44 |
+| `Toggle` medium / large | track 24 / 28 | 縦 hitSlop 10 / 8 | 44 |
+| `Checkbox` の行 | box 20 | hitSlop 12 | 44 |
+
+- **背景を持つ要素は hitSlop、持たない要素は `minHeight`**。背景がある要素を minHeight で伸ばすと見た目が変わるため
+- **横方向の hitSlop は隣接する操作要素との gap の 1/2 まで**。超えると当たり判定が重なって押し違いが起きる
+  （`Toast` の action と × はこれで実際に 8pt 重なっていた。0.7.0 で修正）
+
+### OS の文字サイズ拡大（fontScale）
+
+- `Button` / `TextField` の高さは **`minHeight`**（`height` 固定ではない）。文字が拡大しても縦にクリップしない
+- `Text` は `allowFontScaling` / `maxFontSizeMultiplier` を RN `Text` へ透過する。**既定は未指定 = RN 既定**（拡大に追随）。
+  固定寸法の図版ラベルなど、拡大するとレイアウトが壊れる箇所だけ opt-in で絞る
+
+  ```tsx
+  <Text maxFontSizeMultiplier={1.3}>グラフの軸ラベル</Text>
+  ```
+
+- `Avatar` の initials は器（円）が伸びないため、size 別に上限を掛けている（small 1.6 / medium 1.5 / large 1.3）。
+  拡大は許しつつ円からの溢れだけを止める設定で、利用側の指定は不要
+
+### 読み上げラベルの差し替え（i18n）
+
+内蔵の日本語ラベルは props で差し替えられる。**既定値は日本語のまま**（変えると既存アプリの VoiceOver 読み上げが変わるため）。
+
+| コンポーネント | prop | 既定 |
+|---|---|---|
+| `Toast` / `Alert` / `Modal` | `closeAccessibilityLabel` | `"閉じる"` |
+| `TextField` | `formatErrorAccessibilityLabel: (label, errorText) => string` | `` `${label}。エラー: ${errorText}` `` |
+| `ActionSheet` | `cancelLabel` | `"キャンセル"` |
+| `Skeleton` | `accessibilityLabel` | `"読み込み中"` |
+
+```tsx
+<Modal title="Delete route" closeAccessibilityLabel="Close" onClose={close} visible>…</Modal>
+
+<TextField
+  label="Email"
+  value={email}
+  variant="error"
+  errorText="Invalid format"
+  formatErrorAccessibilityLabel={(label, error) => `${label}. Error: ${error}`}
+/>
+```
+
 ## テーマを注入する（ブランドトークン）
 
 `theme` を渡すと自分のブランドトークンで塗り替わる。未指定なら melta 既定（`nativeTheme`）。
@@ -388,12 +540,21 @@ Icon は唯一 `react-native-svg`（optional peerDependency）に依存するた
 npx expo install react-native-svg
 ```
 
+> bare RN（Expo なし）は `npm install` + `npx pod-install` + ネイティブ再ビルド。
+> [bare React Native](#bare-react-nativeexpo-を使わない場合) を参照。
+
 ```tsx
 import { Icon } from "melta-app/icons";
 
 <Icon name="like-on" accessibilityLabel="いいね" />        // 意味を持つ icon は label 必須
 <Icon name="close" size="sm" color="text-muted" />         // 省略時は装飾扱い（a11y ツリーから除外）
+<Icon name="check" color="status-success" />               // status 色（Alert / Toast と同じ status token）
 ```
+
+`color` は semantic token キーに加えて `"status-success"` / `"status-warning"` / `"status-error"` を受ける
+（`theme.color.status.*.base` を引く。生 hex は受けない）。
+`"status-info"` は**無い** — status token に info の実体が無いため（web 側と同じ割り切り）。
+info 相当は `color="text-accent"` で表す。
 
 グリフは Charcoal Icons（pixiv、Apache-2.0）の curated サブセット + Charcoal に無いグリフの
 Material Symbols Rounded（Google、Apache-2.0）補完（`assets/icons/*.svg` →
@@ -402,29 +563,47 @@ Material Symbols Rounded（Google、Apache-2.0）補完（`assets/icons/*.svg` �
 
 ### SafeArea の差し替え（`melta-app/safe-area`）
 
-Screen の SafeArea は default で RN core の SafeAreaView（deprecated / iOS のみの最小対応、
-依存ゼロ維持）。`react-native-safe-area-context` を使うアプリは subpath から一度有効化すると
-Screen が context 版に切り替わり、RN 0.85+ の deprecation 警告も出なくなる:
+safe-area は default で RN core の SafeAreaView（deprecated / iOS のみの最小対応、依存ゼロ維持。
+**Android では完全な no-op**）。`react-native-safe-area-context` を使うアプリは subpath から
+一度有効化すると `Screen` / `ActionSheet` / `BottomSheet` が context 版に切り替わり、
+Android でも inset が入り、RN 0.85+ の deprecation 警告も出なくなる:
 
 ```bash
 npx expo install react-native-safe-area-context
 ```
 
+> bare RN（Expo なし）は `npm install` + `npx pod-install` + ネイティブ再ビルド。
+> [bare React Native](#bare-react-nativeexpo-を使わない場合) を参照。
+
 ```tsx
-// アプリの entry（Screen の初回 render より前）で一度だけ
+// アプリの entry（初回 render より前）で一度だけ
 import { enableSafeAreaContext } from "melta-app/safe-area";
 enableSafeAreaContext();
 
-// ボトムタブバー等が bottom inset を自前処理するアプリは edge を絞る
-// （全 edge のまま使うとタブ内 Screen の bottom が二重余白になる）
-enableSafeAreaContext({ edges: ["top"] });
+// edges は「Screen の既定値」。省略した Screen にだけ効く
+enableSafeAreaContext({ edges: ["top", "left", "right"] });
 ```
+
+適用する辺の決まり方は 3 段（後のものが勝つ）:
+
+| 対象 | 適用される edge |
+|---|---|
+| `Screen`（`edges` 省略） | `enableSafeAreaContext({ edges })` の既定（未指定なら全 edge） |
+| `Screen edges={[...]}` | その指定（画面ごとに変えられる） |
+| `ActionSheet` / `BottomSheet` | 常に bottom + 左右（画面下端に出るため top は不要） |
+
+> ボトムタブバーがある画面は、アプリ全体を `edges: ["top"]` にするのではなく
+> **タブ配下の画面だけ [`<Screen edges={["top"]}>`](#画面骨格screen)** で絞る。シート系は
+> bottom inset を自前で持つので、グローバル top-only はシートの下余白まで削ってしまう
+> （0.5.x までのアプリ全体 1 個のグローバル指定はこの理由で推奨から外した）。
 
 ⚠️ 前提と契約:
 
 - 祖先に `SafeAreaProvider` が**必須**（無いと `useSafeAreaInsets` が **throw する**。
   React Navigation / Expo Router を使っていれば設置済みのことが多い）。初回 render から
   正しい inset を使うには Provider に `initialMetrics` を渡す
+- **adapter 未登録（RN core フォールバック）では `edges` は無視される。** core の SafeAreaView は
+  「安全域と交差する辺すべて」に padding を入れる仕様で辺を選べないため（Android は no-op）
 - adapter は `useSafeAreaInsets()` を render 中に同期参照して View padding に加算する方式
   （native SafeAreaView の初回フレーム inset 未適用によるフラッシュを避けるため）
 - safe-area と合成する padding は**数値のみ**サポート（`"5%"` 等の非数値は基底として扱えず、

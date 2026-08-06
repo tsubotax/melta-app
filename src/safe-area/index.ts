@@ -11,9 +11,10 @@
  *   import { enableSafeAreaContext } from "melta-app/safe-area";
  *   enableSafeAreaContext();
  *
- * これで Screen の SafeArea が useSafeAreaInsets() + View の adapter に切り替わる。
- * Provider の context 値を render 中に同期参照して padding を付けるため、native
- * SafeAreaView の layout/state 更新を待たず、初回 render から inset が反映される。
+ * これで Screen / ActionSheet / BottomSheet の SafeArea が useSafeAreaInsets() + View の
+ * adapter に切り替わる。Provider の context 値を render 中に同期参照して padding を付けるため、
+ * native SafeAreaView の layout/state 更新を待たず、初回 render から inset が反映される。
+ * Android でも効く（RN core の SafeAreaView は Android では完全 no-op）。
  *
  * ⚠️ 前提: アプリの root に SafeAreaProvider が必要（無いと useSafeAreaInsets が throw
  * する）。初回 render から正しい inset を使うには Provider に initialMetrics も渡す。
@@ -35,13 +36,21 @@ import {
   setSafeAreaView,
   type SafeAreaViewLike,
   type SafeAreaViewLikeProps,
-} from "../components/safe-area-registry";
+} from "../components/safe-area-registry.js";
 
 const ALL_EDGES = ["top", "right", "bottom", "left"] as const satisfies readonly Edge[];
 
 /** enableSafeAreaContext() の設定。edges 省略時は従来相当の全 edge。 */
 export interface EnableSafeAreaContextOptions {
-  /** Screen に適用する edge。tab bar 等が担当する edge は除外する。 */
+  /**
+   * **Screen の既定 edge**（`edges` prop を渡さなかった Screen に適用される）。
+   * tab bar 等が担当する edge は除外する。
+   *
+   * ⚠️ 0.5.x までは「アプリ全体で 1 個のグローバル」だったが、edge は消費者ごとに
+   * 決まるべきものなので既定値の意味に変わった。ActionSheet / BottomSheet は画面下端に
+   * 出る都合上、ここの指定に関わらず自前の edge（bottom + 左右）を使う。
+   * 画面ごとに変えたい場合は `<Screen edges={["top"]} />` のように Screen 側で指定する。
+   */
   edges?: readonly Edge[];
 }
 
@@ -100,7 +109,12 @@ function createContextSafeAreaView(selectedEdges: readonly Edge[]): SafeAreaView
   return ContextSafeAreaView;
 }
 
-/** Screen の SafeArea を context 同期参照の View adapter に切り替える。 */
+/**
+ * melta の SafeArea を context 同期参照の View adapter に切り替える。
+ *
+ * registry には**ファクトリ**を渡す（消費者ごとに edges が違うため）。同じ edges 集合には
+ * 同じコンポーネント参照が返るよう memo するのは registry 側の責務。
+ */
 export function enableSafeAreaContext(options: EnableSafeAreaContextOptions = {}): void {
-  setSafeAreaView(createContextSafeAreaView(options.edges ?? ALL_EDGES));
+  setSafeAreaView(createContextSafeAreaView, options.edges ?? ALL_EDGES);
 }

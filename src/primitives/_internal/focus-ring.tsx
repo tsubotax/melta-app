@@ -17,7 +17,7 @@
 
 import { useState } from "react";
 import { View } from "react-native";
-import { useTheme } from "../../theme";
+import { useTheme } from "../../theme/index.js";
 
 export function useFocusRing() {
   const [focused, setFocused] = useState(false);

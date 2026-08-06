@@ -9,8 +9,80 @@
 
 ## Unreleased
 
+### 追加
+
+- **`Screen` に `edges` / `scrollViewProps` / `scrollViewRef` を追加**（dogfood 不足-22 / 不足-24 の解消）。
+  safe-area を適用する辺を画面ごとに指定でき（`<Screen edges={["top"]}>`）、内部 ScrollView へ
+  `onScroll` / `keyboardShouldPersistTaps` / `refreshControl` 等を渡せる（`variant="scroll"` のみ。
+  `variant="fixed"` に渡すと dev ビルドで warn）。`contentContainerStyle` は DS の padding と
+  **配列合成**（渡した側が後勝ち）なので DS の padding が丸ごと消えない。内部 ScrollView の
+  `scrollEventThrottle` 既定は `16`（iOS 既定 0 では `onScroll` が 1 ドラッグ 1 発しか来ず、
+  スクロール連動ヘッダが動かないため。上書き可）
+- **`Text` に `allowFontScaling` / `maxFontSizeMultiplier` を追加**（RN `Text` へ透過。既定は
+  未指定 = RN 既定で OS の文字サイズ設定に追随）
+- **`Icon` の `color` が status 色を受けるようになった** — `"status-success"` / `"status-warning"` /
+  `"status-error"`（`theme.color.status.*.base` を解決。ActionSheet の destructive ラベルと同じ慣用）。
+  `"status-info"` は無い（status token に info の実体が無いため。info 相当は `color="text-accent"`）
+- **読み上げラベルの i18n フック**（既定は日本語のまま据え置き = 既存アプリの VoiceOver は不変）:
+  `Toast` / `Alert` / `Modal` の `closeAccessibilityLabel?: string`（既定 `"閉じる"`）、
+  `TextField` の `formatErrorAccessibilityLabel?: (label, errorText) => string`
+  （既定 `` `${label}。エラー: ${errorText}` ``）
+
+### 修正
+
+- **`ActionSheet` / `BottomSheet` の safe-area が Android で効いていなかった**。RN core の
+  `SafeAreaView` 直 import で、core は `Platform.select({ ios: native, default: View })` =
+  **Android では素の View（完全 no-op）**。シートがジェスチャバーの下に敷かれていた。
+  safe-area registry 経由に変更し、`melta-app/safe-area` を有効化したアプリでは Android でも
+  下 inset が入る（シートの edge は bottom + 左右で固定。`enableSafeAreaContext` の `edges`
+  指定には引きずられない）
+- **`Toast` の action と × が押し違いを起こしていた** — 両方に hitSlop 10 が付き、間隔 gap 12 に
+  対し当たり判定が **8pt 重なっていた**（重なる帯では × が押し勝ち、「元に戻す」を押したつもりが
+  Toast が閉じる）。横方向の hitSlop を gap/2 = 6 に絞り、× は箱の幅下限を 32pt に広げて
+  実効 44pt を維持
+- **`Modal` の × のタップ標的が実効 29pt しかなかった** — 箱の下限が無く、グリフ幅 + hitSlop 8 のみ。
+  Toast / Alert と同じ正典パターン（視覚 24 の箱 + hitSlop 10 = 44pt）へ
+- **dark モードで `Tag variant="basic"` がカードに溶けて見えなかった** — dark の `bg-page-alt` が
+  `bg-surface` と同値 `#1e293b`（コントラスト比 1.00:1）だったのが原因。melta-contracts 0.7.0 で
+  dark `bg-page-alt` = `#334155` に分離され、`native-theme.ts` の再生成で解消
+  （`TextField` disabled の背景が同化していた問題も同時に解消。Tag 側のコード変更は無し）
+- **OS の文字サイズ拡大で `Button` / `TextField` の文字がクリップしていた** — 高さが `height` 固定
+  だった（`Button` medium は fontScale 1.12x からクリップ）。`minHeight` に変更して縦に伸びるように。
+  `Button` の iconOnly だけは正方形を保つため width/height 固定のまま（中身が glyph で伸びない）
+- **`Avatar` の initials が文字サイズ拡大で円から溢れていた** — 器（円）は伸びないため、size 別の
+  `maxFontSizeMultiplier`（small 1.6 / medium 1.5 / large 1.3 = box ÷ lineHeight の切り捨て）で
+  溢れだけを止める。拡大自体は許す。利用側の指定は不要
+- **`moduleResolution: node16` / `nodenext` の TypeScript 消費者で型が解決できなかった問題を修正**。
+  配布する `.d.ts` の相対 import が拡張子なし（`from "./theme"`）で、`lib/typescript/package.json` が
+  `{"type":"module"}` のため ESM 扱いになり `TS2834`（Relative import paths need explicit file
+  extensions）で落ちていた。**`skipLibCheck: true`（各種テンプレートの既定）の消費者では
+  エラーが黙殺され、`melta-app` の export が「存在しないメンバー」として型だけ静かに欠落する**
+  という気づきにくい壊れ方をしていた。`src/` の相対 import 193 か所すべてに `.js` 拡張子を
+  明示して修正（TS の ESM 規約どおり `./x.js` はソースの `./x.ts` を指す。ディレクトリ import は
+  `./x/index.js` に展開）。ランタイムの解決先は変わらないので、Metro / bundler 消費者への影響は無い
+- **`melta-app/eslint-plugin` に型が付いた**。`eslint-rules/melta.d.mts` を追加し、exports の
+  `./eslint-plugin` / `./eslint-rules/melta.mjs` に `types` 条件を宣言。従来は型が引けず、
+  TS 消費者の flat config で暗黙 `any` になっていた（`MeltaPlugin` / `MeltaRuleName` /
+  `MeltaFlatConfig` を型として公開。ESLint 本体の型には依存しない）
+
 ### 変更
 
+- **実効タップ標的 44pt を全操作要素に横断適用**（視覚寸法は据え置き、当たり判定だけ拡張。
+  契約側の根拠は melta-contracts 0.7.0 の `A11Y_MIN_TAP_TARGET_44`）。新たに 44pt を満たすのは
+  `Button` small/medium（縦 hitSlop 6/2、iconOnly は四方）/ `Tag filter-chip`（縦 5）/
+  `Radio` option 行（`minHeight: 44`）/ `Toggle`（縦 10/8）。従来から満たしていた
+  Tag removable × / Toast × / Alert × / Checkbox は不変。破壊的変更ではない
+  （props / 型の削除なし。`Button` labeled の `height` → `minHeight` 化により、消費者が
+  `style={{ height }}` で上書きしていた場合のみ合成挙動が変わり得る）
+- **`enableSafeAreaContext({ edges })` の `edges` の意味が変わった**（シグネチャは互換）。
+  「アプリ全体で 1 個のグローバル」から「**`Screen` の既定値**」へ。シート系はこの指定に
+  関わらず自前の edge を使う。タブバー対応の推奨も「アプリ全体を `edges: ["top"]`」から
+  「**タブ配下の画面だけ `<Screen edges={["top"]}>`**」に変更（グローバル top-only は
+  シート系の下余白まで削るため推奨から外した）
+- **`ActionSheet` の safe-area の位置を `BottomSheet` と同じ「内側」に統一**（見た目が変わる）。
+  従来は sheet 群の外側にあり、iOS では inset 帯に overlay の黒が見えていた。最下部の面
+  （cancel）の内側に移し、inset 帯まで `bg-surface` で塗られるように。引き換えに cancel
+  ブロックは inset のぶん背が高くなる
 - **peerDependencies を実態に合わせて宣言**: `react >=18.2.0` / `react-native >=0.71.0`
   （`gap` レイアウトと `role` prop が RN 0.71 導入のため。従来の `"*"` は 0.70 以下でも
   install できてしまい、無言でレイアウトが崩れる状態だった）。README に RN 版対応表を追加
@@ -23,6 +95,36 @@
   どちらも無ければ throw。旧実装は兄弟パス直書きのみで、兄弟 melta-ui を意図的に置かない
   CI では **silent skip** されていた）
 - README に CI / npm バッジを追加
+- **installability ゲートを 3 構成 × 4 fixture に拡張**。従来は `moduleResolution: bundler` しか
+  見ておらず、上記の node16/nodenext 型崩れを素通りさせていた。fixture（main / icons /
+  safe-area / eslint-plugin）× moduleResolution（bundler / node16 / nodenext）の計 12 回の tsc に
+  加えて、[attw](https://github.com/arethetypeswrong/arethetypeswrong.github.io)（`@arethetypeswrong/cli`、
+  バージョン固定）で tarball の exports を resolution mode ごとに直接検査する。
+  attw の ignore は ESM-only 方針と整合する `node10` / `node16-cjs` の 2 列だけ
+  （`--profile esm-only`）で、`node16 (from ESM)` と `bundler` は fail 条件のまま
+- jest に `moduleNameMapper`（`^(\.{1,2}/.*)\.js$` → `$1`）を追加。babel-jest は TS の
+  `./x.js` → `./x.ts` 規約を解決できないため（jest 公式が ESM+TS 向けに案内している対処）
+- README に **bare React Native** 節（optional peer はネイティブモジュールなので
+  `npx pod-install` + ネイティブ再ビルドが要る）と **`__DEV__`** 節（Metro 以外では
+  dev 検証が自動で無効になる。有効化は `NODE_ENV=development` か define）を追加
+- **safe-area registry をファクトリ化**（`resolveSafeAreaView(edges)`）。消費者ごとに必要な
+  edge が違う（Screen = 可変 / シート系 = 下端固定）ため。生成物は edges の正規化キーで
+  memo（render 中に呼ばれるので、毎回別コンポーネント型を返すと subtree が unmount/remount
+  して state が消える）。未登録時のフォールバックは従来どおり RN core SafeAreaView
+  （core は辺を選べないため `edges` は無視される — README に明記）
+- **`src/a11y/tap-target.ts` を新設**（44pt 方針の数値 SSOT、公開面には出さない）+
+  **`tap-target-conformance.test.ts`（51 ケース）**。全操作要素の実効タップ標的 ≥44pt を
+  styles resolver の出力 + hitSlop 定数から機械照合。hitSlop 値は各 `*.styles.ts` に
+  literal で置く規約（導出関数から自動計算すると視覚寸法の変更に hitSlop が追随して
+  検査が構造的に素通りするため）。「定数を export しただけで component が使っていない」
+  を塞ぐ参照検査つき。AGENTS.md の resolver 規約に規約 10（タップ標的 3 原則）を追加
+- ThemeProvider / defineTheme の docstring を実態へ訂正: dev で入れ子まで freeze されるのは
+  `defineTheme()` の戻り値（= `useTheme().theme`）。公開 export の `nativeTheme` は
+  `cloneTokenTree` で参照が切られているため凍らない（0.4.3 で意図的に変更済み。
+  docstring だけが 0.4.2 以前の記述のまま残っていた）
+- `native-theme.ts` を melta-contracts 0.7.0 から再生成（dark `bg-page-alt: #334155`）。
+  `BUTTON_SIZE_SPEC` / `TEXTFIELD_SIZE_SPEC` のキーを `minHeight` に改名し（recipe 0.7.0 と
+  語彙を統一）、conformance に「recipe に `height` が復活したら落ちる」検査を追加
 
 ---
 
