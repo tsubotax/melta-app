@@ -235,7 +235,7 @@ typecheck_entry safe-area check-safe-area.tsx
 
 echo "→ eslint plugin の import + ルール実体検査（存在チェックだけでは exports 誤記・export 名変更・ルール欠落を検出できない）"
 node --input-type=module -e "
-const expected = ['no-raw-color', 'no-raw-radius', 'no-raw-spacing', 'no-raw-fontsize'];
+const expected = ['no-raw-color', 'no-raw-radius', 'no-raw-spacing', 'no-raw-fontsize', 'no-raw-lineheight'];
 // configs.recommended は severity の配布経路（消費者が手書きするとドリフトする）。
 // 中身まで照合しないと「config はあるが空」「severity が入れ替わった」を検出できない。
 const expectedSeverity = {
@@ -243,6 +243,7 @@ const expectedSeverity = {
   'melta/no-raw-radius': 'error',
   'melta/no-raw-spacing': 'warn',
   'melta/no-raw-fontsize': 'warn',
+  'melta/no-raw-lineheight': 'warn',
 };
 for (const spec of ['melta-app/eslint-plugin', 'melta-app/eslint-rules/melta.mjs']) {
   const mod = await import(spec);
@@ -276,7 +277,7 @@ cat > check-eslint-plugin.ts <<'TS'
 import { meltaPlugin, type MeltaPlugin, type MeltaRuleName } from "melta-app/eslint-plugin";
 
 const plugin: MeltaPlugin = meltaPlugin;
-const names: MeltaRuleName[] = ["no-raw-color", "no-raw-radius", "no-raw-spacing", "no-raw-fontsize"];
+const names: MeltaRuleName[] = ["no-raw-color", "no-raw-radius", "no-raw-spacing", "no-raw-fontsize", "no-raw-lineheight"];
 for (const name of names) {
   if (!plugin.rules[name]) throw new Error(`rule ${name} missing`);
 }

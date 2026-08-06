@@ -9,8 +9,15 @@
  *
  * 下限は使用フォントのメトリクス（ascent + descent）に依存するが、melta はフォントを同梱しない
  * （system フォント運用）ので、既定は **Android の日本語 system フォント Noto Sans CJK JP の
- * 実測 1.448**（hhea: (1160 + 288) / 1000。AOSP 版・Google Fonts 版とも同値、2026-08-06 実測）
- * を切り上げた 1.45 とする。iOS（Hiragino 1.50 相当）にはこの clip 機序が無いので基準にしない。
+ * 実測 1.448** を切り上げた 1.45 とする。iOS（Hiragino 1.50 相当）にはこの clip 機序が無いので
+ * 基準にしない。
+ *
+ * この 1.448 は手実測メモではなく**CI が毎回機械検算する**（W8）:
+ * scripts/lib/line-height-floor.test.ts が、実フォントから抽出した生メトリクス fixture
+ * （scripts/lib/fixtures/reference-font-metrics.json、sha256 + 取得元 URL 付き）に
+ * RN CustomLineHeightSpan の式 `max(A+D, 2·winAsc−A+D, 2·winDesc−D+A)/unitsPerEm` を適用し、
+ * DEFAULT_MIN_LINE_HEIGHT_RATIO = ceil(実測×100)/100 の完全一致を強制する。
+ * 参照フォントを差し替えるときは scripts/extract-font-metrics.ts で再抽出する（手順はそこに記載）。
  *
  * フォントを同梱する消費者は、そのフォントの実測比率を theme の
  * `typography.minLineHeightRatio` で宣言する（例: LINE Seed JP = 1.61）。

@@ -71,6 +71,7 @@ function writeFixture(name: string, contents: string): string {
 
 const RAW_COLOR_SOURCE = `export const styles = { box: { backgroundColor: "#ff0000" } };\n`;
 const RAW_SPACING_SOURCE = `export const styles = { box: { padding: 13 } };\n`;
+const RAW_LINEHEIGHT_SOURCE = `export const styles = { caption: { lineHeight: 16 } };\n`;
 const CLEAN_SOURCE = `export const styles = { box: { flex: 1 } };\n`;
 
 mkdirSync(FIXTURE_DIR, { recursive: true });
@@ -130,6 +131,13 @@ test("d. 生 spacing（warn ルール）→ block せず additionalContext", () 
   assert.equal(out.decision, undefined, "warn で block してはいけない");
   assert.equal(out.hookSpecificOutput?.hookEventName, "PostToolUse");
   assert.match(out.hookSpecificOutput?.additionalContext ?? "", /melta\/no-raw-spacing/);
+});
+
+test("d-2. 生 lineHeight（W8 第5ルール・warn）→ block せず additionalContext", () => {
+  const out = runHook(writeFixture("warn-lineheight.tsx", RAW_LINEHEIGHT_SOURCE));
+  assert.ok(out, "warn なのに無出力");
+  assert.equal(out.decision, undefined, "warn で block してはいけない");
+  assert.match(out.hookSpecificOutput?.additionalContext ?? "", /melta\/no-raw-lineheight/);
 });
 
 // --- e. ハーネスの故障を黙って通さない（fail-loud） ---

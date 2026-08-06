@@ -26,7 +26,8 @@ export type MeltaRuleName =
   | "no-raw-color"
   | "no-raw-radius"
   | "no-raw-spacing"
-  | "no-raw-fontsize";
+  | "no-raw-fontsize"
+  | "no-raw-lineheight";
 
 /** flat config の 1 要素として展開できる推奨設定。 */
 export interface MeltaFlatConfig {

@@ -167,7 +167,7 @@ src/Bad.tsx
 
 ### `configs.recommended` の中身
 
-`configs.recommended`（flat config 形式）は plugin の登録とルール 4 本の severity を含む。
+`configs.recommended`（flat config 形式）は plugin の登録とルール 5 本の severity を含む。
 **severity の正本は plugin 側**なので、消費者がドキュメントから写して持つ必要はない。
 
 | ルール | 既定 severity | 内容 |
@@ -176,6 +176,7 @@ src/Bad.tsx
 | `melta/no-raw-radius` | error | `borderRadius` の数値直書き → `theme.radius.*` |
 | `melta/no-raw-spacing` | warn | `padding`/`margin`/`gap` の数値直書き（false positive あり） |
 | `melta/no-raw-fontsize` | warn | `fontSize` の数値直書き |
+| `melta/no-raw-lineheight` | warn | `lineHeight` の数値直書き（生値はフォントの必要行間を素通りし、Android で濁点が欠ける。詰める場合は theme の `minLineHeightRatio` 宣言とセットで — 機序は `src/theme/line-height.ts`） |
 
 ⚠️ **base config は省略できない。** `meltaPlugin.configs.recommended` は parser も `files` も
 持たない（適用範囲を消費者側に委ねる設計）。実測される挙動は 2 つ:
@@ -217,10 +218,11 @@ export default [
   {
     plugins: { melta: meltaPlugin },
     rules: {
-      "melta/no-raw-color": "error",    // 生 hex/rgb/hsl → theme.color.*
-      "melta/no-raw-radius": "error",   // borderRadius 数値直書き → theme.radius.*
-      "melta/no-raw-spacing": "warn",   // padding/margin/gap 数値直書き（false positive あり）
-      "melta/no-raw-fontsize": "warn",  // fontSize 数値直書き
+      "melta/no-raw-color": "error",      // 生 hex/rgb/hsl → theme.color.*
+      "melta/no-raw-radius": "error",     // borderRadius 数値直書き → theme.radius.*
+      "melta/no-raw-spacing": "warn",     // padding/margin/gap 数値直書き（false positive あり）
+      "melta/no-raw-fontsize": "warn",    // fontSize 数値直書き
+      "melta/no-raw-lineheight": "warn",  // lineHeight 数値直書き（Android の字形欠け防止）
     },
   },
 ];

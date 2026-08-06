@@ -1,0 +1,111 @@
+{
+  "$comment": "生成物。手で編集しない — scripts/extract-font-metrics.ts で実フォントから再抽出する。required は fixture に持たない（テストが scripts/lib/font-metrics.ts の式で毎回再計算する）",
+  "source": {
+    "file": "NotoSansCJK-Regular.ttc",
+    "sha256": "b76b0433203017ca80401b2ee0dd69350349871c4b19d504c34dbdd80541690a",
+    "url": "https://github.com/notofonts/noto-cjk/raw/main/Sans/OTC/NotoSansCJK-Regular.ttc",
+    "extractedAt": "2026-08-06"
+  },
+  "faces": [
+    {
+      "unitsPerEm": 1000,
+      "ascent": 1160,
+      "descent": 288,
+      "lineGap": 0,
+      "winAscent": 1160,
+      "winDescent": 288,
+      "useTypoMetrics": false,
+      "fallback": false
+    },
+    {
+      "unitsPerEm": 1000,
+      "ascent": 1160,
+      "descent": 288,
+      "lineGap": 0,
+      "winAscent": 1160,
+      "winDescent": 288,
+      "useTypoMetrics": false,
+      "fallback": false
+    },
+    {
+      "unitsPerEm": 1000,
+      "ascent": 1160,
+      "descent": 288,
+      "lineGap": 0,
+      "winAscent": 1160,
+      "winDescent": 288,
+      "useTypoMetrics": false,
+      "fallback": false
+    },
+    {
+      "unitsPerEm": 1000,
+      "ascent": 1160,
+      "descent": 288,
+      "lineGap": 0,
+      "winAscent": 1160,
+      "winDescent": 288,
+      "useTypoMetrics": false,
+      "fallback": false
+    },
+    {
+      "unitsPerEm": 1000,
+      "ascent": 1160,
+      "descent": 288,
+      "lineGap": 0,
+      "winAscent": 1160,
+      "winDescent": 288,
+      "useTypoMetrics": false,
+      "fallback": false
+    },
+    {
+      "unitsPerEm": 1000,
+      "ascent": 1160,
+      "descent": 288,
+      "lineGap": 0,
+      "winAscent": 1160,
+      "winDescent": 288,
+      "useTypoMetrics": false,
+      "fallback": false
+    },
+    {
+      "unitsPerEm": 1000,
+      "ascent": 1160,
+      "descent": 288,
+      "lineGap": 0,
+      "winAscent": 1160,
+      "winDescent": 288,
+      "useTypoMetrics": false,
+      "fallback": false
+    },
+    {
+      "unitsPerEm": 1000,
+      "ascent": 1160,
+      "descent": 288,
+      "lineGap": 0,
+      "winAscent": 1160,
+      "winDescent": 288,
+      "useTypoMetrics": false,
+      "fallback": false
+    },
+    {
+      "unitsPerEm": 1000,
+      "ascent": 1160,
+      "descent": 288,
+      "lineGap": 0,
+      "winAscent": 1160,
+      "winDescent": 288,
+      "useTypoMetrics": false,
+      "fallback": false
+    },
+    {
+      "unitsPerEm": 1000,
+      "ascent": 1160,
+      "descent": 288,
+      "lineGap": 0,
+      "winAscent": 1160,
+      "winDescent": 288,
+      "useTypoMetrics": false,
+      "fallback": false
+    }
+  ]
+}

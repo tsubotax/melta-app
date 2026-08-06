@@ -7,6 +7,31 @@
 
 ---
 
+## Unreleased
+
+### 追加
+
+- **eslint ルール第 5 弾 `melta/no-raw-lineheight`（warn、recommended 入り）**。`lineHeight` の
+  数値直書きを検知する（W8）。生の lineHeight はフォントの必要行間 — RN Android の
+  CustomLineHeightSpan が下限を割ると字形を削り、濁点・半濁点が欠ける — を素通りする。
+  `theme.typography.fontSize.*` の対を使うか、詰める場合は theme の `minLineHeightRatio`
+  宣言とセットで。`no-raw-fontsize` が fontSize しか見ず lineHeight の生値が機械で
+  止まらなかった穴（modelog dogfood 不足-35 の記録）を塞ぐ
+
+### 内部
+
+- **`DEFAULT_MIN_LINE_HEIGHT_RATIO`（1.45）の根拠を手実測コメントから機械検算へ**（W8）。
+  RN CustomLineHeightSpan の正しい下限式
+  `max(A+D, 2·winAsc−A+D, 2·winDesc−D+A) / unitsPerEm`（USE_TYPO_METRICS 対応・lineGap 入らず。
+  modelog 側レビューで確定した訂正版、検算表 = modelog decisions.md §23）を
+  `scripts/lib/font-metrics.ts` に移植し、参照フォント（Noto Sans CJK JP、Android system の
+  日本語フォント）の実ファイルから抽出した生メトリクス fixture（sha256 + 取得元 URL の
+  provenance 付き、10 face 全走査で実測 1.4480）に対して CI が毎回再計算。
+  `既定値 = ceil(実測 × 100) / 100` の**完全一致**を強制するので、参照フォントが変わって
+  必要比率が上下どちらに動いても赤になる。再抽出 CLI = `scripts/extract-font-metrics.ts`。
+  あわせて native-theme 全 8 段の lineHeight が下限以上であることの回帰も追加
+  （`scripts/lib/line-height-floor.test.ts`、式の分岐 synthetic テスト込み）
+
 ## 0.7.0 — 2026-08-06
 
 **破壊的変更（0.x 運用なので minor で表現）**: `enableSafeAreaContext({ edges })` の `edges` の

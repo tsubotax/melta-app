@@ -8,6 +8,10 @@
  * 機序と 1.45 の根拠は src/theme/line-height.ts。
  */
 
+/* eslint-disable melta/no-raw-lineheight --
+   このテストの生 lineHeight は「lint をすり抜けた生値でも runtime クランプが勝つ」ことの
+   検証対象そのもの（意図的な違反値）。ここを token に直したらテストが無意味になる */
+
 import { describe, test, expect } from "@jest/globals";
 import { StyleSheet } from "react-native";
 import { render } from "@testing-library/react-native";

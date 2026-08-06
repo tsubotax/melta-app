@@ -1,13 +1,16 @@
 /**
  * melta design lint ルール（設計書 §5、D-1）。
  *
- * RN で機械検知できる raw 値の 4 類型のみを対象とする補助線（AST 検知は変数経由/spread で漏れるので
+ * RN で機械検知できる raw 値の 5 類型のみを対象とする補助線（AST 検知は変数経由/spread で漏れるので
  * 純度の本丸は A-3 conformance）。token 経由（theme.* の MemberExpression）は許可、生値を弾く。
  *
- * - no-raw-color   : hex/rgb/hsl の文字列リテラル → error
- * - no-raw-radius  : borderRadius 系プロパティに数値リテラル直書き → error
- * - no-raw-spacing : padding/margin/gap 系に数値リテラル直書き → warn（false positive 多）
- * - no-raw-fontsize: fontSize に数値リテラル直書き → warn
+ * - no-raw-color     : hex/rgb/hsl の文字列リテラル → error
+ * - no-raw-radius    : borderRadius 系プロパティに数値リテラル直書き → error
+ * - no-raw-spacing   : padding/margin/gap 系に数値リテラル直書き → warn（false positive 多）
+ * - no-raw-fontsize  : fontSize に数値リテラル直書き → warn
+ * - no-raw-lineheight: lineHeight に数値リテラル直書き → warn（W8。生の lineHeight は
+ *   フォントの必要行間（Android の CustomLineHeightSpan が字形を削る下限）を素通りする。
+ *   theme.typography.fontSize.* の対を使うか、詰めるなら minLineHeightRatio 宣言とセットで）
  *
  * この severity は `meltaPlugin.configs.recommended`（flat config）として機械可読な形で配布する。
  * 消費者が手で書き写すとドリフト源になるため（rally-nav の外部導入 T6、2026-08-04）、
@@ -98,6 +101,29 @@ export const meltaPlugin = {
         };
       },
     },
+    "no-raw-lineheight": {
+      meta: {
+        type: "suggestion",
+        docs: {
+          description:
+            "lineHeight は theme.typography.fontSize.* の対を使う（生数値はフォントの必要行間を素通りし、Android で字形が欠ける）",
+        },
+      },
+      create(context) {
+        return {
+          Property(node) {
+            if (keyName(node) === "lineHeight" && isRawNumber(node.value)) {
+              context.report({
+                node,
+                message:
+                  "lineHeight の生数値は theme.typography.fontSize.* の対を推奨。" +
+                  "詰める場合も theme の minLineHeightRatio 宣言とセットで（Android は下限を割ると濁点が欠ける）。",
+              });
+            }
+          },
+        };
+      },
+    },
   },
 };
 
@@ -110,6 +136,7 @@ const RECOMMENDED_RULES = {
   "melta/no-raw-radius": "error",
   "melta/no-raw-spacing": "warn",
   "melta/no-raw-fontsize": "warn",
+  "melta/no-raw-lineheight": "warn",
 };
 
 // flat config 慣行に従い、plugin 自身を参照する config は定義後に後付けする（自己参照の循環を避ける）。
