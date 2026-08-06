@@ -14,7 +14,7 @@
 - **peerDependencies を実態に合わせて宣言**: `react >=18.2.0` / `react-native >=0.71.0`
   （`gap` レイアウトと `role` prop が RN 0.71 導入のため。従来の `"*"` は 0.70 以下でも
   install できてしまい、無言でレイアウトが崩れる状態だった）。README に RN 版対応表を追加
-- `engines.node >=22` を宣言（README の要件を package.json でも機械宣言）
+- `engines.node >=22` を宣言（CI・ツール面の検証環境を package.json で機械宣言し、README にも明記）
 - 配布物が **ESM のみ**であることを README に明記（CJS dual 出力はしない方針を確定）
 
 ### 内部

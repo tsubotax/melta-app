@@ -32,7 +32,7 @@
 npm install melta-app
 ```
 
-必須の peerDependencies は `react` / `react-native` の 2 つ（runtime 依存ゼロ）。機能別の optional peer が 2 つ — `react-native-svg`（`melta-app/icons` を使う場合のみ）と `react-native-safe-area-context`（`melta-app/safe-area` を使う場合のみ）。配布物は **ESM のみ**（`require()` では読めない。Metro / 主要バンドラは対応済み）。
+必須の peerDependencies は `react` / `react-native` の 2 つ（runtime 依存ゼロ）。機能別の optional peer が 2 つ — `react-native-svg`（`melta-app/icons` を使う場合のみ）と `react-native-safe-area-context`（`melta-app/safe-area` を使う場合のみ）。配布物は **ESM のみ**（`require()` では読めない。検証済みは Expo 56 / Metro — 他バンドラは ESM 対応が前提）。eslint plugin / hook などの Node ツール面は Node.js 22 で検証している（`engines` 宣言）。
 
 **React Native バージョン対応**（下限 0.71 は `gap` / `role` 使用のため。型・Jest で検証済みなのは Expo 56 / RN 0.85 / React 19.2 の組のみ）:
 
@@ -40,7 +40,8 @@ npm install melta-app
 |---|---|---|
 | 0.85（検証済み） | ✅ | safe-area-context 5.x / svg 15.13+ |
 | 0.74〜0.84 | 型上は互換（未検証） | safe-area-context 5.x / svg 15.8+ |
-| 0.71〜0.73 | 型上は互換（未検証） | safe-area-context 4.x / svg 15.0〜15.7 |
+| 0.73 | 型上は互換（未検証） | safe-area-context 4.x / svg 15.8+ |
+| 0.71〜0.72 | 型上は互換（未検証） | safe-area-context 4.x / svg 15.0〜15.7 |
 | 〜0.70 | ❌（`gap` レイアウトが崩れる） | — |
 
 > ⚠️ **0.x 系につき破壊的変更は minor で入る**（CHANGELOG 方針）。`^` 範囲でなく**バージョン固定か `~` 範囲**を推奨。

@@ -82,8 +82,9 @@ function resolveRealTokensPath(): string {
   }
 }
 
-test("normalizeTokens: 実 tokens.json を RN theme に変換する", () => {
-  const raw = JSON.parse(readFileSync(resolveRealTokensPath(), "utf8")) as RawTokens;
+/** 実 tokens の正規化検証本体（npm 契約 / 兄弟 dev 版の両テストで共有）。 */
+function assertRealTokensNormalize(tokensPath: string): void {
+  const raw = JSON.parse(readFileSync(tokensPath, "utf8")) as RawTokens;
   const theme = normalizeTokens(raw);
 
   // color
@@ -128,4 +129,21 @@ test("normalizeTokens: 実 tokens.json を RN theme に変換する", () => {
 
   // zIndex
   assert.equal(theme.zIndex.modal, 50);
+}
+
+test("normalizeTokens: 実 tokens.json（npm 契約、fail-closed）を RN theme に変換する", () => {
+  assertRealTokensNormalize(resolveRealTokensPath());
+});
+
+test("normalizeTokens: 兄弟 melta-ui の dev 版 tokens も同じ検証を通す（存在時のみ）", (t) => {
+  // npm-first 化（上のテスト）だけだと、ローカルの兄弟 melta-ui で編集中の dev 版契約が
+  // 一切検証されなくなる（Codex W1 レビュー指摘）。publish 前の契約変更をローカルで
+  // 早期検出するため、兄弟がある環境では dev 版にも同じ assert を通す。
+  // CI には兄弟が意図的に無い（npm 経路の証明）ので、ここは skip が正しい。
+  const sibling = resolve(here, "../../../melta-ui/design/contracts/tokens.json");
+  if (!existsSync(sibling)) {
+    t.skip("兄弟 melta-ui なし（CI では npm 契約テストが本体）");
+    return;
+  }
+  assertRealTokensNormalize(sibling);
 });
