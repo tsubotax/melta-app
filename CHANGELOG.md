@@ -7,7 +7,11 @@
 
 ---
 
-## Unreleased
+## 0.7.0 — 2026-08-06
+
+**破壊的変更（0.x 運用なので minor で表現）**: `enableSafeAreaContext({ edges })` の `edges` の
+意味変更（アプリ全体 → `Screen` の既定値）/ `ActionSheet` の safe-area 位置の変更（見た目が変わる）/
+`Checkbox` 行の `minHeight: 44` 化（行が最大 8pt 高くなる）。詳細は下記「変更」。
 
 ### 追加
 
