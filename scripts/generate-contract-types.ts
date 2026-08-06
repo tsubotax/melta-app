@@ -20,6 +20,7 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, resolve, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { resolveContractsComponentsDir } from "./lib/contracts-root";
+import { isMainModule } from "./lib/main-guard";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 
@@ -144,7 +145,4 @@ function main(): void {
 }
 
 // --- main guard（allowlist を import するだけの呼び出し元では codegen を走らせない） ---
-const isMain =
-  process.argv[1] != null && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
-
-if (isMain) main();
+if (isMainModule(import.meta.url)) main();

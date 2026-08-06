@@ -83,7 +83,25 @@ export function resolveContractsComponentsDir(options: ResolveOptions = {}): str
   return resolveContractsArtifact("components", options);
 }
 
-/** トークン源（web 形式の tokens.json。RN 正規化は normalize-tokens が行う）。 */
+/**
+ * トークン源（web 形式の tokens.json。RN 正規化は normalize-tokens が行う）。
+ *
+ * npm 経路は `require.resolve("melta-contracts/tokens")`（package exports 経由）で解決する。
+ * 現状 exports は `"./tokens": "./tokens.json"` なのでルート直下 join と等価だが、
+ * 実体パスの決定権は melta-contracts 側の exports に残す（マッピングが変わっても追従する）。
+ */
 export function resolveTokensPath(options: ResolveOptions = {}): string {
-  return resolveContractsArtifact("tokens.json", options);
+  try {
+    return require.resolve("melta-contracts/tokens");
+  } catch {
+    // 未 install、または exports 先の実体が無い。兄弟 fallback へ落ちる
+  }
+  const sibling = join(SIBLING_CONTRACTS_ROOT, "tokens.json");
+  if (existsSync(sibling)) {
+    if (options.warnOnFallback) {
+      console.warn(`⚠️  melta-contracts 未 install。開発 fallback を使用: ${sibling}`);
+    }
+    return sibling;
+  }
+  throw notFound("melta-contracts の tokens.json");
 }

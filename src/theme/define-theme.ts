@@ -214,13 +214,19 @@ const FONT_WEIGHT_KEYS = keysOf<Record<FontWeightKey, true>>({
  * プロパティにも true を返すので、それで判定すると「持っていない mode に置いた番人の getter」を
  * 値として数えてしまい、解決後の theme に対して常に light / dark 両方を返す（0.4.0 の不具合）。
  * 入力（素のデータプロパティ）と解決後（番人つき）のどちらに対しても正しく答える必要がある。
+ *
+ * @experimental 公開しているが安定 API ではない。挙動・シグネチャは予告なく変わりうる。
  */
 export function declaredModes(semantic: Partial<Record<ThemeMode, SemanticColors>>): ThemeMode[] {
   const withValue = new Set(Object.keys(semantic));
   return MODES.filter((mode) => withValue.has(mode));
 }
 
-/** colorScheme capability を `color.semantic` のキー集合から導出する。 */
+/**
+ * colorScheme capability を `color.semantic` のキー集合から導出する。
+ *
+ * @experimental 公開しているが安定 API ではない。挙動・シグネチャは予告なく変わりうる。
+ */
 export function deriveColorScheme(
   semantic: Partial<Record<ThemeMode, SemanticColors>>,
 ): ColorSchemeCapability {
@@ -239,6 +245,8 @@ export function deriveColorScheme(
  * 未知の値は**黙って light-dark 扱いにしない**。TypeScript を使わない消費者や、将来
  * capability の値が増えたときに、誤った値が「両対応の theme」として通ってしまうと、
  * 持っていない mode で描画されて初めて壊れる（＝原因から遠い場所で落ちる）。
+ *
+ * @experimental 公開しているが安定 API ではない。挙動・シグネチャは予告なく変わりうる。
  */
 export function supportedModes(colorScheme: ColorSchemeCapability): ThemeMode[] {
   switch (colorScheme) {
@@ -268,6 +276,8 @@ export function supportedModes(colorScheme: ColorSchemeCapability): ThemeMode[] 
  * - **`forcedMode` との不一致は報告する**。宣言同士の矛盾＝呼び出し側の間違いなので violation を返す。
  *   ただし throw はしない（clamp して描き続ける）。厳格に落としたいテストや compiler が
  *   violation を error に昇格させる側の責務にする。
+ *
+ * @experimental 公開しているが安定 API ではない。挙動・シグネチャ・violation の内容は予告なく変わりうる。
  */
 export function resolveMode(
   colorScheme: ColorSchemeCapability,

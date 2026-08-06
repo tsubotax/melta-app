@@ -81,33 +81,76 @@ function parseSpecifiers(body: string): { name: string; isType: boolean }[] {
     });
 }
 
-/** 1 ファイルの export を収集する。`export *` は再帰的に辿る。 */
+/**
+ * 1 ファイルの export を収集する。`export *` は再帰的に辿る。
+ *
+ * **fail-closed**: 既知パターンのどれにも掛からない `export` 文を見つけたら throw する。
+ * 正規表現スキャンは「知らない構文 = 黙って素通り」で壊れる（`export type * from` を
+ * 取りこぼしても snapshot は緑のまま = このテストの主張が嘘になる）ため、
+ * 未知構文は取りこぼしではなくエラーにして、パターン追加を強制する。
+ */
 function collectSurface(file: string, out: Surface, seen: Set<string>): Surface {
   if (seen.has(file)) return out;
   seen.add(file);
   const source = stripComments(readFileSync(file, "utf8"));
+  /** 既知パターンが消費した `export` トークンの開始位置（fail-closed 検査用）。 */
+  const consumed = new Set<number>();
+  const track = (m: RegExpMatchArray) => {
+    if (m.index != null) consumed.add(m.index);
+  };
 
+  // export type * from "./x"（対象の公開名すべてが型として再輸出される）
+  for (const m of source.matchAll(/export\s+type\s*\*\s*from\s*["']([^"']+)["']/g)) {
+    track(m);
+    const target = resolveModule(file, m[1]);
+    if (!target) continue;
+    const sub = collectSurface(target, { values: new Set(), types: new Set() }, new Set(seen));
+    for (const name of [...sub.values, ...sub.types]) out.types.add(name);
+  }
+  // export * as NS from "./x" / export type * as NS from "./x"（公開されるのは NS の1名だけ）
+  for (const m of source.matchAll(
+    /export\s+(type\s+)?\*\s*as\s+([A-Za-z0-9_$]+)\s*from\s*["'][^"']+["']/g,
+  )) {
+    track(m);
+    (m[1] ? out.types : out.values).add(m[2]);
+  }
   // export * from "./x"（再エクスポート元の公開面をそのまま引き継ぐ）
   for (const m of source.matchAll(/export\s*\*\s*from\s*["']([^"']+)["']/g)) {
+    track(m);
     const target = resolveModule(file, m[1]);
     if (target) collectSurface(target, out, seen);
   }
   // export type { A, B } from "./x"
   for (const m of source.matchAll(/export\s+type\s*\{([^}]*)\}\s*from\s*["'][^"']+["']/g)) {
+    track(m);
     for (const s of parseSpecifiers(m[1])) out.types.add(s.name);
   }
   // export { A, type B } from "./x" / export { A }
   for (const m of source.matchAll(/export\s*\{([^}]*)\}(?:\s*from\s*["'][^"']+["'])?/g)) {
+    track(m);
     for (const s of parseSpecifiers(m[1])) (s.isType ? out.types : out.values).add(s.name);
   }
   // ローカル宣言の export
   for (const m of source.matchAll(
     /^export\s+(?:declare\s+)?(?:async\s+)?(?:function|const|let|var|class|enum)\s+([A-Za-z0-9_$]+)/gm,
   )) {
+    track(m);
     out.values.add(m[1]);
   }
   for (const m of source.matchAll(/^export\s+(?:declare\s+)?(?:interface|type)\s+([A-Za-z0-9_$]+)/gm)) {
+    track(m);
     out.types.add(m[1]);
+  }
+
+  // fail-closed: 行頭の `export` で始まるのに、どのパターンにも消費されなかった文があれば
+  // スキャナの知らない構文（export default / 新構文など）。黙って素通りさせない。
+  for (const m of source.matchAll(/^export\b/gm)) {
+    if (m.index != null && !consumed.has(m.index)) {
+      const line = source.slice(m.index, source.indexOf("\n", m.index));
+      throw new Error(
+        `${file}: スキャナが解釈できない export 文があります（パターン追加が必要）: ${line.trim()}`,
+      );
+    }
   }
   return out;
 }

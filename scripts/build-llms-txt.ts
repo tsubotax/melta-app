@@ -18,6 +18,7 @@ import { resolve, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { toComponentName } from "./lib/conformance.js";
 import { resolveContractsRoot } from "./lib/contracts-root.js";
+import { isMainModule } from "./lib/main-guard.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, "..");
@@ -148,10 +149,7 @@ ${componentLines.join("\n")}
 }
 
 // --- main guard（check-drift.ts からの import 時は書き込まない） ---
-const isMain =
-  process.argv[1] != null && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
-
-if (isMain) {
+if (isMainModule(import.meta.url)) {
   const llmsTxt = renderLlmsTxt();
   writeFileSync(resolve(root, "llms.txt"), llmsTxt, "utf8");
   console.log(`✅ llms.txt (${llmsTxt.length} chars) を生成`);
