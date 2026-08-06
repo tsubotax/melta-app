@@ -1,11 +1,12 @@
 {
-  "$comment": "生成物。手で編集しない — scripts/extract-font-metrics.ts で実フォントから再抽出する。required は fixture に持たない（テストが scripts/lib/font-metrics.ts の式で毎回再計算する）",
+  "$comment": "生成物。手で編集しない — scripts/extract-font-metrics.ts で実フォントから再抽出する。required は fixture に持たない（テストが scripts/lib/font-metrics.ts の式で毎回再計算する）。integrity = fixtureIntegrity(source, faces)（extractedAt 除外）。テストが再計算照合する",
   "source": {
     "file": "NotoSansCJK-Regular.ttc",
     "sha256": "b76b0433203017ca80401b2ee0dd69350349871c4b19d504c34dbdd80541690a",
     "url": "https://github.com/notofonts/noto-cjk/raw/main/Sans/OTC/NotoSansCJK-Regular.ttc",
     "extractedAt": "2026-08-06"
   },
+  "integrity": "cc9fce11cdf0e8c946894a659b09a5dc33b9f9cbadf3c93e7b83f5e82ab0e8d4",
   "faces": [
     {
       "unitsPerEm": 1000,

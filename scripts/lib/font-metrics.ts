@@ -28,6 +28,7 @@
  * - A + D を max に残すのは、そこを割った瞬間に削りが始まるため
  */
 
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 
 /** OS/2 テーブル内のオフセット（version 0 でも 78 バイトあるので全 version で読める） */
@@ -59,24 +60,66 @@ export interface FaceMetrics {
 }
 
 /**
- * 1面の必要行間比。fixture（生テーブル値）とテストがこの同じ関数で計算する —
- * 式を2箇所に写経すると「同じ事故に対して2つの真実」ができるため。
+ * 1面の必要行間の分子（font unit の整数）。fixture（生テーブル値）とテスト・抽出 CLI が
+ * この同じ関数で計算する — 式を2箇所に写経すると「同じ事故に対して2つの真実」ができるため。
+ * 比率にせず整数のまま返すのは、切り上げ判定を浮動小数点に触れさせないため（下記 ceil2）。
  */
-export function requiredRatioOfFace(face: FaceMetrics): number {
+export function requiredNumeratorOfFace(face: FaceMetrics): number {
   const natural = face.ascent + face.descent;
   if (face.fallback || face.winAscent == null || face.winDescent == null) {
     // win* を知りようがない場合は従来式へフォールバック。lineGap は本来この判定に入らないが、
     // 「削れる余地ゼロ」を仮定するしかなく、足すぶん安全側。lineGap は負値がありうるので
     // 自然行高 A+D を max で floor する
-    return Math.max(natural, natural + face.lineGap) / face.unitsPerEm;
+    return Math.max(natural, natural + face.lineGap);
   }
-  return (
-    Math.max(
-      natural,
-      2 * face.winAscent - face.ascent + face.descent,
-      2 * face.winDescent - face.descent + face.ascent,
-    ) / face.unitsPerEm
+  return Math.max(
+    natural,
+    2 * face.winAscent - face.ascent + face.descent,
+    2 * face.winDescent - face.descent + face.ascent,
   );
+}
+
+/** 1面の必要行間比（表示・比較用の float）。 */
+export function requiredRatioOfFace(face: FaceMetrics): number {
+  return requiredNumeratorOfFace(face) / face.unitsPerEm;
+}
+
+/**
+ * 必要行間比の小数第2位切り上げを**整数演算だけ**で求める。
+ * `Math.ceil(ratio * 100) / 100` は浮動小数点誤差で、数学的にちょうど2桁の値
+ * （例: 1100/1000 = 1.10）を1段余分に切り上げうる（Codex レビュー 2026-08-06）。
+ * 分子・unitsPerEm とも整数なので `ceil(n·100 / upm) = floor((n·100 + upm − 1) / upm)` が厳密。
+ */
+export function requiredRatioCeil2OfFace(face: FaceMetrics): number {
+  const n = requiredNumeratorOfFace(face);
+  return Math.floor((n * 100 + face.unitsPerEm - 1) / face.unitsPerEm) / 100;
+}
+
+/**
+ * fixture の整合ハッシュ。抽出 CLI が書き、テストが再計算して照合する（正規形をここに一元化）。
+ * 手編集や merge 破損で faces / source が動くと一致しなくなる（改竄の完全防止ではない —
+ * フォント実物を CI に持ち込まない以上、悪意ある編集は原理的に止められない。
+ * 目的は「extractor を通さず値だけ書き換えた」事故・カジュアルな改変の検出）。
+ * extractedAt を含めないのは、同じフォントの再抽出でハッシュが変わらないようにするため。
+ */
+export function fixtureIntegrity(
+  source: { file: string; sha256: string; url: string },
+  faces: FaceMetrics[],
+): string {
+  const canonical = JSON.stringify({
+    source: { file: source.file, sha256: source.sha256, url: source.url },
+    faces: faces.map((f) => ({
+      unitsPerEm: f.unitsPerEm,
+      ascent: f.ascent,
+      descent: f.descent,
+      lineGap: f.lineGap,
+      winAscent: f.winAscent,
+      winDescent: f.winDescent,
+      useTypoMetrics: f.useTypoMetrics,
+      fallback: f.fallback,
+    })),
+  });
+  return createHash("sha256").update(canonical).digest("hex");
 }
 
 /** sfnt 1面ぶんのテーブルディレクトリを読む（base = ttc なら各 face のオフセット、単体なら 0） */

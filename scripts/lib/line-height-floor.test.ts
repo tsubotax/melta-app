@@ -17,7 +17,12 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
-import { requiredRatioOfFace, type FaceMetrics } from "./font-metrics.js";
+import {
+  fixtureIntegrity,
+  requiredRatioCeil2OfFace,
+  requiredRatioOfFace,
+  type FaceMetrics,
+} from "./font-metrics.js";
 import {
   DEFAULT_MIN_LINE_HEIGHT_RATIO,
   minLineHeightFor,
@@ -27,6 +32,7 @@ import { nativeTheme } from "../../src/theme/native-theme.js";
 const fixturePath = join(dirname(fileURLToPath(import.meta.url)), "fixtures", "reference-font-metrics.json");
 const fixture = JSON.parse(readFileSync(fixturePath, "utf8")) as {
   source: { file: string; sha256: string; url: string; extractedAt: string };
+  integrity: string;
   faces: FaceMetrics[];
 };
 
@@ -76,6 +82,16 @@ test("fixture: provenance が揃っている（手編集でなく再抽出で更
   assert.ok(fixture.faces.length >= 1, "face が入っている");
 });
 
+test("fixture: integrity ハッシュが faces + source と一致（extractor を通さない値編集の検出）", () => {
+  // 悪意ある編集の完全防止ではない（フォント実物が CI に無い以上、原理的に不可能）。
+  // 「メトリクスだけ書き換えて期待値に合わせる」カジュアルな改変・merge 破損をここで落とす
+  assert.equal(
+    fixtureIntegrity(fixture.source, fixture.faces),
+    fixture.integrity,
+    "fixture が extractor の出力と一致しない。手編集せず scripts/extract-font-metrics.ts で再抽出すること",
+  );
+});
+
 test("fixture: fallback 面が無い（OS/2 を読めないフォントでは安全を保証できない）", () => {
   assert.deepEqual(
     fixture.faces.filter((f) => f.fallback),
@@ -85,15 +101,29 @@ test("fixture: fallback 面が無い（OS/2 を読めないフォントでは安
 });
 
 test("DEFAULT_MIN_LINE_HEIGHT_RATIO = 参照フォント必要比率の小数第2位切り上げ、と完全一致", () => {
-  // ttc は全 face 走査して最大を採る（1面でも欠けたら事故）
+  // ttc は全 face 走査して最大を採る（1面でも欠けたら事故）。
+  // 切り上げは整数演算版（ceil は単調なので max(ceil2(face)) = ceil2(max ratio)。
+  // float の Math.ceil(ratio*100) は 2 桁ちょうどの値を誤って 1 段上げうる — Codex レビュー）
   const required = Math.max(...fixture.faces.map(requiredRatioOfFace));
-  const expected = Math.ceil(required * 100) / 100;
+  const expected = Math.max(...fixture.faces.map(requiredRatioCeil2OfFace));
   assert.equal(
     DEFAULT_MIN_LINE_HEIGHT_RATIO,
     expected,
     `既定 ${DEFAULT_MIN_LINE_HEIGHT_RATIO} が参照フォント実測 ${required.toFixed(4)} の切り上げ ${expected} と一致しない。` +
       `参照フォントを差し替えた場合は line-height.ts の既定値とコメントを追随させること`,
   );
+});
+
+test("ceil2: 整数演算の切り上げが float 誤差の影響を受けない（境界の回帰）", () => {
+  // 1100/1000 = 1.10 ちょうど。float 版は 1.10*100 = 110.00000000000001 → 1.11 に化ける
+  const exact: FaceMetrics = {
+    unitsPerEm: 1000, ascent: 900, descent: 200, lineGap: 0,
+    winAscent: 900, winDescent: 200, useTypoMetrics: false, fallback: false,
+  };
+  assert.equal(requiredRatioCeil2OfFace(exact), 1.1, "2桁ちょうどは切り上げない");
+  // 1つ上の分子は確実に次の段へ
+  const above: FaceMetrics = { ...exact, ascent: 900, descent: 201 };
+  assert.equal(requiredRatioCeil2OfFace(above), 1.11);
 });
 
 // --- 既定 theme が自らの下限を満たしていることの回帰（0.6.0 の5段修正を守る） ---

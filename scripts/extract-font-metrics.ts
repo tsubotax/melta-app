@@ -19,7 +19,7 @@ import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { fontMetrics, requiredRatioOfFace } from "./lib/font-metrics.js";
+import { fixtureIntegrity, fontMetrics, requiredRatioOfFace } from "./lib/font-metrics.js";
 
 const args = process.argv.slice(2);
 const urlIndex = args.indexOf("--url");
@@ -39,16 +39,19 @@ const sha256 = createHash("sha256").update(readFileSync(fontPath)).digest("hex")
 const required = Math.max(...faces.map(requiredRatioOfFace));
 const hasFallback = faces.some((f) => f.fallback);
 
+const source = {
+  file: basename(fontPath),
+  sha256,
+  url: sourceUrl,
+  extractedAt: new Date().toISOString().slice(0, 10),
+};
 const fixture = {
   $comment:
     "生成物。手で編集しない — scripts/extract-font-metrics.ts で実フォントから再抽出する。" +
-    "required は fixture に持たない（テストが scripts/lib/font-metrics.ts の式で毎回再計算する）",
-  source: {
-    file: basename(fontPath),
-    sha256,
-    url: sourceUrl,
-    extractedAt: new Date().toISOString().slice(0, 10),
-  },
+    "required は fixture に持たない（テストが scripts/lib/font-metrics.ts の式で毎回再計算する）。" +
+    "integrity = fixtureIntegrity(source, faces)（extractedAt 除外）。テストが再計算照合する",
+  source,
+  integrity: fixtureIntegrity(source, faces),
   faces,
 };
 
