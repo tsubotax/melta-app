@@ -98,8 +98,8 @@ export const CONTRACTS = {
   },
   header: {
     id: "header",
-    version: "0.1.0",
-    variants: ["default"],
+    version: "0.2.0",
+    variants: ["default", "actions"],
     sizes: [],
     states: ["default"],
   },

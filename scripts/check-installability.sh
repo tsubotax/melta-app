@@ -157,7 +157,7 @@ const id: ContractId = "button";
 export function App() {
   return (
     <ThemeProvider>
-      <Screen header={<Header title="fixture" />}>
+      <Screen header={<Header variant="actions" title="fixture" trailing={<Button label="送信" onPress={() => {}} />} />}>
         <Stack gap="4">
           <Row gap="2" justify="between" wrap>
             <Avatar name="Taro Tanaka" status="online" />

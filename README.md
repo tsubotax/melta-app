@@ -668,3 +668,18 @@ telemetry / 使用状況の収集は無い。runtime 依存ゼロ（peerDependen
 ## License
 
 MIT（[LICENSE](./LICENSE)）。同梱するアイコングリフの帰属表示は [THIRD_PARTY_LICENSES.md](./THIRD_PARTY_LICENSES.md)。
+
+
+### 操作バーとしてのHeader
+
+`<Header variant="actions" title="作業ログを残す" leading={closeButton} trailing={actions} />` は、
+タイトルを画面では隠し、読み上げ可能な見出しとして残します。`title`には空でない画面名を渡します。
+左右の操作は既存のslotで渡し、操作間のgapと各ボタンの有効領域はslot内で確保してください。
+Headerの上下余白と下線は標準recipeが持つため、アプリ側で複製しません。
+中央spacer前後のgapはactionsではspacing.1、defaultでは従来のspacing.3です。
+variant省略時は従来どおり可視タイトルを表示します。
+
+カタログをWeb exportしてローカル配信した後、`npm run check:header-layout -- --base <URL>` で
+320/393px幅・大きな子要素の余白と44pt標的を測定できます。Playwrightは検証環境に用意し、
+別のインストールを使う場合は `--playwright-module <playwrightのディレクトリ>` を渡します。
+この実描画検査は手動レーンで、OSの文字拡大・読み上げ確認は別途必要です。
