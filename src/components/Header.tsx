@@ -1,51 +1,52 @@
 /**
- * Header — 画面ヘッダー primitive（title + leading? / trailing? slot + 下 border）。
- * contract: header（app 先行定義、melta-contracts）。dogfood 不足-3 の解消。
- * Screen の header slot に差して使う想定（単体でも使える）。
- *
- * - title は melta の Text（xl / bold / text-heading / heading role）で描画し、
- *   heading として読み上げられる（contract a11y required）。
- * - titleWrapStyle の flex:1 で title が余白を占有し trailing を右端へ押す。
- * - 決定ロジックは pure resolver（header.styles.ts）に分離 — recipe との機械照合対象。
+ * Header — 画面名と左右の操作を持つ共通ヘッダー。
+ * actionsでは画面名を視覚的に隠すが、独立したa11y見出しとして残す。
+ * 余白・下線・見出しの配置はheader recipeとpure resolverが所有する。
  */
-
 import { useMemo, type ReactNode } from "react";
 import { View, type StyleProp, type ViewStyle } from "react-native";
 import { useTheme } from "../theme/index.js";
-import { CONTRACTS } from "../contracts/contract-types.js";
+import { CONTRACTS, type VariantOf } from "../contracts/contract-types.js";
 import { Text } from "../primitives/Text.js";
-import { resolveHeaderStyle, type HeaderStyle } from "./header.styles.js";
+import { HEADER_SPEC, resolveHeaderStyle } from "./header.styles.js";
 
 interface HeaderProps {
-  /** 画面タイトル（heading として読み上げ）。 */
+  /** 空でない画面名。actionsでも読み上げるため必須。 */
   title: string;
-  /** title の左の slot（戻るボタン等）。 */
+  /** defaultは可視見出し、actionsは可視タイトルのない操作バー。 */
+  variant?: VariantOf<"header">;
   leading?: ReactNode;
-  /** 右端の slot（アクション等）。 */
   trailing?: ReactNode;
   style?: StyleProp<ViewStyle>;
   testID?: string;
 }
 
-export function Header({ title, leading, trailing, style, testID }: HeaderProps) {
+export function Header({ title, variant = "default", leading, trailing, style, testID }: HeaderProps) {
   const { theme, mode } = useTheme();
-
-  const { containerStyle, titleWrapStyle } = useMemo<HeaderStyle>(
-    () => resolveHeaderStyle(theme, mode),
-    [theme, mode],
+  const { containerStyle, titleWrapStyle, hiddenTitleStyle } = useMemo(
+    () => resolveHeaderStyle(theme, mode, { variant }), [theme, mode, variant],
   );
-
   return (
     <View style={[containerStyle, style]} testID={testID}>
       {leading}
       <View style={titleWrapStyle}>
-        <Text variant="xl" weight="bold" color="text-heading" role="heading" numberOfLines={1}>
-          {title}
-        </Text>
+        {variant === "actions" ? (
+          // 見出しTextの契約を再利用し、左右の操作を親の読み上げへ畳まない。
+          <View pointerEvents="none" style={hiddenTitleStyle}>
+            <Text variant={HEADER_SPEC.titleFont} weight={HEADER_SPEC.titleWeight}
+              color={HEADER_SPEC.titleColor} role="heading" numberOfLines={1}>
+              {title}
+            </Text>
+          </View>
+        ) : (
+          <Text variant={HEADER_SPEC.titleFont} weight={HEADER_SPEC.titleWeight}
+            color={HEADER_SPEC.titleColor} role="heading" numberOfLines={1}>
+            {title}
+          </Text>
+        )}
       </View>
       {trailing}
     </View>
   );
 }
-
 Header.__contract = CONTRACTS.header;

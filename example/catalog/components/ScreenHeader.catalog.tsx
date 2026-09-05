@@ -4,8 +4,8 @@
  * （実画面での使用は ProjectFeedScreen が担当）。
  */
 
-import { View } from "react-native";
-import { Screen, Header, Stack, Text, Button } from "melta-app";
+import { Pressable, View } from "react-native";
+import { Screen, Header, Stack, Row, Text, Button } from "melta-app";
 import { useTheme } from "melta-app";
 
 export function ScreenHeaderCatalog() {
@@ -24,6 +24,19 @@ export function ScreenHeaderCatalog() {
         title="プロジェクトフィード"
         trailing={<Button variant="subtle" size="small" label="編集" onPress={() => {}} />}
       />
+
+      {/* 投稿フォーム相当の文字数と余白を持つ44pt操作で、Headerのslot配置を検査する。 */}
+      <Header testID="header-actions" variant="actions" title="作業ログを残す"
+        leading={<Pressable accessibilityRole="button" accessibilityLabel="閉じる"
+          style={{ minWidth: 44, minHeight: 44, justifyContent: "center", alignItems: "center" }} onPress={() => {}}>
+          <Text variant="sm">閉</Text>
+        </Pressable>}
+        trailing={<Row gap="1">{["下書き", "投稿する"].map(label => (
+          <Pressable key={label} accessibilityRole="button" accessibilityLabel={label}
+            style={{ minWidth: theme.spacing["16"], minHeight: 44, paddingHorizontal: label === "投稿する" ? theme.spacing["4"] : undefined, justifyContent: "center", alignItems: "center" }} onPress={() => {}}>
+            <Text variant="sm">{label}</Text>
+          </Pressable>
+        ))}</Row>} />
 
       {/* Screen(scroll) + header slot のミニプレビュー */}
       <View style={frame}>

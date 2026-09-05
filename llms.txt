@@ -23,7 +23,7 @@ UI を組む前に docs/patterns.md（組み方の規範）を読むこと。exa
 - [card](https://melta.tsubotax.com/design/contracts/components/card.contract.json): ✅ `Card` — コンテンツコンテナ。Basic / Metrics / Media / Action / Link の5バリエーション。
 - [checkbox](https://melta.tsubotax.com/design/contracts/components/checkbox.contract.json): ✅ `Checkbox` — 複数選択フォームコントロール。CSS 18px サイズ。
 - [empty-state](https://melta.tsubotax.com/design/contracts/components/empty-state.contract.json): ✅ `EmptyState` — データ無し時のプレースホルダー（アイコン + タイトル + 説明 + 任意のアクション）。Text + Button の compose。
-- [header](https://melta.tsubotax.com/design/contracts/components/header.contract.json): ✅ `Header` — 画面ヘッダー primitive（title + leading? / trailing? slot、下 border）。Screen の header slot に差して使う想定。title は text-heading の見出しとして読
+- [header](https://melta.tsubotax.com/design/contracts/components/header.contract.json): ✅ `Header` — 画面ヘッダー。defaultは可視見出し、actionsは見出しを視覚的に隠した操作バー。どちらも意味のあるtitleを必須とし、leading/trailingの操作を個別に読み上げる。
 - [icon](https://melta.tsubotax.com/design/contracts/components/icon.contract.json): ✅ `Icon` — 統一アイコン primitive。name prop でグリフを選択し（グリフ集合は実装側の公開面 = assets/icons の Charcoal セット由来）、色は semantic token キー限定の prop（default 
 - [image](https://melta.tsubotax.com/design/contracts/components/image.contract.json): ✅ `Image` — 画像表示 primitive。aspectRatio / radius / contentFit / onError fallback を持つ。Phase1 は RN コア Image、expo-image は Phase2。
 - [metric](https://melta.tsubotax.com/design/contracts/components/metric.contract.json): ✅ `Metric` — 数値 + 単位 + ラベルの指標表示 primitive（距離 / 時間 / 獲得標高 等の走行サマリー表示）。tabular-nums で桁揃え。sizes の height は数値テキストの想定行高(px)で、実 fontSize は実
