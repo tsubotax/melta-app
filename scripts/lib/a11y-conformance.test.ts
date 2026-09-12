@@ -112,14 +112,11 @@ const ROLE_RULES: Record<string, RoleRule> = {
   screen: { contractRole: "none", allowed: [], required: [], note: "契約 role: none" },
   header: {
     contractRole: "banner",
-    allowed: [],
-    required: [],
+    allowed: ["header"],
+    required: ["header"],
     note:
-      "RN に banner は無い。accessibilityRole='header' は RN では『見出し』の意味なので、" +
-      "ヘッダー帯そのものに付けると帯全体が見出しとして読まれる。契約 a11y.required の" +
-      "「title は heading として読み上げる」は Header.tsx が melta の Text role='heading' に" +
-      "委譲して満たしており、role は子コンポーネント内で付く ＝ ファイル単位の静的走査では見えない" +
-      "（render tree のテストの担当）",
+      "RNにbannerは無い。中央タイトルだけにheader roleを付け、帯全体はaccessibleにしない。" +
+      "default/actionsはTextへheadingを委譲する。帯と個別操作の分離はRN構造テストで検証する",
   },
   icon: { contractRole: "img", allowed: ["image"], required: ["image"], note: "img の RN 対応語は image" },
   avatar: { contractRole: "img", allowed: ["image"], required: ["image"], note: "img の RN 対応語は image" },

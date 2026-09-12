@@ -38,6 +38,16 @@ export function ScreenHeaderCatalog() {
           </Pressable>
         ))}</Row>} />
 
+      {/* 中央タイトルは片側だけの操作、長い日本語、空席を実描画で照合する。 */}
+      <Header testID="header-centered" variant="centered" title="ホーム" />
+      {["けんたさんのアトリエ", "とても長い日本語のプロフィール名さんのアトリエ"].map((title, i) => (
+        <Header key={title} testID={`header-navigation-${i}`} variant="navigation" title={title}
+          leading={<Pressable accessibilityRole="button" accessibilityLabel="戻る" onPress={() => {}}
+            style={{ width: 44, minHeight: 44, justifyContent: "center", alignItems: "center" }}>
+            <Text variant="lg">戻</Text>
+          </Pressable>} />
+      ))}
+
       {/* Screen(scroll) + header slot のミニプレビュー */}
       <View style={frame}>
         <Screen header={<Header title="scroll 画面" />}>

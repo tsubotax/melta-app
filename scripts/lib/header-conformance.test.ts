@@ -14,12 +14,12 @@ const recipe = loadAppRecipe(root, "header.recipe.json");
 const contract = JSON.parse(readFileSync(join(root, "components/header.contract.json"), "utf8"));
 
 test("header: 契約とrecipeのvariant集合、サイズ、状態を網羅する", () => {
-  assert.deepEqual(Object.keys(contract.variants).sort(), ["actions", "default"]);
-  assert.deepEqual(Object.keys(recipe.variants ?? {}).sort(), ["actions", "default"]);
+  assert.deepEqual(Object.keys(contract.variants).sort(), ["actions", "centered", "default", "navigation"]);
+  assert.deepEqual(Object.keys(recipe.variants ?? {}).sort(), ["actions", "centered", "default", "navigation"]);
   assert.deepEqual(Object.keys(recipe.sizes ?? {}), []);
   assert.deepEqual(Object.keys(recipe.states ?? {}), []);
 });
-for (const variant of ["default", "actions"] as const) {
+for (const variant of ["default", "actions", "centered", "navigation"] as const) {
   test(`header: ${variant}の全slotをrecipeと一致させる`, () => {
     assert.deepEqual(resolveHeaderStyle(nativeTheme, "light", { variant }),
       resolveStyleRefs(tokens, recipe.variants![variant] as Record<string, unknown>));
@@ -27,11 +27,18 @@ for (const variant of ["default", "actions"] as const) {
   test(`header: ${variant}はdarkとカスタムspacingへ追従する`, () => {
     const theme = { ...nativeTheme, spacing: { ...nativeTheme.spacing, "1": 6, "3": 20, "4": 24 } };
     const result = resolveHeaderStyle(theme, "dark", { variant }).containerStyle;
-    assert.equal(result.paddingVertical, 20);
-    assert.equal(result.paddingHorizontal, 24);
-    assert.equal(result.gap, variant === "actions" ? 6 : 20);
-    assert.equal(result.backgroundColor, theme.color.semantic.dark["bg-page"]);
-    assert.equal(result.borderBottomColor, theme.color.semantic.dark["border-default"]);
+    if (variant === "default" || variant === "actions") {
+      assert.equal(result.paddingVertical, 20);
+      assert.equal(result.paddingHorizontal, 24);
+      assert.equal(result.gap, variant === "actions" ? 6 : 20);
+      assert.equal(result.backgroundColor, theme.color.semantic.dark["bg-page"]);
+    } else {
+      assert.equal(result.minHeight, 44);
+      assert.equal(result.height, undefined);
+      assert.equal(result.paddingVertical, undefined);
+      assert.equal(result.paddingHorizontal, variant === "navigation" ? 24 : undefined);
+    }
+    assert.equal(result.borderBottomColor, variant === "centered" ? undefined : theme.color.semantic.dark["border-default"]);
   });
 }
 test("header: 省略時は従来defaultと同じで、actionsだけに隠す寸法を持つ", () => {
@@ -45,4 +52,11 @@ test("header: 省略時は従来defaultと同じで、actionsだけに隠す寸�
   assert.equal(actionsGap, 4);
   assert.equal(standard.hiddenTitleStyle, undefined);
   assert.deepEqual(actions.hiddenTitleStyle, { position: "absolute", width: 1, height: 1, overflow: "hidden" });
+});
+
+test("navigationだけが実機のhairlineを使い、既存variantの下線を変えない", () => {
+  for (const variant of ["default", "actions", "navigation"] as const) {
+    const style = resolveHeaderStyle(nativeTheme, "dark", { variant }, 0.5);
+    assert.equal(style.containerStyle.borderBottomWidth, variant === "navigation" ? 0.5 : 1);
+  }
 });

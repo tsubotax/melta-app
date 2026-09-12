@@ -683,3 +683,24 @@ variant省略時は従来どおり可視タイトルを表示します。
 320/393px幅・大きな子要素の余白と44pt標的を測定できます。Playwrightは検証環境に用意し、
 別のインストールを使う場合は `--playwright-module <playwrightのディレクトリ>` を渡します。
 この実描画検査は手動レーンで、OSの文字拡大・読み上げ確認は別途必要です。
+
+### 中央タイトルのHeader
+
+`variant="centered"` は親のページ余白内に置く中央タイトル（内側横余白と下線なし）、
+`variant="navigation"` は左右のページ余白と端末hairlineを持つ詳細画面用です。
+いずれも最小高44で、左右に同じ幅を予約し、長いタイトルは1行で省略します。
+左右slotには44ptの単独アイコン操作を渡してください。幅の広い文字操作はdefault/actionsを使います。
+見出しと左右操作は独立した読み上げ対象です。
+
+```tsx
+<Header variant="centered" title="ホーム" />
+<Header variant="navigation" title="詳細" leading={backButton} />
+```
+
+中央タイトルの組版はlg/boldです。長い動的タイトルは`titleVariant="base"`で1段下げられます。
+`wrapTitle={heading => <Animated.View ...>{heading}</Animated.View>}`で見出しを保持したまま
+外部のアニメーションを適用できます。非表示中はwrapperに`aria-hidden`等を設定し、
+戻る操作まで隠さないでください。MeltaはReanimatedへ依存しません。
+
+`HEADER_CENTERED_MIN_HEIGHT`は初期見積もり用です。スクロール退避は可能な限りonLayoutの実測値を使い、
+文字拡大時の高くなったHeaderを固定高で切らないでください。

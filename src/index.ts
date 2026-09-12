@@ -22,3 +22,5 @@ export {
   type SizeOf,
   type StateOf,
 } from "./contracts/contract-types.js";
+
+export { HEADER_CENTERED_MIN_HEIGHT } from "./components/Header.js";

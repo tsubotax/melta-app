@@ -51,6 +51,40 @@ try {
       assert.ok(await bar.getByRole("heading", { name: "作業ログを残す" }).count() === 1);
       results.push({ enlarged, ...metrics });
     }
+    for (const id of ["header-centered", "header-navigation-0", "header-navigation-1"]) {
+      const centered = page.getByTestId(id);
+      await centered.evaluate((el, width) => { el.style.width = `${width}px`; }, width);
+      await centered.scrollIntoViewIfNeeded();
+      const measure = () => centered.evaluate(el => {
+        const box = r => ({ x: r.x, y: r.y, width: r.width, height: r.height, right: r.right, bottom: r.bottom });
+        return { bar: box(el.getBoundingClientRect()),
+          title: box(el.querySelector('[role="heading"]').getBoundingClientRect()),
+          sides: [box(el.firstElementChild.getBoundingClientRect()), box(el.lastElementChild.getBoundingClientRect())],
+          controls: [...el.querySelectorAll('[role="button"]')].map(b => box(b.getBoundingClientRect())) };
+      });
+      const check = m => {
+        assert.ok(Math.abs(m.bar.x + m.bar.width / 2 - m.title.x - m.title.width / 2) < 0.75, JSON.stringify(m));
+        assert.ok(m.title.x >= m.sides[0].right - 0.1 && m.title.right <= m.sides[1].x + 0.1, JSON.stringify(m));
+        assert.ok(m.title.y >= m.bar.y - 0.1 && m.title.bottom <= m.bar.bottom + 0.1, JSON.stringify(m));
+        assert.ok(m.sides.every(s => s.width >= 44), JSON.stringify(m));
+        assert.ok(m.controls.every(c => c.width >= 44 && c.height >= 44 && c.x >= m.bar.x && c.right <= m.bar.right), JSON.stringify(m));
+      };
+      for (const enlarged of [false, true]) {
+        if (enlarged) await centered.evaluate(el => {
+          for (const text of el.querySelectorAll('[role="heading"] [dir="auto"]')) {
+            text.style.fontSize = "28px"; text.style.lineHeight = "45px";
+          }
+        });
+        const metrics = await measure();
+        check(metrics);
+        results.push({ id, width, enlarged, ...metrics });
+      }
+      // 計器自体が横ズレを落とすことを、実DOMの破壊で確認する。
+      await centered.getByRole("heading").evaluate(el => { el.style.transform = "translateX(8px)"; });
+      const broken = await measure();
+      assert.throws(() => check(broken));
+      await centered.getByRole("heading").evaluate(el => { el.style.transform = ""; });
+    }
     await page.close();
   }
   console.log(JSON.stringify(results, null, 2));

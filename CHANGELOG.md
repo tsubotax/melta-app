@@ -7,6 +7,17 @@
 
 ---
 
+## 0.10.0 — 2026-09-12
+
+### 追加
+
+- `Header` に中央タイトルの `centered`／`navigation` を追加。左右の単独アイコン用44pt領域、長いタイトルの1行省略、文字拡大時の最小高を共通化する。既存の `default`／`actions` は維持する。
+- 中央タイトルの `titleVariant="base" | "lg"`、利用側のfadeを接続する `wrapTitle`、最小高の公開定数 `HEADER_CENTERED_MIN_HEIGHT` を追加。
+
+### 内部
+
+- 公開版 `melta-contracts 0.9.0` を採用し、recipe照合・RN構造・カタログ実描画・配布型の検査を更新。
+
 ## 0.8.1 — 2026-08-06
 
 Codex スパン監査（W3〜W8 の 5 commit 通し）の反映。44pt 横断保証の残り穴 2 つを閉じる。
