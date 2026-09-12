@@ -1,37 +1,50 @@
 /**
  * Header — 画面名と左右の操作を持つ共通ヘッダー。
- * actionsでは画面名を視覚的に隠すが、独立したa11y見出しとして残す。
- * 余白・下線・見出しの配置はheader recipeとpure resolverが所有する。
+ * 配置・余白・見出しの組版を所有し、navigationやタイトルのアニメーションは利用側が渡す。
  */
 import { useMemo, type ReactNode } from "react";
-import { View, type StyleProp, type ViewStyle } from "react-native";
+import { StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
 import { useTheme } from "../theme/index.js";
 import { CONTRACTS, type VariantOf } from "../contracts/contract-types.js";
 import { Text } from "../primitives/Text.js";
-import { HEADER_SPEC, resolveHeaderStyle } from "./header.styles.js";
+import { HEADER_SPEC, isCenteredHeader, resolveHeaderStyle } from "./header.styles.js";
+
+/** 中央タイトルの最小高。スクロール量には可能な限りonLayoutの実測を使う。 */
+export const HEADER_CENTERED_MIN_HEIGHT = HEADER_SPEC.centeredMinHeight;
 
 interface HeaderProps {
   /** 空でない画面名。actionsでも読み上げるため必須。 */
   title: string;
-  /** defaultは可視見出し、actionsは可視タイトルのない操作バー。 */
   variant?: VariantOf<"header">;
+  /** 中央タイトルの長い画面名を1段下げる。default/actionsの組版は変更しない。 */
+  titleVariant?: "base" | "lg";
+  /** 中央タイトルのfade用。渡された見出しを保ち、アニメーションと読み上げ非表示だけを包む。 */
+  wrapTitle?: (heading: ReactNode) => ReactNode;
   leading?: ReactNode;
   trailing?: ReactNode;
   style?: StyleProp<ViewStyle>;
   testID?: string;
 }
 
-export function Header({ title, variant = "default", leading, trailing, style, testID }: HeaderProps) {
+export function Header({ title, variant = "default", titleVariant = HEADER_SPEC.centeredTitleFont,
+  wrapTitle, leading, trailing, style, testID }: HeaderProps) {
   const { theme, mode } = useTheme();
-  const { containerStyle, titleWrapStyle, hiddenTitleStyle } = useMemo(
-    () => resolveHeaderStyle(theme, mode, { variant }), [theme, mode, variant],
+  const { containerStyle, titleWrapStyle, hiddenTitleStyle, leadingStyle, trailingStyle } = useMemo(
+    () => resolveHeaderStyle(theme, mode, { variant }, StyleSheet.hairlineWidth), [theme, mode, variant],
   );
+  const centered = isCenteredHeader(variant);
+  // 中央タイトルは既存の本文字間を維持し、独立した見出しの意味をwrapperで与える。
+  const centeredTitle = centered ? (
+    <View accessible accessibilityRole="header" accessibilityLabel={title}>
+      <Text variant={titleVariant} weight={HEADER_SPEC.titleWeight}
+        color={HEADER_SPEC.titleColor} numberOfLines={1}>{title}</Text>
+    </View>
+  ) : null;
   return (
     <View style={[containerStyle, style]} testID={testID}>
-      {leading}
+      {centered ? <View style={leadingStyle}>{leading}</View> : leading}
       <View style={titleWrapStyle}>
-        {variant === "actions" ? (
-          // 見出しTextの契約を再利用し、左右の操作を親の読み上げへ畳まない。
+        {centered ? (wrapTitle ? wrapTitle(centeredTitle) : centeredTitle) : variant === "actions" ? (
           <View pointerEvents="none" style={hiddenTitleStyle}>
             <Text variant={HEADER_SPEC.titleFont} weight={HEADER_SPEC.titleWeight}
               color={HEADER_SPEC.titleColor} role="heading" numberOfLines={1}>
@@ -45,7 +58,7 @@ export function Header({ title, variant = "default", leading, trailing, style, t
           </Text>
         )}
       </View>
-      {trailing}
+      {centered ? <View style={trailingStyle}>{trailing}</View> : trailing}
     </View>
   );
 }

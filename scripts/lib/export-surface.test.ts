@@ -185,6 +185,7 @@ const EXPECTED_SURFACE: Record<string, { values: string[]; types: string[] }> = 
       "Checkbox",
       "DEFAULT_MIN_LINE_HEIGHT_RATIO",
       "EmptyState",
+      "HEADER_CENTERED_MIN_HEIGHT",
       "Header",
       "Image",
       "Metric",

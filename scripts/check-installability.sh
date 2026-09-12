@@ -135,6 +135,7 @@ import {
   Row,
   Screen,
   Header,
+  HEADER_CENTERED_MIN_HEIGHT,
   Avatar,
   TextField,
   Toggle,
@@ -157,6 +158,9 @@ const id: ContractId = "button";
 export function App() {
   return (
     <ThemeProvider>
+      <Header variant="centered" title="ホーム" />
+      <Header variant="navigation" title="詳細" titleVariant="base" wrapTitle={heading => <>{heading}</>} />
+      <Text>{HEADER_CENTERED_MIN_HEIGHT}</Text>
       <Screen header={<Header variant="actions" title="fixture" trailing={<Button label="送信" onPress={() => {}} />} />}>
         <Stack gap="4">
           <Row gap="2" justify="between" wrap>
