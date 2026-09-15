@@ -37,6 +37,11 @@ export const CARD_SURFACE_SPEC = {
   padding: SpacingKey;
 };
 
+/** Surface と resolver は同じ elevation 選択を共有する。 */
+export function resolveSkeletonSurfaceProps(elevation: "default" | "none" = "default") {
+  return { ...CARD_SURFACE_SPEC, elevation: elevation === "none" ? "none" as const : CARD_SURFACE_SPEC.elevation };
+}
+
 /** バー / アバター円の寸法。recipe と同じく token に対応が無い literal（recipe description 参照）。 */
 export const SKELETON_METRICS = {
   /** text variant の行バー高さ */
@@ -86,7 +91,7 @@ export interface SkeletonVariantStyles {
  * バーの色は text / circle / card すべて border-default（contract に忠実、§1 Agent m2）。
  * card の土台は CARD_SURFACE_SPEC のキーから解決する（component 側の Surface props と同源）。
  */
-export function resolveSkeletonVariants(theme: NativeTheme, mode: ThemeMode): SkeletonVariantStyles {
+export function resolveSkeletonVariants(theme: NativeTheme, mode: ThemeMode, elevation: "default" | "none" = "default"): SkeletonVariantStyles {
   const sem = theme.color.semantic[mode];
   const bar = sem["border-default"];
   return {
@@ -106,21 +111,22 @@ export function resolveSkeletonVariants(theme: NativeTheme, mode: ThemeMode): Sk
         backgroundColor: bar,
       },
     },
-    card: {
+    // card を使う時だけ影を解決する。text/circle は影のトークンを読まない。
+    get card() { return {
       style: {
         backgroundColor: sem[CARD_SURFACE_SPEC.bg],
         borderRadius: theme.radius[CARD_SURFACE_SPEC.radius],
         borderWidth: 1,
         borderColor: bar,
         padding: theme.spacing[CARD_SURFACE_SPEC.padding],
-        elevation: theme.elevation[CARD_SURFACE_SPEC.elevation],
+        elevation: theme.elevation[resolveSkeletonSurfaceProps(elevation).elevation],
       },
       barStyle: {
         height: SKELETON_METRICS.cardBarHeight,
         borderRadius: theme.radius.sm,
         backgroundColor: bar,
       },
-    },
+    }; },
   };
 }
 

@@ -704,3 +704,7 @@ variant省略時は従来どおり可視タイトルを表示します。
 
 `HEADER_CENTERED_MIN_HEIGHT`は初期見積もり用です。スクロール退避は可能な限りonLayoutの実測値を使い、
 文字拡大時の高くなったHeaderを固定高で切らないでください。
+
+### Card / Skeletonの影なし指定
+
+`<Card elevation="none">...</Card>` と `<Skeleton variant="card" elevation="none" />` は背景・枠・余白を維持して影だけを除く。省略時の `default` は従来どおり。Cardのaction/linkもnoneなら押下中に影が付かない。Skeletonのtext/circleは影のトークンを参照しない。

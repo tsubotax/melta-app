@@ -26,7 +26,7 @@ import { Surface } from "./Surface.js";
 import { useTheme } from "../theme/index.js";
 import { CONTRACTS } from "../contracts/contract-types.js";
 import {
-  CARD_SURFACE_SPEC,
+  resolveSkeletonSurfaceProps,
   PULSE_OPACITY,
   SKELETON_METRICS,
   resolveSkeletonStates,
@@ -35,6 +35,8 @@ import {
 } from "./skeleton.styles.js";
 
 interface SkeletonProps {
+  /** card の影。text/circle は影を使用しない。 */
+  elevation?: "default" | "none";
   variant?: SkeletonVariant;
   width?: DimensionValue;
   /** text variant の行数。 */
@@ -46,6 +48,7 @@ interface SkeletonProps {
 
 export function Skeleton({
   variant = "text",
+  elevation = "default",
   width = "100%",
   lines = 1,
   accessibilityLabel = "読み込み中",
@@ -53,7 +56,7 @@ export function Skeleton({
   testID,
 }: SkeletonProps) {
   const { theme, mode } = useTheme();
-  const styles = useMemo(() => resolveSkeletonVariants(theme, mode), [theme, mode]);
+  const styles = useMemo(() => resolveSkeletonVariants(theme, mode, elevation), [theme, mode, elevation]);
   // 初期値 opacityFrom = 非アニメ（reduce-motion でも光らない）。reduce-motion OFF を確認後にのみ loop で揺らす。
   const opacity = useRef(new Animated.Value(PULSE_OPACITY.from)).current;
 
@@ -105,7 +108,7 @@ export function Skeleton({
     const { borderWidth, borderColor } = styles.card.style;
     return (
       <Surface
-        {...CARD_SURFACE_SPEC}
+        {...resolveSkeletonSurfaceProps(elevation)}
         // contract skeleton.card は border-default を要求（Surface は border を出さないので Skeleton で付与）。
         style={[{ borderWidth, borderColor }, style]}
         testID={testID}
