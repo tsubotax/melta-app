@@ -49,6 +49,8 @@ import { validateCardProps } from "./card.validate.js";
 const reported = new Set<string>();
 
 interface CardBase {
+  /** none は押下中も影なし。省略時は従来の影を維持する。 */
+  elevation?: "default" | "none";
   header?: ReactNode;
   footer?: ReactNode;
   media?: ReactNode;
@@ -77,6 +79,7 @@ type CardProps = CardBase &
 
 export function Card({
   variant = "basic",
+  elevation = "default",
   header,
   footer,
   media,
@@ -121,7 +124,7 @@ export function Card({
 
   if (!interactive) {
     return (
-      <View role="article" testID={testID} style={[resolveCardShape(theme, mode, variant), style]}>
+      <View role="article" testID={testID} style={[resolveCardShape(theme, mode, variant, false, elevation), style]}>
         {content}
       </View>
     );
@@ -137,7 +140,7 @@ export function Card({
       // 独立した操作要素として読み上げられる（既定の Pressable は子を畳んでしまう）。
       accessible={false}
       testID={testID}
-      style={({ pressed }) => [resolveCardShape(theme, mode, variant, pressed), style]}
+      style={({ pressed }) => [resolveCardShape(theme, mode, variant, pressed, elevation), style]}
     >
       {content}
     </Pressable>

@@ -7,7 +7,11 @@
  */
 
 import type { ViewStyle } from "react-native";
-import type { NativeTheme, ThemeMode, ElevationKey } from "../theme/index.js";
+import type { NativeTheme, ThemeMode, ElevationKey, RadiusKey, SpacingKey } from "../theme/index.js";
+
+export const CARD_SPEC = {
+  radius: "lg", padding: "6", elevation: "sm", pressedElevation: "md", flatElevation: "none",
+} as const satisfies { radius: RadiusKey; padding: SpacingKey; elevation: ElevationKey; pressedElevation: ElevationKey; flatElevation: ElevationKey };
 
 export type CardVariant = "basic" | "media" | "action" | "link";
 
@@ -33,17 +37,19 @@ export function resolveCardShape(
   mode: ThemeMode,
   variant: CardVariant,
   pressed = false,
+  elevation: "default" | "none" = "default",
 ): ViewStyle {
   const sem = theme.color.semantic[mode];
-  const elevation: ElevationKey = pressed && CARD_INTERACTIVE[variant] ? "md" : "sm";
+  const elevationKey = elevation === "none" ? CARD_SPEC.flatElevation
+    : pressed && CARD_INTERACTIVE[variant] ? CARD_SPEC.pressedElevation : CARD_SPEC.elevation;
   return {
     backgroundColor: sem["bg-surface"],
-    borderRadius: theme.radius.lg,
+    borderRadius: theme.radius[CARD_SPEC.radius],
     borderWidth: 1,
     borderColor: sem["border-default"],
     // media は内側 clip View が padding を持つので外枠は padding なし。
-    ...(variant === "media" ? null : { padding: theme.spacing["6"] }),
-    ...theme.elevation[elevation],
+    ...(variant === "media" ? null : { padding: theme.spacing[CARD_SPEC.padding] }),
+    ...theme.elevation[elevationKey],
   };
 }
 
@@ -52,5 +58,5 @@ export function resolveCardBodyStyle(
   theme: NativeTheme,
   variant: CardVariant,
 ): { padding: number } | undefined {
-  return variant === "media" ? { padding: theme.spacing["6"] } : undefined;
+  return variant === "media" ? { padding: theme.spacing[CARD_SPEC.padding] } : undefined;
 }
